@@ -1,12 +1,12 @@
 "use client";
 
-import { FormInput } from "@/components/form/form-input";
 import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/use-actions";
 import { Board } from "@prisma/client";
 import { ElementRef, useRef, useState } from "react";
 import { updateBoard } from "@/actions/update-board";
 import { toast } from "sonner";
+import { FormTextarea } from "@/components/form/form-textarea";
 
 interface BoardTitleFormProps {
   data: Board;
@@ -25,7 +25,7 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
   });
 
   const formRef = useRef<ElementRef<"form">>(null);
-  const inputRef = useRef<ElementRef<"input">>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [title, setTitle] = useState(data.title);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -35,8 +35,8 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
     // Focus Input
     setIsEditing(true);
     setTimeout(() => {
-      inputRef.current?.focus();
-      inputRef.current?.select();
+      textareaRef.current?.focus();
+      textareaRef.current?.select();
     });
   };
 
@@ -56,12 +56,13 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
         ref={formRef}
         className="flex items-center gap-x-2"
       >
-        <FormInput
-          ref={inputRef}
+        <FormTextarea
+          ref={textareaRef}
           id="title"
           onBlur={onBlur}
           defaultValue={title}
-          className="text-lg font-bold px-[7px] py-1 h-7 bg-transparent focus-visible:outline-none focus-visible:ring-transparent border-none"
+          className="resize-none shadow-none text-lg font-bold px-[7px] py-1 h-7 bg-transparent focus-visible:outline-none focus-visible:ring-transparent border-none"
+          errors={fieldErrors}
         />
       </form>
     );

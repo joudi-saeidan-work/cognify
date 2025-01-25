@@ -1,5 +1,5 @@
 "use client";
-
+import TextareaAutosize from "react-textarea-autosize";
 import { forwardRef, KeyboardEventHandler } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -50,7 +50,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
               {label}
             </Label>
           ) : null}{" "}
-          <Textarea
+          <TextareaAutosize
             onKeyDown={onKeyDown}
             onBlur={onBlur}
             onClick={onClick}
@@ -61,7 +61,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             id={id}
             disabled={pending || disabled}
             className={cn(
-              "resize-none focus-visible:ring-0 focus-visible:ring-offset-0 ring-0 focus:ring-0 outline-none shadow-sm ",
+              " focus-visible:ring-0 focus-visible:ring-offset-0 ring-0 focus:ring-0 outline-none shadow-sm ",
               className
             )}
             aria-describedby={`${id}-error`}
