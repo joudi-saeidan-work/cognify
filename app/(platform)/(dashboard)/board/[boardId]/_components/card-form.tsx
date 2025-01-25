@@ -1,6 +1,5 @@
 "use client";
 
-import { FormSubmit } from "@/components/form/form-submit";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
@@ -10,7 +9,6 @@ import { createCard } from "@/actions/create-card";
 import { useParams } from "next/navigation";
 import { useOnClickOutside, useEventListener } from "usehooks-ts";
 import { toast } from "sonner";
-import { error } from "console";
 
 interface CardFormProps {
   listId: string;
@@ -36,7 +34,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        disableEditing;
+        disableEditing();
       }
     };
     useOnClickOutside(formRef, disableEditing);
@@ -46,6 +44,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         formRef.current?.requestSubmit();
+        disableEditing();
       }
     };
 
@@ -64,16 +63,11 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
             id="title"
             onKeyDown={onTextareaDown}
             ref={ref}
-            placeholder="Enter a title for this card"
+            placeholder="write anything ..."
             errors={fieldErrors}
           />
           <input hidden id="listId" name="listId" value={listId} />
-          <div className="flex items-center gap-x-1">
-            <FormSubmit>Add card</FormSubmit>
-            <Button onClick={disableEditing} size="sm" variant="ghost">
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+          <div />
         </form>
       );
     }
@@ -87,7 +81,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
           onClick={enableEditing}
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add a card
+          write or type "/" for commands
         </Button>
       </div>
     );
