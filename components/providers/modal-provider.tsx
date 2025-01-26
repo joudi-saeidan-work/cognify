@@ -1,7 +1,7 @@
 "use client";
 
-import { CardModal } from "@/components/modals/card-modals";
 import { useEffect, useState } from "react";
+import { ContentForm } from "../modals/editor";
 
 export const ModalProvider = () => {
   // protect it from hydration errors ,, only rendered by client
@@ -15,5 +15,5 @@ export const ModalProvider = () => {
     return;
   }
 
-  return <CardModal />;
+  return <ContentForm />;
 };

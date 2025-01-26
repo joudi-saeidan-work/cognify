@@ -14,7 +14,7 @@ import { toast } from "sonner";
 interface ActionsProps {
   data: CardWithList;
 }
-export const Actions = ({ data }: ActionsProps) => {
+export const CardActions = ({ data }: ActionsProps) => {
   const params = useParams();
 
   const cardModal = useCardModal();
@@ -82,16 +82,6 @@ export const Actions = ({ data }: ActionsProps) => {
         <Trash className="h-4 w-4 mr-2" />
         Delete
       </Button>
-    </div>
-  );
-};
-
-Actions.Skeleton = function ActionSkeleton() {
-  return (
-    <div className="space-y-2 mt-2">
-      <Skeleton className="w-20 h-4 bg-neutral-200" />
-      <Skeleton className="w-full h-8 bg-neutral-200" />
-      <Skeleton className="w-full h-8 bg-neutral-200" />
     </div>
   );
 };
