@@ -7,9 +7,10 @@ import {
   PopoverTrigger,
   PopoverClose,
 } from "@/components/ui/popover";
-import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "@/lib/fetcher";
+import { CardWithList } from "@/types";
 interface CardExpandProps {
   id: string;
 }
@@ -17,19 +18,28 @@ const CardExpand = ({ id }: CardExpandProps) => {
   const cardModal = useCardModal();
   const { onOpen } = cardModal;
 
-  // need the card id to get the description to check if the user already have a description
   const queryClient = useQueryClient();
 
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // ToDo what happens if we copy a card?
-  // get the card id and open the card model and render the note icon
+  const { data: cardData } = useQuery<CardWithList>({
+    queryKey: ["card", id], // Unique key for caching the card data.
+    queryFn: () => fetcher(`/api/cards/${id}`), // Function to fetch the card data from the API.
+    enabled: !!id, //only fetch if `id` is defined
+  });
+
+  useEffect(() => {
+    if (cardData?.description) {
+      setIsExpanded(true);
+    }
+  }, [cardData]);
+
   const handleExpandToNote = async () => {
     await queryClient.prefetchQuery(["card", id], () =>
       fetcher(`api/cards/${id}`)
     );
-    onOpen(id); // open card model
-    setIsExpanded(true); // set state
+    onOpen(id);
+    setIsExpanded(true);
   };
 
   if (isExpanded) {

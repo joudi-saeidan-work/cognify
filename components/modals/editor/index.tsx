@@ -29,7 +29,6 @@ export const ContentForm = () => {
     queryKey: ["card", id], // Unique key for caching the card data.
     queryFn: () => fetcher(`/api/cards/${id}`), // Function to fetch the card data from the API.
     enabled: !!id, //only fetch if `id` is defined
-    onError: (error) => console.log("Error fetching card data", error),
   });
 
   // Should be valid json to be rendered
