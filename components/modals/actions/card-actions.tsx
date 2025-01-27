@@ -3,7 +3,6 @@
 import { copyCard } from "@/actions/copy-card";
 import { deleteCard } from "@/actions/delete-card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useAction } from "@/hooks/use-actions";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { CardWithList } from "@/types";

@@ -22,6 +22,8 @@ const CardExpand = ({ id }: CardExpandProps) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // ToDo what happens if we copy a card?
+  // get the card id and open the card model and render the note icon
   const handleExpandToNote = async () => {
     await queryClient.prefetchQuery(["card", id], () =>
       fetcher(`api/cards/${id}`)

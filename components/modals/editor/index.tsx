@@ -7,14 +7,13 @@ import { CardWithList } from "@/types"; // Type definition for a card with its a
 import { fetcher } from "@/lib/fetcher"; // Utility function for making API requests.
 import { CardHeader } from "./header"; // Header component for displaying card information.
 import Editor from "./editor";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useParams } from "next/navigation";
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { updateCard } from "@/actions/update-card";
 import DOMPurify from "dompurify";
-import { JSONContent } from "novel";
 
 export const defaultHtml = `<p className="absolute top-0 left-0 text-gray-400 pointer-events-none p-4" >write or type " / " for commands</p>`;
 
@@ -26,31 +25,34 @@ export const ContentForm = () => {
   const params = useParams();
   const queryClient = useQueryClient();
 
-  const {
-    data: cardData,
-    isLoading,
-    isError,
-  } = useQuery<CardWithList>({
+  const { data: cardData } = useQuery<CardWithList>({
     queryKey: ["card", id], // Unique key for caching the card data.
     queryFn: () => fetcher(`/api/cards/${id}`), // Function to fetch the card data from the API.
     enabled: !!id, //only fetch if `id` is defined
     onError: (error) => console.log("Error fetching card data", error),
   });
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState<string>(
-    JSON.stringify({ type: "doc", content: [] })
-  );
+  // Should be valid json to be rendered
+  const initialValue = JSON.stringify({
+    type: "doc",
+    content: [
+      {
+        type: "paragraph",
+        content: [{ type: "text", text: `write or type "/" for commands` }],
+      },
+    ],
+  });
 
-  const enableEditing = () => {
-    setIsEditing(true);
-  };
+  const [content, setContent] = useState<string>(initialValue);
 
-  const disableEditing = () => {
-    setIsEditing(false);
-  };
-
-  // TODO validate content
+  // whenever the cardData changes we need to reset the content to render the correct description
+  useEffect(() => {
+    if (cardData?.description) {
+      setContent(cardData.description);
+    } else {
+      setContent(initialValue);
+    }
+  }, [cardData]);
 
   const { execute } = useAction(updateCard, {
     onSuccess: (cardData: any) => {
@@ -69,17 +71,10 @@ export const ContentForm = () => {
 
   // Get values
   const handleSubmit = () => {
-    const description = content;
     const boardId = params.boardId as string;
     // ToDO execute
-    execute({ boardId, id: cardData?.id, description });
+    execute({ boardId, id: cardData?.id, description: content });
   };
-
-  // need to sanitize the html to protect the contents from XSS
-  const sanitizedHtml = DOMPurify.sanitize(
-    cardData?.description || defaultHtml
-  );
-  console.log(sanitizedHtml);
 
   if (!isOpen) return null;
   return (
@@ -95,7 +90,9 @@ export const ContentForm = () => {
               <div className="flex-grow bg-neutral-100 overflow-hidden pl-10 pr-10 pt-10">
                 <Editor
                   initialValue={JSON.parse(content)}
-                  onChange={setContent}
+                  onChange={(newContent) => {
+                    setContent(newContent);
+                  }}
                 />
               </div>
               <Button type="submit" onClick={handleSubmit}>

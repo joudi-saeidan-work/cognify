@@ -20,15 +20,13 @@ import {
   ListCollapse,
   ListOrdered,
 } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query"; // Hook for fetching and caching data.
-import { CardWithList } from "@/types";
+import { useQueryClient } from "@tanstack/react-query"; // Hook for fetching and caching data.
 import { useParams } from "next/navigation";
 import { useAction } from "@/hooks/use-actions";
 import { copyCard } from "@/actions/copy-card";
 import { toast } from "sonner";
 import { deleteCard } from "@/actions/delete-card";
 import { Card } from "@prisma/client";
-import { updateCard } from "@/actions/update-card";
 import { ElementRef, useState, useRef } from "react";
 
 interface CardOptionsProps {
