@@ -61,7 +61,7 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
 
-  //Apply Codeblock Highlighting on the HTML from editor.getHTML()
+  // apply code highlight
   const highlightCodeblocks = (content: string) => {
     const doc = new DOMParser().parseFromString(content, "text/html");
     doc.querySelectorAll("pre code").forEach((el) => {
@@ -73,7 +73,7 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
   };
 
   return (
-    <div className="relative w-full max-w-screen-lg">
+    <div className="relative w-full max-w-screen-lg h-[500px] overflow-y-auto bg-neutral-100 ">
       <EditorRoot>
         <EditorContent
           immediatelyRender={false}
@@ -133,7 +133,7 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
               ))}
             </EditorCommandList>
           </EditorCommand>
-          {/* AI code generation */}
+          {/* ToDo AI code generation */}
           <EditorMenu open={openAI} onOpenChange={setOpenAI}>
             <Separator orientation="vertical" />
             <NodeSelector open={openNode} onOpenChange={setOpenNode} />

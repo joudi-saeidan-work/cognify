@@ -86,14 +86,12 @@ export const ContentForm = () => {
           ) : (
             <div className="flex flex-col h-full">
               <CardHeader data={cardData} />
-              <div className="flex-grow bg-neutral-100 overflow-hidden pl-10 pr-10 pt-10">
-                <Editor
-                  initialValue={JSON.parse(content)}
-                  onChange={(newContent) => {
-                    setContent(newContent);
-                  }}
-                />
-              </div>
+              <Editor
+                initialValue={JSON.parse(content)}
+                onChange={(newContent) => {
+                  setContent(newContent);
+                }}
+              />
               <Button type="submit" onClick={handleSubmit}>
                 Save Note
               </Button>
