@@ -36,6 +36,7 @@ export const ListItem = ({ data, index }: ListItemProps) => {
           ref={provided.innerRef}
           className="shrink-0 h-full w-[272px] select-none"
         >
+          {/* ToDo add feature that changes the color of cards */}
           <div
             {...provided.dragHandleProps}
             className="w-full rounded-md bg-[#f1f2f4]"
@@ -58,6 +59,7 @@ export const ListItem = ({ data, index }: ListItemProps) => {
                 </ol>
               )}
             </Droppable>
+            {/* ToDO: we can add a text editor here for future improvements */}
             <CardForm
               listId={data.id}
               ref={textareaRef}

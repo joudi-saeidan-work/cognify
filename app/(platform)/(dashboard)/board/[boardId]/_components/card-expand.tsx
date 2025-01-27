@@ -8,6 +8,8 @@ import {
   PopoverClose,
 } from "@/components/ui/popover";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { fetcher } from "@/lib/fetcher";
 interface CardExpandProps {
   id: string;
 }
@@ -15,11 +17,17 @@ const CardExpand = ({ id }: CardExpandProps) => {
   const cardModal = useCardModal();
   const { onOpen } = cardModal;
 
+  // need the card id to get the description to check if the user already have a description
+  const queryClient = useQueryClient();
+
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleExpandToNote = () => {
-    setIsExpanded(true); // set state
+  const handleExpandToNote = async () => {
+    await queryClient.prefetchQuery(["card", id], () =>
+      fetcher(`api/cards/${id}`)
+    );
     onOpen(id); // open card model
+    setIsExpanded(true); // set state
   };
 
   if (isExpanded) {

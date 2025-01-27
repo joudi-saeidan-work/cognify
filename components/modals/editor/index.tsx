@@ -13,34 +13,34 @@ import { useParams } from "next/navigation";
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { updateCard } from "@/actions/update-card";
+import DOMPurify from "dompurify";
+import { JSONContent } from "novel";
 
-export const defaultValue = {
-  type: "doc",
-  content: [
-    {
-      type: "paragraph",
-      content: [{ type: "text", text: 'write or type " / " for commands' }],
-    },
-  ],
-};
+export const defaultHtml = `<p className="absolute top-0 left-0 text-gray-400 pointer-events-none p-4" >write or type " / " for commands</p>`;
 
 export const ContentForm = () => {
-  const id = useCardModal((state) => state.id) as string;
-
+  const id = useCardModal((state) => state.id);
   const isOpen = useCardModal((state) => state.isOpen);
   const onClose = useCardModal((state) => state.onClose);
-
-  const { data: cardData } = useQuery<CardWithList>({
-    queryKey: ["card", id], // Unique key for caching the card data.
-    queryFn: () => fetcher(`/api/cards/${id}`), // Function to fetch the card data from the API.
-  });
-  console.log(`Printing Data "${cardData}"`); //this is undefined
 
   const params = useParams();
   const queryClient = useQueryClient();
 
+  const {
+    data: cardData,
+    isLoading,
+    isError,
+  } = useQuery<CardWithList>({
+    queryKey: ["card", id], // Unique key for caching the card data.
+    queryFn: () => fetcher(`/api/cards/${id}`), // Function to fetch the card data from the API.
+    enabled: !!id, //only fetch if `id` is defined
+    onError: (error) => console.log("Error fetching card data", error),
+  });
+
   const [isEditing, setIsEditing] = useState(false);
-  const [content, setContent] = useState<string>("");
+  const [content, setContent] = useState<string>(
+    JSON.stringify({ type: "doc", content: [] })
+  );
 
   const enableEditing = () => {
     setIsEditing(true);
@@ -52,8 +52,7 @@ export const ContentForm = () => {
 
   // TODO validate content
 
-  // ToDO fix server actions
-  const { execute, fieldErrors } = useAction(updateCard, {
+  const { execute } = useAction(updateCard, {
     onSuccess: (cardData: any) => {
       queryClient.invalidateQueries({
         queryKey: ["card", cardData.id],
@@ -61,7 +60,7 @@ export const ContentForm = () => {
       queryClient.invalidateQueries({ queryKey: ["card-logs", cardData.id] });
 
       toast.success(`Card "${cardData.title} updated"`);
-      disableEditing();
+      onClose(); // Close modal after saving
     },
     onError: (error) => {
       toast.error(error);
@@ -69,33 +68,43 @@ export const ContentForm = () => {
   });
 
   // Get values
-  const handleSubmit = (values: any) => {
+  const handleSubmit = () => {
     const description = content;
     const boardId = params.boardId as string;
     // ToDO execute
     execute({ boardId, id: cardData?.id, description });
   };
 
+  // need to sanitize the html to protect the contents from XSS
+  const sanitizedHtml = DOMPurify.sanitize(
+    cardData?.description || defaultHtml
+  );
+  console.log(sanitizedHtml);
+
+  if (!isOpen) return null;
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      {/* <DialogContent className="rounded-lg shadow-lg bg-white border border-gray-200 w-[85%] h-[95%] mx-auto"> */}
-      {/* <DialogContent className="rounded-lg shadow-lg bg-white border border-gray-200 w-[85%] h-[95%] mx-auto flex flex-col"> */}
-      <DialogContent className="rounded-lg shadow-lg bg-white border border-gray-200 w-[85%] h-[95%] mx-auto flex flex-col">
-        <DialogTitle className="hidden">Edit Card</DialogTitle>
-        {!cardData ? (
-          <></>
-        ) : (
-          <div className="flex flex-col h-full">
-            <CardHeader data={cardData} />
-            <div className="flex-grow bg-neutral-100 overflow-hidden pl-10 pr-10 pt-10">
-              <Editor initialValue={defaultValue} onChange={setContent} />
+      {id ? ( // Only render content if `id` exists
+        <DialogContent className="rounded-lg shadow-lg bg-white border border-gray-200 w-[85%] h-[95%] mx-auto flex flex-col">
+          <DialogTitle className="hidden">Edit Card</DialogTitle>
+          {!cardData ? (
+            <></>
+          ) : (
+            <div className="flex flex-col h-full">
+              <CardHeader data={cardData} />
+              <div className="flex-grow bg-neutral-100 overflow-hidden pl-10 pr-10 pt-10">
+                <Editor
+                  initialValue={JSON.parse(content)}
+                  onChange={setContent}
+                />
+              </div>
+              <Button type="submit" onClick={handleSubmit}>
+                Save Note
+              </Button>
             </div>
-            <Button type="submit" onClick={handleSubmit}>
-              Save Note
-            </Button>
-          </div>
-        )}
-      </DialogContent>
+          )}
+        </DialogContent>
+      ) : null}
     </Dialog>
   );
 };

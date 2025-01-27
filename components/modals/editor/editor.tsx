@@ -93,7 +93,17 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
             },
           }}
           onUpdate={({ editor }) => {
-            onChange(editor.getHTML());
+            // When ever there is a change
+            // highlight the code block within the content
+            const htmlContent = editor.getHTML();
+            highlightCodeblocks(htmlContent);
+
+            // pass the content as json to store in the database
+
+            const editorContent = editor.getJSON();
+            const content = JSON.stringify(editorContent);
+
+            onChange(content);
           }}
           slotAfter={<ImageResizer />}
         >
