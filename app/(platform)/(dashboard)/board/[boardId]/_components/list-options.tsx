@@ -8,19 +8,39 @@ import {
   PopoverClose,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { MoreHorizontal, X } from "lucide-react";
+import { Brush, MoreHorizontal, X } from "lucide-react";
 import { FormSubmit } from "@/components/form/form-submit";
-import { Separator } from "@/components/ui/separator";
 import { useAction } from "@/hooks/use-actions";
 import { deleteList } from "@/actions/delete-list";
 import { toast } from "sonner";
-import { ElementRef, useRef } from "react";
+import { ElementRef, useRef, useState } from "react";
 import { copyList } from "@/actions/copy-list";
+import { Copy, Trash, Plus } from "lucide-react";
 
 interface ListOptionsProps {
   data: List;
   onAddCard: () => void;
 }
+
+const colors = [
+  { card: "#FDE8E8", list: "#F6B7B7" },
+  { card: "#FEF3DC", list: "#F9CF8E" },
+  { card: "#FFF9D5", list: "#FAE587" },
+  { card: "#D6F8D6", list: "#94DA94" },
+  { card: "#D7F2F8", list: "#8AC9DA" },
+  { card: "#DEE8FA", list: "#A4B8F2" },
+  { card: "#E9DFF9", list: "#C7A6F2" },
+  { card: "#EAEAEA", list: "#B3B3B3" },
+  { card: "#FCD4D4", list: "#F28D8D" },
+  { card: "#FDEAC5", list: "#F7C36B" },
+  { card: "#FFF4B8", list: "#F5D34A" },
+  { card: "#C8F3C8", list: "#72C372" },
+  { card: "#C7EDF5", list: "#68BED1" },
+  { card: "#C9E3F5", list: "#74AEE1" },
+  { card: "#E4D6F6", list: "#A28CE2" },
+  { card: "#E7E7E7", list: "#9F9F9F" },
+];
+
 export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
   const closeRef = useRef<ElementRef<"button">>(null);
 
@@ -56,54 +76,108 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
     executeDelete({ id, boardId });
   };
 
+  const [selectedColor, setSelectedColor] = useState<{
+    card: string;
+    list: string;
+  } | null>(null);
+
+  const handleColorSelect = (color: { card: string; list: string }) => {
+    setSelectedColor(color);
+  };
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button className="h-auto w-auto p-2" variant="ghost">
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
-        <div className="text-sm font-medium text-center text-neutral-600 pb-4">
-          List Actions
-        </div>
-        <PopoverClose ref={closeRef} asChild>
+    <>
+      {/* color  */}
+      <Popover>
+        <PopoverTrigger asChild>
           <Button
-            className="h-auto w-auto p-2 absolute top-2 right-2 text-neutral-600"
+            className="h-auto w-auto p-2 text-neutral-700"
             variant="ghost"
           >
-            <X className="h-4 w-4" />
+            <Brush className="w-4 h-4" />
           </Button>
-        </PopoverClose>
-        <Button
-          onClick={onAddCard}
-          className="rounded-none w-full h-full p-2 px-5 justify-start font-normal text-sm"
-          variant="ghost"
+        </PopoverTrigger>
+        <PopoverContent
+          className="bg-popover w-full"
+          side="bottom"
+          align="start"
         >
-          Add card..
-        </Button>
-        <form action={onCopy}>
-          <input hidden name="id" id="id" value={data.id} />
-          <input hidden name="boardId" id="boardId" value={data.boardId} />
-          <FormSubmit
-            className="rounded-none w-full h-full p-2 px-5 justify-start font-normal text-sm"
+          <div className="font-semibold text-neutral-500 text-sm pb-2">
+            Color
+          </div>
+          <div className="grid grid-cols-8 gap-2">
+            {colors.map(({ card, list }, index) => (
+              <div
+                key={index}
+                className="w-8 h-8 relative cursor-pointer"
+                onClick={() => handleColorSelect({ card, list })}
+              >
+                {/* ListColorBlock */}
+                <div
+                  className="w-full h-1/4 rounded-t-md"
+                  style={{ backgroundColor: list }}
+                ></div>
+                {/* CardColorBlock */}
+                <div
+                  className="w-full h-1/2 rounded-b-md"
+                  style={{ backgroundColor: card }}
+                ></div>
+                {/* Outline for the selected color */}
+                {(selectedColor?.card === card ||
+                  selectedColor?.list === list) && (
+                  <div className=" h-6 w-8 absolute inset-0 border-2 border-blue-500 rounded-md"></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+      {/* options */}
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            className="h-auto w-auto p-2 text-neutral-700"
             variant="ghost"
           >
-            Copy List..
-          </FormSubmit>
-        </form>
-        <Separator />
-        <form action={onDelete}>
-          <input hidden name="id" id="id" value={data.id} />
-          <input hidden name="boardId" id="boardId" value={data.boardId} />
-          <FormSubmit
-            className="rounded-none w-full h-full p-2 px-5 justify-start font-normal text-sm"
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="bg-popover w-40 px-0 pt-3 pb-3"
+          side="bottom"
+          align="start"
+        >
+          <PopoverClose ref={closeRef} asChild></PopoverClose>
+          <Button
+            onClick={onAddCard}
+            className="flex items-center gap-2 rounded- w-full h-full  px-2 py-1.5  justify-start font-normal text-sm"
             variant="ghost"
           >
-            Delete this list
-          </FormSubmit>
-        </form>
-      </PopoverContent>
-    </Popover>
+            <Plus className="h-4 w-4" />
+            Add Card
+          </Button>
+          <form action={onCopy}>
+            <input hidden name="id" id="id" value={data.id} />
+            <input hidden name="boardId" id="boardId" value={data.boardId} />
+            <FormSubmit
+              className="flex items-center gap-2 rounded-sm w-full h-full  px-2 py-1.5  justify-start font-normal text-sm"
+              variant="ghost"
+            >
+              <Copy />
+              Copy List
+            </FormSubmit>
+          </form>
+          <form action={onDelete}>
+            <input hidden name="id" id="id" value={data.id} />
+            <input hidden name="boardId" id="boardId" value={data.boardId} />
+            <FormSubmit
+              className="flex items-center gap-2 text-red-500 rounded-sm w-full h-full  px-2 py-1.5 justify-start font-normal text-sm"
+              variant="ghost"
+            >
+              <Trash /> Delete List
+            </FormSubmit>
+          </form>
+        </PopoverContent>
+      </Popover>
+    </>
   );
 };

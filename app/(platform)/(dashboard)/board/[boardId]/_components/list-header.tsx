@@ -74,19 +74,20 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
             value={data.boardId}
           ></input>
           <FormInput
+            errors={fieldErrors}
             ref={inputRef}
             onBlur={onBlur}
             id="title"
             placeholder="Enter list title.."
             defaultValue={title}
-            className="text-sm px-[7px] py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus-bg-white"
+            className="text-sm px-[7px] py-1 h-7 font-semibold border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus-bg-white"
           />
           <button type="submit" hidden />
         </form>
       ) : (
         <div
           onClick={enableEditing}
-          className="w-full text-sm px-2.5 py-1 h-7 font-medium border-transparent"
+          className="w-full text-sm px-2.5 py-1 h-7 font-semibold border-transparent"
         >
           {title}
         </div>
