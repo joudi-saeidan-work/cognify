@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/use-actions";
 import { Board } from "@prisma/client";
-import { ElementRef, useRef, useState } from "react";
+import { ElementRef, TextareaHTMLAttributes, useRef, useState } from "react";
 import { updateBoard } from "@/actions/update-board";
 import { toast } from "sonner";
 import { FormTextarea } from "@/components/form/form-textarea";
@@ -31,6 +31,7 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const disableEditing = () => setIsEditing(false);
+
   const enableEditing = () => {
     // Focus Input
     setIsEditing(true);
@@ -48,6 +49,15 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
     formRef.current?.requestSubmit();
   };
 
+  // when user clicks Enter new board is created
+  const onTextareaDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+      disableEditing();
+    }
+  };
+
   if (isEditing) {
     // when editing
     return (
@@ -57,12 +67,13 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
         className="flex items-center gap-x-2"
       >
         <FormTextarea
+          onKeyDown={onTextareaDown}
           ref={textareaRef}
           id="title"
           onBlur={onBlur}
           defaultValue={title}
-          className="resize-none shadow-none text-lg font-bold px-[7px] py-1 h-7 bg-transparent focus-visible:outline-none focus-visible:ring-transparent border-none"
-          errors={fieldErrors}
+          className="resize-none shadow-none text-lg font-bold px-[7px] py-1 h-7 focus-visible:outline-none focus-visible:ring-transparent border-none"
+          color={"transparent"}
         />
       </form>
     );
