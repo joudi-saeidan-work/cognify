@@ -37,9 +37,11 @@ export const ListItem = ({ data, index }: ListItemProps) => {
           className="shrink-0 h-full w-[272px] select-none"
         >
           {/* ToDo add feature that changes the color of cards */}
+          {/* Should have a default color */}
           <div
             {...provided.dragHandleProps}
-            className="w-full rounded-md bg-[#f1f2f4]"
+            className="w-full rounded-md"
+            style={{ backgroundColor: data.color || "#FFFFFF" }}
           >
             <ListHeader onAddCard={enableEditing} data={data} />
             <Droppable droppableId={data.id} type="card">
@@ -61,6 +63,7 @@ export const ListItem = ({ data, index }: ListItemProps) => {
             </Droppable>
             {/* ToDO: we can add a text editor here for future improvements */}
             <CardForm
+              color={data.color}
               listId={data.id}
               ref={textareaRef}
               isEditing={isEditing}

@@ -17,14 +17,14 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { title, boardId, listId } = data;
+  const { title, color, boardId, listId } = data;
   let card;
   let list;
 
   // try to find the list where the card is
   try {
     list = await db.list.findUnique({
-      where: { id: listId, board: { orgId } },
+      where: { id: listId, color, board: { orgId } },
     });
     if (!list) {
       return {
@@ -32,8 +32,16 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       };
     }
 
-    // determine the new order for the card
+    //check if there is an existing card in the same list with a color
+    const existingCardWithColor = await db.card.findFirst({
+      where: { listId, NOT: { color: null } },
+      select: { color: true },
+    });
 
+    // use the color from the existing card, or use default color
+    const inheritedColor = existingCardWithColor?.color || color || "#FFFFFF";
+
+    // determine the new order for the card
     const lastCard = await db.card.findFirst({
       where: { listId: listId },
       orderBy: { order: "desc" },
@@ -43,7 +51,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     const newOrder = lastCard ? lastCard.order + 1 : 1;
 
     card = await db.card.create({
-      data: { title, listId, order: newOrder },
+      data: { title, listId, color: inheritedColor, order: newOrder },
     });
 
     await createAuditLog({

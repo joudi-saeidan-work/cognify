@@ -16,7 +16,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { title, boardId } = data;
+  const { title, boardId, color } = data;
   let list;
 
   try {
@@ -38,7 +38,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     const newOrder = lastList ? lastList.order + 1 : 1;
 
     list = await db.list.create({
-      data: { title, boardId, order: newOrder },
+      data: { title, boardId, color, order: newOrder },
     });
 
     await createAuditLog({

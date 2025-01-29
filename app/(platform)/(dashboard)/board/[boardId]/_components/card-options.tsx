@@ -36,9 +36,6 @@ interface CardOptionsProps {
 const CardOptions = ({ data }: CardOptionsProps) => {
   // gets the board id
   const params = useParams();
-  const [newTitle, setNewTitle] = useState(data.title);
-  const queryClient = useQueryClient();
-  const inputRef = useRef<ElementRef<"input">>(null);
 
   // copy card action
   const { execute: executeCopyCard, isLoading: isLoadingCopy } = useAction(
@@ -90,7 +87,7 @@ const CardOptions = ({ data }: CardOptionsProps) => {
         <Button
           size="sm"
           variant="ghost"
-          className="absolute left-0 h-4 w-4 text-neutral-700"
+          className="absolute left-0 h-4 w-4 text-neutral-700 hover:bg-transparent "
           title="Actions"
         >
           <GripVertical className="w-4 h-4" />

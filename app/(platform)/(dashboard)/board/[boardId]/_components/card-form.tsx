@@ -15,10 +15,11 @@ interface CardFormProps {
   enableEditing: () => void;
   disableEditing: () => void;
   isEditing: boolean;
+  color: string | null;
 }
 
 export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
-  ({ listId, disableEditing, enableEditing, isEditing }, ref) => {
+  ({ listId, color, disableEditing, enableEditing, isEditing }, ref) => {
     const params = useParams();
     const formRef = useRef<ElementRef<"form">>(null);
 
@@ -60,12 +61,13 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       return (
         <form className="m-1 py-0.5 space-y-4" action={onSubmit} ref={formRef}>
           <FormTextarea
+            color={color}
             id="title"
             onKeyDown={onTextareaDown}
             ref={ref}
             placeholder="write anything ..."
             errors={fieldErrors}
-            className="resize-none relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm bg-white rounded-md shadow-none w-full"
+            className="resize-none relative flex flex-col justify-between  border-none hover:border-black/20 py-2 px-3 text-sm rounded-md shadow-none w-full"
           />
           <input hidden id="listId" name="listId" value={listId} />
           <div />
@@ -74,9 +76,11 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
     }
 
     return (
+      // need to put color here
       <div className="pt-2 px-2">
         <Button
           className="h-auto px-2 py-1.5 w-full justify-start text-muted-foreground text-sm"
+          style={{ backgroundColor: color || "#FFFFFF" }}
           size="sm"
           variant="ghost"
           onClick={enableEditing}

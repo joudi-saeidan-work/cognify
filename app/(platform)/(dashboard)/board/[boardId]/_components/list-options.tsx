@@ -8,7 +8,7 @@ import {
   PopoverClose,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Brush, MoreHorizontal, X } from "lucide-react";
+import { Brush, MoreHorizontal } from "lucide-react";
 import { FormSubmit } from "@/components/form/form-submit";
 import { useAction } from "@/hooks/use-actions";
 import { deleteList } from "@/actions/delete-list";
@@ -16,6 +16,9 @@ import { toast } from "sonner";
 import { ElementRef, useRef, useState } from "react";
 import { copyList } from "@/actions/copy-list";
 import { Copy, Trash, Plus } from "lucide-react";
+import { updateList } from "@/actions/update-list";
+import { useParams } from "next/navigation";
+import { updateCards } from "@/actions/update-cards";
 
 interface ListOptionsProps {
   data: List;
@@ -43,6 +46,18 @@ const colors = [
 
 export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
   const closeRef = useRef<ElementRef<"button">>(null);
+  const params = useParams();
+
+  const [selectedColor, setSelectedColor] = useState<{
+    card: string;
+    list: string;
+  } | null>(null);
+
+  const handleColorSelect = (color: { card: string; list: string }) => {
+    setSelectedColor(color);
+    onUpdateCard(color.card);
+    onUpdateList(color.list);
+  };
 
   const { execute: executeDelete } = useAction(deleteList, {
     onSuccess: (data) => {
@@ -64,6 +79,26 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
     },
   });
 
+  const { execute: executeUpdateList } = useAction(updateList, {
+    onSuccess: (data) => {
+      toast.success(`List color "${data.title}" updated. `);
+      closeRef.current?.click();
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  const { execute: executeUpdateCards } = useAction(updateCards, {
+    onSuccess: () => {
+      toast.success(`Card Color updated! `);
+      closeRef.current?.click();
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
   const onCopy = (formData: FormData) => {
     const id = formData.get("id") as string;
     const boardId = formData.get("boardId") as string;
@@ -76,21 +111,36 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
     executeDelete({ id, boardId });
   };
 
-  const [selectedColor, setSelectedColor] = useState<{
-    card: string;
-    list: string;
-  } | null>(null);
+  const onUpdateList = (listColor: string) => {
+    // How do we get the board id and the card id if we don't have form data
+    const boardId = params.boardId as string;
 
-  const handleColorSelect = (color: { card: string; list: string }) => {
-    setSelectedColor(color);
+    executeUpdateList({
+      id: data.id,
+      title: data.title,
+      boardId,
+      color: listColor,
+    });
   };
+
+  const onUpdateCard = (cardColor: string) => {
+    // How do we get the board id and the card id if we don't have form data
+    const boardId = params.boardId as string;
+
+    executeUpdateCards({
+      listId: data.id,
+      boardId,
+      color: cardColor,
+    });
+  };
+
   return (
     <>
       {/* color  */}
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            className="h-auto w-auto p-2 text-neutral-700"
+            className="h-auto w-auto p-2 text-neutral-700 hover:bg-transparent"
             variant="ghost"
           >
             <Brush className="w-4 h-4" />
@@ -135,7 +185,7 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            className="h-auto w-auto p-2 text-neutral-700"
+            className="h-auto w-auto p-2 text-neutral-700 hover:bg-transparent"
             variant="ghost"
           >
             <MoreHorizontal className="h-4 w-4" />

@@ -5,7 +5,8 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { InputType, ReturnType } from "./types";
 import { createSafeAction } from "@/lib/create-safe-actions";
-import { UpdateList } from "./schema";
+import { UpdateCards } from "./schema";
+import { values } from "lodash";
 import { createAuditLog } from "@/lib/create-audit-log";
 import { ACTION, ENTITY_TYPE } from "@prisma/client";
 
@@ -16,32 +17,21 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { title, id, boardId, color } = data;
+  const { listId, boardId, color } = data;
 
-  let list;
-
+  let cards;
+  let updatedCount;
   try {
-    list = await db.list.update({
-      where: {
-        id,
-        boardId,
-        board: {
-          orgId,
-        },
-      },
-      data: { title, color },
+    cards = await db.card.updateMany({
+      where: { listId, list: { board: { orgId } } },
+      data: { color },
     });
-    await createAuditLog({
-      entityTitle: list.title,
-      entityId: list.id,
-      entityType: ENTITY_TYPE.LIST,
-      action: ACTION.UPDATE,
-    });
+    updatedCount = cards.count; // Get the count of updated rows
   } catch (error) {
-    return { error: "Failed to update" };
+    return { error: "Failed to update cards" };
   }
   revalidatePath(`/board/${boardId}`);
-  return { data: list };
+  return { data: { updatedCount } }; // Return the count of updated row
 };
 
-export const updateList = createSafeAction(UpdateList, handler);
+export const updateCards = createSafeAction(UpdateCards, handler);

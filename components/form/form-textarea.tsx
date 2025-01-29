@@ -19,6 +19,7 @@ interface FormTextareaProps {
   onClick?: () => void;
   onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement> | undefined;
   defaultValue?: string;
+  color?: string | null;
 }
 
 export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
@@ -35,6 +36,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
       onClick,
       onKeyDown,
       defaultValue,
+      color,
     },
     ref
   ) => {
@@ -51,6 +53,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             </Label>
           ) : null}{" "}
           <TextareaAutosize
+            style={{ backgroundColor: color || "#FFFFFF" }}
             onKeyDown={onKeyDown}
             onBlur={onBlur}
             onClick={onClick}
