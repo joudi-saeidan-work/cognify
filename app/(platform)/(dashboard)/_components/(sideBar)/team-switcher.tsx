@@ -9,7 +9,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useOrganization } from "@clerk/nextjs";
-import { useTheme } from "next-themes";
 import { Separator } from "@/components/ui/separator";
 
 export function TeamSwitcher() {

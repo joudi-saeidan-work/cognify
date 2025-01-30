@@ -1,7 +1,5 @@
 // Header.tsx
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { ModeToggle } from "@/app/(platform)/(dashboard)/_components/(header)/ThemeModeToggle";
-import { RotateCcw } from "lucide-react";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import * as React from "react";
 import { Hint } from "@/components/hint";
 

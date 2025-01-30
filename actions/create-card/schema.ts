@@ -10,4 +10,5 @@ export const CreateCard = z.object({
   boardId: z.string(),
   listId: z.string(),
   color: z.string().optional(),
+  description: z.string().optional(),
 });

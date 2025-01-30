@@ -9,13 +9,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Hint } from "@/components/hint";
 
 interface ModeToggleProps {
   colorBlindMode: boolean;
   setColorBlindMode: React.Dispatch<React.SetStateAction<boolean>>;
 }
-export function ModeToggle({
+export function ThemeToggle({
   colorBlindMode,
   setColorBlindMode,
 }: ModeToggleProps) {
