@@ -71,19 +71,7 @@ export async function POST(req: Request) {
     // each chat completion message would have a role
     // assistent -> ai , system -> what we use to give instructions
     // each message needs a content which is the message itself
-    const systemMessage: ChatCompletionSystemMessageParam = {
-      role: "system",
-      content:
-        "You are an intelligent note-taking app, You answer the user's question based on their existing notes.  " +
-        "The relevant notes for this query are:\n" +
-        relevantNotes
-          ?.map(
-            (note) =>
-              `Title: ${note.title}\n\nDescription:\n${note.description}`
-          )
-          .join("\n\n"),
-    };
-    // will look like this
+
     // Title: Passwords
     // Content:
     // somepassword
@@ -94,15 +82,14 @@ export async function POST(req: Request) {
 
     console.log("Sending request to chat..");
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", //this is good enough much cheaper and still good
-      stream: true, // enables the response streaming
-      messages: [systemMessage, ...messagesTruncated], // we send the isntrusctions + the last 6 messages (chat history)
-    });
+    // const response = await openai.chat.completions.create({
+    //   model: "gpt-3.5-turbo", //this is good enough much cheaper and still good
+    //   stream: true, // enables the response streaming
+    //   messages: [systemMessage, ...messagesTruncated], // we send the isntrusctions + the last 6 messages (chat history)
+    // });
 
     console.log("streaming data..");
 
-    // **✅ Convert OpenAI System Message to string format**
     const systemMessageContent =
       messagesTruncated +
       `You are an intelligent note-taking assistant. Answer based on user notes.\n` +
@@ -121,7 +108,7 @@ export async function POST(req: Request) {
     const stream = streamText({
       model: openaiObect("gpt-3.5-turbo"),
       system: systemMessageContent,
-      messages: messages,
+      messages: messagesTruncated,
       temperature: 1,
     });
     return stream.toDataStreamResponse();

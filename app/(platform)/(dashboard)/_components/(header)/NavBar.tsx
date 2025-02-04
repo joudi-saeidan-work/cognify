@@ -9,7 +9,8 @@ import { dark } from "@clerk/themes";
 import { UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "../../../../../components/ThemeModeToggle";
-import ChatButton from "../(ai)/chatbutton";
+import ChatButton from "../(ai-agents)/note-whiz";
+import AssistanceButton from "../(ai-agents)/assitance-button";
 // Main NavBar component definition
 const NavBar = () => {
   const [zoomLevel, setZoomLevel] = useState(64); // Default font size percentage
@@ -62,7 +63,7 @@ const NavBar = () => {
         />
       </div>
       <div className="ml-auto flex items-center gap-x-2">
-        <ChatButton />
+        <AssistanceButton />
 
         <UserButton
           afterSignOutUrl="/"

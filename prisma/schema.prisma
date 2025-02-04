@@ -16,6 +16,7 @@ datasource db {
 
 model Board{
   id              String @id @default(uuid())
+  isDefault       Boolean @default(false) // Board has a default value
   orgId           String
   title           String
   imageId         String @db.Text

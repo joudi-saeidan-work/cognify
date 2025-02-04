@@ -27,7 +27,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   // try to find the list where the card is
   try {
     list = await db.list.findUnique({
-      where: { id: listId, color, board: { orgId } },
+      where: { id: listId, board: { orgId } },
     });
     if (!list) {
       return {
@@ -60,7 +60,13 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
     const card = await prisma?.$transaction(async (tx) => {
       const card = await tx.card.create({
-        data: { title, listId, color: inheritedColor, order: newOrder },
+        data: {
+          title,
+          listId,
+          color: inheritedColor,
+          order: newOrder,
+          description,
+        },
       });
       await createAuditLog({
         entityId: card.id,
