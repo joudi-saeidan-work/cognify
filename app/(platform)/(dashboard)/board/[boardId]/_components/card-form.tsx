@@ -57,6 +57,13 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       execute({ title, boardId, listId });
     };
 
+    const getTextColor = () => {
+      if (color && color != "bg-background") {
+        return "text-neutral-700";
+      }
+      return "text-foreground";
+    };
+
     if (isEditing) {
       return (
         <form className="m-1 py-0.5 space-y-4" action={onSubmit} ref={formRef}>
@@ -79,7 +86,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       // need to put color here
       <div className="pt-2 px-2">
         <Button
-          className="h-auto px-2 py-1.5 w-full justify-start text-muted-foreground text-sm"
+          className={`h-auto px-2 py-1.5 w-full justify-start text-sm ${getTextColor()}`}
           style={{ backgroundColor: color || undefined }}
           size="sm"
           variant="ghost"

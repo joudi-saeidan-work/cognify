@@ -45,12 +45,18 @@ export function TeamSwitcher() {
                   display: "flex",
                   alignItems: "center",
                 },
+                organizationSwitcherTrigger: {
+                  color: "var(--foreground)",
+                },
+                organizationPreviewTextContainer: {
+                  color: "var(--foreground)",
+                },
               },
               baseTheme: theme === "dark" ? dark : undefined,
             }}
           />
         </SidebarMenuButton>
-        <Separator className="mt-1" />
+        <Separator className="mt-1 dark:bg-muted" />
       </SidebarMenuItem>
     </SidebarMenu>
   );

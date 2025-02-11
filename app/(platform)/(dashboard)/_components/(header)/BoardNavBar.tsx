@@ -1,3 +1,5 @@
+"use client";
+
 import { Plus } from "lucide-react"; // Imports the "Plus" icon, which will be used as an icon in the mobile "Create" button.
 import { Logo } from "@/components/logo"; // Imports the Logo component to display a brand or app logo in the navbar.
 import { Button } from "@/components/ui/button"; // Imports a reusable Button component for consistent button styles across the app.

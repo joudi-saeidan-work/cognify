@@ -9,7 +9,7 @@ const OrganizationIdPage = async () => {
       <Info />
       {/* Full-width separator */}
 
-      <Separator className="my-4 w-screen" />
+      <Separator className="my-4 w-screen dark:bg-muted" />
       <div className="px-2 md:px-4">
         <Suspense fallback={<BoardList.Skeleton />}>
           <BoardList />

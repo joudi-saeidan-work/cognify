@@ -21,13 +21,9 @@ export const Info = () => {
         />
       </div>
       <div className="space-y-1">
-        <p className="font-semibold text-3xl text-neutral-700">
+        <p className="font-semibold text-3xl text-muted-foreground">
           {organization?.name}
         </p>
-        <div className="flex items-center text-sm text-muted-foreground">
-          <CreditCard className="h-3 w-3 mr-1" />
-          Free
-        </div>
       </div>
     </div>
   );

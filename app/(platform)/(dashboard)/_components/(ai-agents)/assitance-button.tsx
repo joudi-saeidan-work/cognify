@@ -20,7 +20,7 @@ const AssistanceButton = () => {
       {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="font-semibold text-foreground" variant="ghost">
+          <Button className="font-semibold text-foreground" variant="outline">
             <Bot className="h-5 w-5" /> Get Assistance
             <ChevronDown className="h-4 w-4" />
           </Button>

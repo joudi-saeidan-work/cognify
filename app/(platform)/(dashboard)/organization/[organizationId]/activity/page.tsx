@@ -8,7 +8,7 @@ const ActivityPage = () => {
     <div className="w-full mb-20 p-4">
       <Info />
       {/* Full-width separator */}
-      <Separator className="my-4 w-screen" />
+      <Separator className="my-4 w-screen dark:bg-muted" />
       <Suspense fallback={<ActivityList.Skeleton />}>
         <ActivityList />
       </Suspense>
@@ -16,4 +16,3 @@ const ActivityPage = () => {
   );
 };
 export default ActivityPage;
-// export default always with pages and layouts

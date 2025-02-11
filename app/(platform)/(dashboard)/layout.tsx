@@ -19,11 +19,10 @@ const DashBoardLayout = ({ children }: { children: React.ReactNode }) => {
   const isBoardPage = path.includes("/board");
   const sideBarColor = isMobile && isBoardPage ? "bg-black/20" : "";
 
-  return (
+  return !isBoardPage ? (
     <div className="min-h-screen flex flex-col">
-      {/* NavBar */}
       <NavBar />
-      {/* Main content */}
+
       <div className="pt-14 flex-1 flex z-[0]">
         <SidebarProvider defaultOpen={true}>
           {/* removed z score for testing */}
@@ -45,23 +44,15 @@ const DashBoardLayout = ({ children }: { children: React.ReactNode }) => {
                   />
                 </Hint>
               )}
-              {/* Side bar Trigger */}
-              {/* {isBoardPage ? (
-                <Hint description="Side Bar">
-                  <StickySidebarTrigger />
-                </Hint>
-              ) : (
-                <Hint description="Side Bar">
-                  <SidebarTrigger className="mt-2.5" />
-                </Hint>
-              )} */}
-              {/* Side bar content */}
+
               <SidebarContent>{children}</SidebarContent>
             </main>
           </div>
         </SidebarProvider>
       </div>
     </div>
+  ) : (
+    <>{children}</>
   );
 };
 

@@ -57,8 +57,8 @@ body {
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
+    --muted: 240 5% 90%;
+    --muted-foreground: 240 4% 40%;
     --accent: 0 0% 97%; /* Slightly lighter than background for light theme */
     --accent-foreground: 0 0% 45%; /* Soft gray text for accent */
     --destructive: 0 84.2% 60.2%;
@@ -92,8 +92,8 @@ body {
     --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 13%; /* #212121 - Clerk's secondary surface */
     --secondary-foreground: 0 0% 100%;
-    --muted: 0 0% 13%;
-    --muted-foreground: 215 20.2% 65.1%; /* Clerk's muted text */
+    --muted: 240 4% 25%;
+    --muted-foreground: 240 5% 75%;
     --accent: 0 0% 16%; /* Slightly lighter than background for dark theme */
     --accent-foreground: 0 0% 85%; /* Light gray text for accent */
     --destructive: 0 84% 60%; /* #EF4444 - Clerk's error red */
