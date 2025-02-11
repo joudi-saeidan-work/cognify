@@ -10,9 +10,12 @@ import {
 } from "@/components/ui/sidebar";
 import { useOrganization } from "@clerk/nextjs";
 import { Separator } from "@/components/ui/separator";
+import { useTheme } from "next-themes";
+import { dark } from "@clerk/themes";
 
 export function TeamSwitcher() {
   const { organization: activeOrganization } = useOrganization();
+  const { theme } = useTheme();
   return (
     <SidebarMenu>
       <SidebarMenuItem>
@@ -43,6 +46,7 @@ export function TeamSwitcher() {
                   alignItems: "center",
                 },
               },
+              baseTheme: theme === "dark" ? dark : undefined,
             }}
           />
         </SidebarMenuButton>

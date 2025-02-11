@@ -8,12 +8,14 @@ import { ElementRef, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useEventListener } from "usehooks-ts";
 import { ListOptions } from "./list-options";
+import { useTheme } from "next-themes";
 
 interface ListHeaderProps {
   data: List;
   onAddCard: () => void;
 }
 export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
+  const { theme } = useTheme();
   const [title, setTitle] = useState(data.title);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -62,17 +64,17 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
   };
   useEventListener("keydown", onKeyDown);
 
+  const getTextColor = () => {
+    if (data.color) return "text-neutral-800";
+    return "text-foreground";
+  };
+
   return (
-    <div className="pt-2  pb-2 px-2 text-sm font-semibold flex  justify-between items-start gap-x-2">
+    <div className="pt-2 pb-2 px-2 text-sm font-semibold flex  justify-between items-start gap-x-2">
       {isEditing ? (
         <form ref={formRef} action={handleSubmit} className="flex-1 px-[2px]">
-          <input hidden id="id" name="id" value={data.id}></input>
-          <input
-            hidden
-            id="boardId"
-            name="boardId"
-            value={data.boardId}
-          ></input>
+          <input hidden id="id" name="id" value={data.id} />
+          <input hidden id="boardId" name="boardId" value={data.boardId} />
           <FormInput
             errors={fieldErrors}
             ref={inputRef}
@@ -80,14 +82,14 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
             id="title"
             placeholder="Enter list title.."
             defaultValue={title}
-            className="text-sm px-[7px] py-1 h-7 font-semibold border-transparent hover:border-input focus:border-input transition truncate bg-transparent focus-bg-white"
+            className={`text-sm px-[7px] py-1 h-7 font-semibold border-transparent hover:border-input focus:border-input transition truncate bg-transparent ${getTextColor()}`}
           />
           <button type="submit" hidden />
         </form>
       ) : (
         <div
           onClick={enableEditing}
-          className="w-full text-sm px-2.5 py-1 h-7 font-semibold border-transparent"
+          className={`w-full text-sm px-2.5 py-1 h-7 font-semibold border-transparent ${getTextColor()}`}
         >
           {title}
         </div>

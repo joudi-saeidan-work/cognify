@@ -6,6 +6,7 @@ import { CardForm } from "./card-form";
 import { cn } from "@/lib/utils";
 import { CardItem } from "./card-item";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
+import { useTheme } from "next-themes";
 
 interface ListItemProps {
   data: ListWithCards;
@@ -13,6 +14,7 @@ interface ListItemProps {
 }
 
 export const ListItem = ({ data, index }: ListItemProps) => {
+  const { theme } = useTheme();
   const textareaRef = useRef<ElementRef<"textarea">>(null);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -28,6 +30,11 @@ export const ListItem = ({ data, index }: ListItemProps) => {
     setIsEditing(false);
   };
 
+  const getBackgroundColor = () => {
+    if (data.color) return data.color;
+    return "bg-background";
+  };
+
   return (
     <Draggable draggableId={data.id} index={index}>
       {(provided) => (
@@ -36,12 +43,10 @@ export const ListItem = ({ data, index }: ListItemProps) => {
           ref={provided.innerRef}
           className="shrink-0 h-full w-[272px] select-none"
         >
-          {/* ToDo add feature that changes the color of cards */}
-          {/* Should have a default color */}
           <div
             {...provided.dragHandleProps}
-            className="w-full rounded-md"
-            style={{ backgroundColor: data.color || "#FFFFFF" }}
+            className="w-full rounded-md bg-background"
+            style={data.color ? { backgroundColor: data.color } : undefined}
           >
             <ListHeader onAddCard={enableEditing} data={data} />
             <Droppable droppableId={data.id} type="card">
@@ -61,9 +66,8 @@ export const ListItem = ({ data, index }: ListItemProps) => {
                 </ol>
               )}
             </Droppable>
-            {/* ToDO: we can add a text editor here for future improvements */}
             <CardForm
-              color={data.color}
+              color={getBackgroundColor()}
               listId={data.id}
               ref={textareaRef}
               isEditing={isEditing}

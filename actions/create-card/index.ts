@@ -42,7 +42,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     });
 
     // use the color from the existing card, or use default color
-    const inheritedColor = existingCardWithColor?.color || color || "#FFFFFF";
+    const inheritedColor = existingCardWithColor?.color ?? color ?? null;
 
     // determine the new order for the card
     const lastCard = await db.card.findFirst({
@@ -58,7 +58,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
 
     // if for some reason the card did not get created we don't want to create an embedding for it..
 
-    const card = await prisma?.$transaction(async (tx) => {
+    const card = await db?.$transaction(async (tx) => {
       const card = await tx.card.create({
         data: {
           title,

@@ -65,14 +65,13 @@ export const ListForm = () => {
         <form
           action={onSubmit}
           ref={formRef}
-          className="w-full p-3 rounded-md bg-white/80 space-y-4 shadow-md"
+          className="w-full p-3 rounded-md bg-background/50 space-y-4 shadow-md backdrop-blur-sm"
         >
           <FormInput
-            // need to add this to render errors
             errors={fieldErrors}
             ref={inputRef}
             id="title"
-            className="bg-white/80 text-sm px-2 py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition"
+            className="text-sm px-2 py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition bg-background/60"
             placeholder="Enter list title..."
           />
           <input hidden value={params.boardId} name="boardId" />
@@ -90,7 +89,7 @@ export const ListForm = () => {
     <ListWrapper>
       <button
         onClick={enableEditing}
-        className="w-full rounded-md bg-white/80 hover:bg-white/50 transition p-3 flex items-center font-medium text-sm"
+        className="w-full rounded-md bg-background/50 hover:bg-background/80 transition p-3 flex items-center font-medium text-sm text-foreground backdrop-blur-sm"
       >
         <Plus className="h-4 w-4 mr-2" />
         Add a list

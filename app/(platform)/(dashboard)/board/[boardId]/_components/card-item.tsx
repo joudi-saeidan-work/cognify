@@ -10,8 +10,8 @@ import { useParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
-import { FormInput } from "@/components/form/form-input";
 import { FormTextarea } from "@/components/form/form-textarea";
+import { useTheme } from "next-themes";
 
 interface CardItemProps {
   data: Card;
@@ -27,6 +27,8 @@ export const CardItem = ({ data, index }: CardItemProps) => {
 
   const formRef = useRef<ElementRef<"form">>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { theme } = useTheme();
 
   const disableEditing = () => setIsEditing(false);
 
@@ -79,12 +81,21 @@ export const CardItem = ({ data, index }: CardItemProps) => {
     formRef.current?.requestSubmit();
   };
 
+  const getTextColor = () => {
+    // Only apply dark text if we have a custom color set
+    if (data.color && data.color !== "bg-background") {
+      return "text-neutral-700";
+    }
+    // Otherwise use theme-aware text color
+    return "text-foreground";
+  };
+
   if (isEditing) {
     return (
       <>
         <div
-          className="relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-none w-full "
-          style={{ backgroundColor: data.color || "#FFFFFF" }}
+          className="relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-none w-full"
+          style={data.color ? { backgroundColor: data.color } : undefined}
         >
           <form ref={formRef} action={onSubmit} className="bg-red">
             <FormTextarea
@@ -114,21 +125,21 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
           role="input"
-          // TODO: condiser updating the card items if
-          className="relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-sm w-full"
+          className="relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-sm w-full bg-background"
           style={{
             ...provided.draggableProps.style,
-            backgroundColor: data.color || "#FFFFFF",
+            ...(data.color && data.color !== "bg-background"
+              ? { backgroundColor: data.color }
+              : {}),
           }}
         >
           <span
             onClick={enableEditing}
-            className="whitespace-pre-wrap break-words overflow-hidden text-ellipsis pr-8 pl-4"
+            className={`whitespace-pre-wrap break-words overflow-hidden text-ellipsis pr-8 pl-4 ${getTextColor()}`}
           >
             {data.title}
           </span>
           <CardExpand id={data.id} />
-          {/* Render Card Options Here */}
           <CardOptions data={data} />
         </div>
       )}

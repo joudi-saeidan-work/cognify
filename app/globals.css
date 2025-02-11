@@ -47,7 +47,7 @@ body {
     --novel-highlight-orange: #fed7aa; /* Tailwind bg-orange-200 */
     --novel-highlight-pink: #fbcfe8; /* Tailwind bg-pink-200 */
     --novel-highlight-gray: #e5e7eb; /* Tailwind bg-gray-200 */
-    --background: 0 0% 100%;
+    --background: 0 0% 95%; /* Soft gray background */
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
@@ -72,7 +72,7 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: var(--background); /* Match main background */
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
     --sidebar-primary-foreground: 0 0% 98%;
@@ -82,41 +82,31 @@ body {
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .dark {
-    --novel-highlight-default: #000000;
-    --novel-highlight-purple: #3f2c4b;
-    --novel-highlight-red: #5c1a1a;
-    --novel-highlight-yellow: #5c4b1a;
-    --novel-highlight-blue: #1a3d5c;
-    --novel-highlight-green: #1a5c20;
-    --novel-highlight-orange: #5c3a1a;
-    --novel-highlight-pink: #5c1a3a;
-    --novel-highlight-gray: #3a3a3a;
-
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --background: 0 0% 13%; /* Soft dark background - #212121 */
+    --foreground: 0 0% 100%; /* #FFFFFF */
+    --card: 0 0% 9%; /* #161616 - Clerk's dark surface */
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 9%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 204 94% 48%; /* #0A84FF - Clerk's primary blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 13%; /* #212121 - Clerk's secondary surface */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 215 20.2% 65.1%; /* Clerk's muted text */
+    --accent: 204 94% 48%; /* Same as primary for consistency */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%; /* #EF4444 - Clerk's error red */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 13%; /* #212121 */
+    --input: 0 0% 13%;
+    --ring: 204 94% 48%; /* Same as primary */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
+    --sidebar-background: var(--background); /* Match main background */
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
     --sidebar-primary-foreground: 0 0% 100%;

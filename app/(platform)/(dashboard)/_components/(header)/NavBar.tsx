@@ -9,7 +9,6 @@ import { dark } from "@clerk/themes";
 import { UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "../../../../../components/ThemeModeToggle";
-import ChatButton from "../(ai-agents)/note-whiz";
 import AssistanceButton from "../(ai-agents)/assitance-button";
 // Main NavBar component definition
 const NavBar = () => {
@@ -24,9 +23,7 @@ const NavBar = () => {
 
   return (
     // Navbar container with fixed positioning at the top of the page, shadows, and padding for structure
-    <nav className="z-[50] fixed top-0 px-4 w-full h-14 border-b shadow-sm bg-gray-50 dark:bg-gray-950 flex items-center transition-colors duration-300">
-      {/* Mobile Sidebar component, positioned at the start of the navbar */}
-      {/* <MobileSideBar /> */}
+    <nav className="z-[50] fixed top-0 px-4 w-full h-14 border-b shadow-sm bg-background text-foreground flex items-center transition-colors duration-300">
       <div className="flex items-center gap-x-4">
         {/* Hidden on small screens (only shown on md and up). Displays the Logo in the navbar */}
         <div className="hidden md:flex">

@@ -80,6 +80,12 @@ const CardOptions = ({ data }: CardOptionsProps) => {
     executeDeleteCard({ id, boardId });
   };
 
+  const getTextColor = () => {
+    if (data?.color && data?.color !== "bg-background")
+      return "text-neutral-700";
+    return "text-foreground";
+  };
+
   return (
     <DropdownMenu>
       {/* Trigger for the dropdown menu */}
@@ -87,7 +93,7 @@ const CardOptions = ({ data }: CardOptionsProps) => {
         <Button
           size="sm"
           variant="ghost"
-          className="absolute left-0 h-4 w-4 text-neutral-700 hover:bg-transparent "
+          className={`absolute left-0 h-4 w-4 text-neutral-700 hover:bg-transparent ${getTextColor()}`}
           title="Actions"
         >
           <GripVertical className="w-4 h-4" />

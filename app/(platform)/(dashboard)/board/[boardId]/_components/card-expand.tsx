@@ -42,12 +42,18 @@ const CardExpand = ({ id }: CardExpandProps) => {
     setIsExpanded(true);
   };
 
+  const getTextColor = () => {
+    if (cardData?.color && cardData?.color !== "bg-background")
+      return "text-neutral-700";
+    return "text-foreground";
+  };
+
   if (isExpanded) {
     return (
       <Button
         size="sm"
         variant="ghost"
-        className="absolute right-2 h-4 w-4 text-neutral-700 hover:bg-transparent  "
+        className={`absolute right-2 h-4 w-4 text-foreground hover:bg-transparent ${getTextColor()}`}
         title="Open Note"
         onClick={handleExpandToNote}
       >
@@ -61,21 +67,21 @@ const CardExpand = ({ id }: CardExpandProps) => {
         <Button
           size="sm"
           variant="ghost"
-          className="absolute right-2 h-4 w-4 text-neutral-700 hover:bg-transparent"
+          className={`absolute right-2 h-4 w-4 hover:bg-transparent ${getTextColor()}`}
           title="Expand"
         >
           <Maximize2 className="w-4 h-4"></Maximize2>
         </Button>
       </PopoverTrigger>
       <PopoverContent side="bottom" align="start" className="w-40">
-        <div className="flex items-center text-sm font-semibold text-neutral-700">
+        <div className="flex items-center text-sm font-semibold ">
           Expand to
         </div>
         <PopoverClose asChild />
         <Button
           variant="ghost"
           onClick={handleExpandToNote}
-          className="flex items-center justify-start p-0 gap-2 w-full text-neural-700"
+          className={`flex items-center justify-start p-0 gap-2 w-full  ${getTextColor()}`}
         >
           <NotebookPen className="w-4 h-4"></NotebookPen>
           Note

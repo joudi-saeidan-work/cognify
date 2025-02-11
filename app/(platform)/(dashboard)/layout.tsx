@@ -25,18 +25,19 @@ const DashBoardLayout = ({ children }: { children: React.ReactNode }) => {
       <NavBar />
       {/* Main content */}
       <div className="pt-14 flex-1 flex z-[0]">
-        <SidebarProvider defaultOpen={false}>
+        <SidebarProvider defaultOpen={true}>
           {/* removed z score for testing */}
           {/* <div className="flex flex-1 z-[50]">  */}
           <div className="flex flex-1">
             {/* Sidebar */}
             <AppSidebar collapsable="icon" />
             <main className="">
-              {!isBoardPage && (
+              {!isBoardPage && isMobile && (
                 <Hint description="Side Bar">
                   <SidebarTrigger className="pt-5" />
                 </Hint>
               )}
+              {/* Mobile Sidebar component, positioned at the start of the navbar */}
               {isMobile && isBoardPage && (
                 <Hint description="Side Bar">
                   <StickySidebarTrigger

@@ -73,7 +73,7 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
   };
 
   return (
-    <div className="relative w-full max-w-screen-lg h-[750px] overflow-y-auto bg-neutral-100 pl-4 pt-4">
+    <div className="relative w-full max-w-screen-lg h-[750px] overflow-y-auto bg-[#1E1E1E] pl-4 pt-4">
       <EditorRoot>
         <EditorContent
           immediatelyRender={false}
@@ -89,7 +89,7 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
               handleImageDrop(view, event, moved, uploadFn),
             attributes: {
               class:
-                "prose dark:prose-invert prose-headings:font-title font-default focus:outline-none",
+                "prose dark:prose-invert prose-headings:font-title font-default focus:outline-none text-[#D4D4D4]",
             },
           }}
           onUpdate={({ editor }) => {

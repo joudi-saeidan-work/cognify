@@ -134,13 +134,18 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
     });
   };
 
+  const getTextColor = () => {
+    if (data?.color && data?.color !== "bg-background")
+      return "text-neutral-700";
+    return "text-foreground";
+  };
   return (
     <>
       {/* color  */}
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            className="h-auto w-auto p-2 text-neutral-700 hover:bg-transparent"
+            className={`h-auto w-auto p-2 hover:bg-transparent ${getTextColor()}`}
             variant="ghost"
           >
             <Brush className="w-4 h-4" />
@@ -151,9 +156,7 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
           side="bottom"
           align="start"
         >
-          <div className="font-semibold text-neutral-500 text-sm pb-2">
-            Color
-          </div>
+          <div className="font-semibold text-sm pb-2">Color</div>
           <div className="grid grid-cols-8 gap-2">
             {colors.map(({ card, list }, index) => (
               <div
@@ -185,21 +188,17 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            className="h-auto w-auto p-2 text-neutral-700 hover:bg-transparent"
+            className={`h-auto w-auto p-2 hover:bg-neutral-500/10 ${getTextColor()}`}
             variant="ghost"
           >
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="h-4 w-4 " />
           </Button>
         </PopoverTrigger>
-        <PopoverContent
-          className="bg-popover w-40 px-0 pt-3 pb-3"
-          side="bottom"
-          align="start"
-        >
+        <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
           <PopoverClose ref={closeRef} asChild></PopoverClose>
           <Button
             onClick={onAddCard}
-            className="flex items-center gap-2 rounded- w-full h-full  px-2 py-1.5  justify-start font-normal text-sm"
+            className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm hover:bg-neutral-500/10"
             variant="ghost"
           >
             <Plus className="h-4 w-4" />

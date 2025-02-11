@@ -71,15 +71,18 @@ export const ContentForm = () => {
   // Get values
   const handleSubmit = () => {
     const boardId = params.boardId as string;
-    // ToDO execute
-    execute({ boardId, id: cardData?.id, description: content });
+    execute({
+      boardId,
+      id: cardData?.id as string,
+      description: content,
+    });
   };
 
   if (!isOpen) return null;
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {id ? ( // Only render content if `id` exists
-        <DialogContent className="rounded-lg shadow-lg bg-white border border-gray-200 w-[85%] h-[95%] mx-auto flex flex-col">
+        <DialogContent className="rounded-lg shadow-lg bg-background border  w-[85%] h-[95%] mx-auto flex flex-col">
           <DialogTitle className="hidden">Edit Card</DialogTitle>
           {!cardData ? (
             <></>
