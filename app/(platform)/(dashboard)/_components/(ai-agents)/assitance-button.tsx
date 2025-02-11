@@ -20,13 +20,13 @@ const AssistanceButton = () => {
       {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="font-semibold">
+          <Button className="font-semibold text-foreground" variant="ghost">
             <Bot className="h-5 w-5" /> Get Assistance
             <ChevronDown className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent side="bottom" align="start">
-          <p className="px-4 py-2 text-sm font-semibold text-primary">
+          <p className="px-4 py-2 text-sm font-semibold text-foreground">
             AI Help
           </p>
           {AI_TOOLS.map((tool) => (

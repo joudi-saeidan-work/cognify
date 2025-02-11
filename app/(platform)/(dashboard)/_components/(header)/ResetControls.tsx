@@ -26,6 +26,7 @@ const ResetControls = ({ setZoomLevel, setColorBlindMode }: ResetProps) => {
           className="p-2"
           aria-label="Reset"
           size="sm"
+          variant="outline"
         >
           <RotateCcw />
         </Button>
