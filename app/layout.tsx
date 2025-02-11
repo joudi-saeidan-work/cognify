@@ -21,7 +21,39 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
-  icons: [{ url: "/logo.svg", href: "/logo.svg" }],
+  icons: [
+    { url: "/favicon/favicon.ico", href: "/favicon.ico" },
+    {
+      url: "/favicon/favicon-16x16.png",
+      href: "/favicon/favicon-16x16.png",
+      type: "image/png",
+      sizes: "16x16",
+    },
+    {
+      url: "/favicon/favicon-32x32.png",
+      href: "/favicon/favicon-32x32.png",
+      type: "image/png",
+      sizes: "32x32",
+    },
+    {
+      url: "/favicon/apple-touch-icon.png",
+      href: "/favicon/apple-touch-icon.png",
+      type: "image/png",
+      sizes: "180x180",
+    },
+    {
+      url: "/favicon/android-chrome-192x192.png",
+      href: "/android-chrome-192x192.png",
+      type: "image/png",
+      sizes: "192x192",
+    },
+    {
+      url: "/favicon/android-chrome-512x512.png",
+      href: "/favicon/android-chrome-512x512.png",
+      type: "image/png",
+      sizes: "512x512",
+    },
+  ],
 };
 
 export default function RootLayout({

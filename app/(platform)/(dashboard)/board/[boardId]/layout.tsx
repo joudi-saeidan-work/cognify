@@ -3,8 +3,8 @@ import { db } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { startCase } from "lodash";
 import { Metadata } from "next";
-import BoardNavbar from "./_components/board-navbar";
-import { cn } from "@/lib/utils";
+import BoardNavbarContainer from "./_components/board-navbar-container";
+import Image from "next/image";
 
 export async function generateMetadata({
   params,
@@ -17,8 +17,6 @@ export async function generateMetadata({
     return { title: "Board" };
   }
 
-  // Render Board
-
   const board = await db.board.findUnique({
     where: {
       id: params.boardId,
@@ -30,6 +28,7 @@ export async function generateMetadata({
     title: board?.title || "Board",
   };
 }
+
 const BoardIdLayout = async ({
   children,
   params,
@@ -50,26 +49,31 @@ const BoardIdLayout = async ({
     },
   });
 
-  console.log(board);
-
   if (!board) {
     notFound();
   }
 
   return (
-    <div className="relative min-h-screen">
-      {/* Background image applied to a fixed layer */}
-      <div
-        style={{ backgroundImage: `url(${board.imageFullUrl})` }}
-        className="fixed top-0 left-0 w-full h-full bg-cover bg-center z-[-2]"
-      />
-      {/* Fixed transparent overlay */}
-      <div className="fixed top-0 left-0 w-full h-full bg-black/10 z-[-1]" />
+    <div className="max-w-9xl mx-auto dark:bg-[#27272a] bg-muted/90 h-full relative rounded-xl overflow-y-auto">
+      {/* Cover Image */}
+      {/* give the user the option to remove/change the cover images  */}
+      <div className="relative w-full h-[180px] bg-black/30 overflow-hidden">
+        <Image
+          src={board.imageFullUrl}
+          alt={board.title}
+          fill
+          className="object-cover opacity-75"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
+      </div>
 
-      {/* Board content */}
-      <BoardNavbar data={board} />
-      <main className="relative pt-28 h-full">{children}</main>
+      {/* Board Content */}
+      <div className="relative dark:bg-[#27272a] bg-muted/90 h-full">
+        <BoardNavbarContainer data={board} />
+        <div className="h-full">{children}</div>
+      </div>
     </div>
   );
 };
+
 export default BoardIdLayout;

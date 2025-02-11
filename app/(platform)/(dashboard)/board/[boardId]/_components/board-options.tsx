@@ -6,52 +6,62 @@ import {
   PopoverTrigger,
   PopoverClose,
 } from "@/components/ui/popover";
-import { MoreHorizontal, X } from "lucide-react";
+import { MoreHorizontal, Trash, Plus } from "lucide-react";
 import { deleteBoard } from "@/actions/delete-board";
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
+import { ElementRef, useRef } from "react";
+import { FormPopOver } from "@/components/form/form-popover";
 
 interface BoardOptionsProps {
   id: string;
 }
+
 const BoardOptions = ({ id }: BoardOptionsProps) => {
+  const closeRef = useRef<ElementRef<"button">>(null);
+
   const { execute, isLoading } = useAction(deleteBoard, {
     onError: (error) => toast.error(error),
   });
 
   const onDelete = () => {
     execute({ id });
+    closeRef.current?.click();
   };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button className="h-auto w-auto p-2" variant="transparent">
+        <Button
+          className="h-auto w-auto p-2 hover:bg-neutral-500/10"
+          variant="ghost"
+        >
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
-        <div className="text-sm font-medium text-center text-neutral-600 pb-4">
-          Board Actions
-        </div>
-
-        <PopoverClose asChild>
+        <PopoverClose ref={closeRef} asChild></PopoverClose>
+        <FormPopOver sideOffset={10} side="right">
           <Button
-            className="h-auto w-auto p-2 absolute top-2 right-2 text-neutral-600"
+            className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm hover:bg-neutral-500/10"
             variant="ghost"
           >
-            <X className="h-4 w-4" />
+            <Plus className="h-4 w-4" />
+            Create Board
           </Button>
-        </PopoverClose>
+        </FormPopOver>
         <Button
-          variant="ghost"
           onClick={onDelete}
-          className="rounded-none w-full h-auto p-2 justify-start font-normal text-sm"
           disabled={isLoading}
+          className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm text-red-500 hover:bg-neutral-500/10"
+          variant="ghost"
         >
-          Delete this board
+          <Trash className="h-4 w-4" />
+          Delete Board
         </Button>
       </PopoverContent>
     </Popover>
   );
 };
+
 export default BoardOptions;

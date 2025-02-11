@@ -16,6 +16,8 @@ interface FormPickerProps {
   errors?: Record<string, string[] | undefined>;
 }
 
+// used to select an image from unsplash
+
 export const FormPicker = ({ id, errors }: FormPickerProps) => {
   const { pending } = useFormStatus();
   const [images, setImages] =

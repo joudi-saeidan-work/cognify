@@ -34,15 +34,16 @@ const NavBar = () => {
       <div className="ml-auto flex items-center gap-x-2">
         <AssistanceButton />
         <Separator orientation="vertical" className="h-6 dark:bg-muted" />
+        <ThemeToggle
+          colorBlindMode={colorBlindMode}
+          setColorBlindMode={setColorBlindMode}
+        />
         <ResetControls
           setZoomLevel={setZoomLevel}
           setColorBlindMode={setColorBlindMode}
         />
         <ZoomControls zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
-        <ThemeToggle
-          colorBlindMode={colorBlindMode}
-          setColorBlindMode={setColorBlindMode}
-        />
+
         <Separator orientation="vertical" className="h-6 dark:bg-muted" />
         <UserButton
           afterSignOutUrl="/"

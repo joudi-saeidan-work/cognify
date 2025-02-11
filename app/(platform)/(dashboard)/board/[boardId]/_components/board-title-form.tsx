@@ -81,7 +81,7 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
   return (
     // when not editing
     <Button
-      className="font-bold text-lg h-auto w-auto p-1 px-2"
+      className="font-bold text-lg h-auto w-auto p-1 px-2 text-foreground"
       variant="transparent"
       onClick={enableEditing}
     >

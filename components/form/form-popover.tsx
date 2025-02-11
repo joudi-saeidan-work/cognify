@@ -18,6 +18,7 @@ import { error } from "console";
 import { FormPicker } from "./form-picker";
 import { ElementRef, useRef } from "react";
 
+// used to create a board
 interface PopOverProps {
   children: React.ReactNode;
   side?: "left" | "right" | "top" | "bottom";

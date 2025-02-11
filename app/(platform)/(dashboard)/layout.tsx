@@ -17,7 +17,6 @@ const DashBoardLayout = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useIsMobile();
 
   const isBoardPage = path.includes("/board");
-  const sideBarColor = isMobile && isBoardPage ? "bg-black/20" : "";
 
   return !isBoardPage ? (
     <div className="min-h-screen flex flex-col">

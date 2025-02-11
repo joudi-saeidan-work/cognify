@@ -94,6 +94,31 @@ model AuditLog {
   updatedAt     DateTime @updatedAt
 } 
 
+model BookmarkFolder {
+  id        String     @id @default(uuid())
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    String
+  orgId     String
+  bookmarks Bookmark[]
+
+  @@index([userId])
+  @@index([orgId])
+}
+
+model Bookmark {
+  id        String         @id @default(uuid())
+  title     String
+  url       String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  folderId  String
+  folder    BookmarkFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+
+  @@index([folderId])
+}
+
 // npx prisma migrate reset  -> resets your whole data base make sure not to do this in prod
 // npx prisma db push -> assign new prisma schema to mysql db 
 // npx prisma generate -> updates prisma with our new types

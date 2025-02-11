@@ -76,7 +76,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
             errors={fieldErrors}
             className="resize-none relative flex flex-col justify-between  border-none hover:border-black/20 py-2 px-3 text-sm rounded-md shadow-none w-full"
           />
-          <input hidden id="listId" name="listId" value={listId} />
+          <input hidden id="listId" name="listId" value={listId} readOnly />
           <div />
         </form>
       );

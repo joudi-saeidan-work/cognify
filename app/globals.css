@@ -243,3 +243,8 @@ pre {
     font-weight: 700;
   }
 }
+
+.board-content {
+  transition: transform 0.3s ease;
+  will-change: transform;
+}

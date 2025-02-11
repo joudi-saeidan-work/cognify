@@ -1,19 +1,101 @@
-import { db } from "@/lib/db";
-import { auth } from "@clerk/nextjs/server";
-import { Board } from "@prisma/client";
+"use client";
+import { Board, Bookmark, BookmarkFolder } from "@prisma/client";
 import { BordTitleForm } from "./board-title-form";
 import BoardOptions from "./board-options";
+import { ThemeToggle } from "@/components/ThemeModeToggle";
+import { Separator } from "@/components/ui/separator";
+import { UserButton, useAuth } from "@clerk/nextjs";
+import ZoomControls from "../../../_components/(header)/ZoomControls";
+import ResetControls from "../../../_components/(header)/ResetControls";
+import AssistanceButton from "../../../_components/(ai-agents)/assitance-button";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import { dark } from "@clerk/themes";
+import { Home, Share } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { BookmarkBar } from "@/components/bookmark/BookmarkBar";
 
 interface BoardNavBarProps {
   data: Board;
+  folders: (BookmarkFolder & { bookmarks: Bookmark[] })[];
 }
 
-const BoardNavbar = async ({ data }: BoardNavBarProps) => {
+const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
+  const [zoomLevel, setZoomLevel] = useState(64); // Default font size percentage
+  const [colorBlindMode, setColorBlindMode] = useState(false);
+  const { theme } = useTheme();
+  const router = useRouter();
+  const { userId, orgId } = useAuth();
+
+  const handleOnClick = () => {
+    if (userId && orgId) {
+      const path = `/organization/${orgId}`;
+      console.log("Navigating to:", path);
+      router.push(path);
+    } else {
+      console.log("Missing userId or orgId:", { userId, orgId });
+    }
+  };
+  useEffect(() => {
+    // Apply the font-size for zoom effect
+    document.documentElement.style.fontSize = `${zoomLevel}%`;
+  }, [zoomLevel]);
   return (
-    <div className="fixed w-full  h-11 z-[50] bg-black/20 flex items-center md:pr-14 pl-12 md:pl-0 pt-1 pb-1 gap-x-4 text-white text-lg">
-      <BordTitleForm data={data} />
-      <div className="ml-auto">
-        <BoardOptions id={data.id} />
+    <div
+      className="w-full h-14 flex items-center px-4 gap-x-4 
+        backdrop-blur-sm border-b 
+       "
+    >
+      {/* Left section */}
+      <div className="flex items-center gap-x-4">
+        <button
+          onClick={handleOnClick}
+          className="hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-md"
+        >
+          <Home className="h-4 w-4 text-muted-foreground" />
+        </button>
+
+        <Separator orientation="vertical" className="h-6" />
+
+        <BookmarkBar folders={folders} />
+
+        <div className="flex items-center gap-x-2">
+          {/* Board icon/color */}
+          <BordTitleForm data={data} />
+          <BoardOptions id={data.id} />
+        </div>
+      </div>
+
+      {/* Right section */}
+      <div className="ml-auto flex items-center gap-x-4">
+        <div className="hidden md:flex items-center gap-x-4">
+          <AssistanceButton />
+          <Separator orientation="vertical" className="h-6" />
+        </div>
+        <ThemeToggle
+          colorBlindMode={colorBlindMode}
+          setColorBlindMode={setColorBlindMode}
+        />
+        <div className="hidden md:flex items-center gap-x-4">
+          <ResetControls
+            setZoomLevel={setZoomLevel}
+            setColorBlindMode={setColorBlindMode}
+          />
+          <ZoomControls zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
+          <Separator orientation="vertical" className="h-6" />
+        </div>
+        <UserButton
+          afterSignOutUrl="/"
+          appearance={{
+            baseTheme: theme === "dark" ? dark : undefined,
+            elements: {
+              avatarBox: {
+                height: 30,
+                width: 30,
+              },
+            },
+          }}
+        />
       </div>
     </div>
   );
