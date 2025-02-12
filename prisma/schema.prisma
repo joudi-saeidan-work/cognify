@@ -16,14 +16,14 @@ datasource db {
 
 model Board{
   id              String @id @default(uuid())
-  isDefault       Boolean @default(false) // Board has a default value
   orgId           String
   title           String
-  imageId         String @db.Text
-  imageThumbUrl   String @db.Text
-  imageFullUrl    String @db.Text 
-  imageUserName   String @db.Text 
-  imageLinkHTML   String @db.Text 
+  imageId         String? @db.Text
+  imageThumbUrl   String? @db.Text
+  imageFullUrl    String? @db.Text 
+  imageUserName   String? @db.Text 
+  imageLinkHTML   String? @db.Text 
+  color           String? @db.Text
 
   lists             List[]
 
