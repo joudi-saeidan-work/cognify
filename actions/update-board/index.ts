@@ -16,7 +16,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { title, id, image, color } = data;
+  const { title, id, image, color, isFavorite } = data;
 
   if (image && color) {
     return { error: "You can only set either an image or a color, not both." };
@@ -46,6 +46,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         imageFullUrl,
         imageLinkHTML,
         imageUserName,
+        isFavorite,
       },
     });
     await createAuditLog({

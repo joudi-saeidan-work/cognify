@@ -24,6 +24,7 @@ model Board{
   imageUserName   String? @db.Text 
   imageLinkHTML   String? @db.Text 
   color           String? @db.Text
+  isFavorite      Boolean @default(false)
 
   lists             List[]
 

@@ -3,20 +3,36 @@ import { Board } from "@prisma/client";
 import { Star } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useAction } from "@/hooks/use-actions";
+import { updateBoard } from "@/actions/update-board";
+import { toast } from "sonner";
 
 interface BoardItemProps {
   board: Board;
-  favorites: string[];
-  toggleFavorite: (id: string) => void;
 }
-const BoardItem = ({ board, favorites, toggleFavorite }: BoardItemProps) => {
-  // need to determine if the board is favorite
-  const isFavorite = favorites.includes(board.id);
+const BoardItem = ({ board }: BoardItemProps) => {
+  const { execute: executeUpdateBoard } = useAction(updateBoard, {
+    onSuccess: (data) => {
+      toast.success(`Board Updated!`);
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  const handleBoardUpdate = () => {
+    const isFavorite = !board.isFavorite;
+    executeUpdateBoard({
+      id: board.id,
+      title: board.title,
+      isFavorite: isFavorite,
+    });
+  };
 
   const handleClick = (event: React.MouseEvent) => {
     event.stopPropagation();
     event.preventDefault();
-    toggleFavorite(board.id);
+    handleBoardUpdate();
   };
   return (
     <Link
@@ -41,7 +57,7 @@ const BoardItem = ({ board, favorites, toggleFavorite }: BoardItemProps) => {
         >
           <Star
             className={`w-10 h-10 ${
-              isFavorite ? "text-yellow-400" : "text-white"
+              board.isFavorite ? "text-yellow-400" : "text-white"
             }`}
           />
         </Button>

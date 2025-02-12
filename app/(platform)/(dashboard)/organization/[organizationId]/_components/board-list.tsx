@@ -7,26 +7,16 @@ import BoardItem from "./board-item";
 import CreateBoard from "./create-board";
 import { Button } from "@/components/ui/button";
 
-// ✅ Define props type
 interface BoardListProps {
   boards: Board[];
 }
 
 const BoardList: React.FC<BoardListProps> = ({ boards }) => {
-  const [favoriteBoards, setFavoriteBoards] = useState<string[]>([]);
+  // const [favoriteBoards, setFavoriteBoards] = useState<string[]>([]);
   const [showFavorites, setShowFavorites] = useState(false); // track if we want to show fav boards
 
-  const toggleFavorite = (id: string) => {
-    setFavoriteBoards(
-      (prev) =>
-        prev.includes(id)
-          ? prev.filter((boardId) => boardId !== id) // Remove if already favorite
-          : [...prev, id] // Add if not favorite
-    );
-  };
-
   const displayedBoards = showFavorites
-    ? boards.filter((board) => favoriteBoards.includes(board.id))
+    ? boards.filter((board) => board.isFavorite === true)
     : boards;
 
   return (
@@ -68,12 +58,7 @@ const BoardList: React.FC<BoardListProps> = ({ boards }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayedBoards.length > 0 ? (
           displayedBoards.map((board) => (
-            <BoardItem
-              key={board.id}
-              board={board}
-              favorites={favoriteBoards}
-              toggleFavorite={toggleFavorite}
-            />
+            <BoardItem key={board.id} board={board} />
           ))
         ) : (
           <p className="text-gray-500 text-center col-span-full">

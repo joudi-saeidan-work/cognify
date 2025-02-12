@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 const CreateBoard = () => {
   const router = useRouter();
 
-  const { execute: executeCreateBoard, fieldErrors } = useAction(createBoard, {
+  const { execute: executeCreateBoard } = useAction(createBoard, {
     onSuccess: (data) => {
       toast.success("Board Created!");
       router.push(`/board/${data.id}`);

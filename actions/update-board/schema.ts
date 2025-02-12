@@ -10,4 +10,5 @@ export const UpdateBoard = z.object({
   id: z.string(),
   image: z.string().optional(),
   color: z.string().optional(),
+  isFavorite: z.boolean().optional(),
 });
