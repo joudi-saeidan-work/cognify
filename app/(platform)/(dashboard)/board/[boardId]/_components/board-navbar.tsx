@@ -21,7 +21,7 @@ interface BoardNavBarProps {
 }
 
 const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
-  const [zoomLevel, setZoomLevel] = useState(64); // Default font size percentage
+  const [zoomLevel, setZoomLevel] = useState(110); // Default font size percentage
   const [colorBlindMode, setColorBlindMode] = useState(false);
   const { theme } = useTheme();
   const router = useRouter();
@@ -42,7 +42,7 @@ const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
   }, [zoomLevel]);
   return (
     <div
-      className="w-full h-14 flex items-center px-4 gap-x-4 
+      className="w-full flex items-center px-4 gap-x-4 
         backdrop-blur-sm border-b 
        "
     >
@@ -55,9 +55,7 @@ const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
           <Home className="h-4 w-4 text-muted-foreground" />
         </button>
 
-        <Separator orientation="vertical" className="h-6" />
-
-        <BookmarkBar folders={folders} />
+        <Separator orientation="vertical" className="h-6 bg-muted-foreground" />
 
         <div className="flex items-center gap-x-2">
           {/* Board icon/color */}
@@ -70,7 +68,12 @@ const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
           <AssistanceButton />
-          <Separator orientation="vertical" className="h-6" />
+          <BookmarkBar folders={folders} />
+
+          <Separator
+            orientation="vertical"
+            className="h-6 bg-muted-foreground"
+          />
         </div>
         <ThemeToggle
           colorBlindMode={colorBlindMode}
@@ -82,7 +85,10 @@ const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
             setColorBlindMode={setColorBlindMode}
           />
           <ZoomControls zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
-          <Separator orientation="vertical" className="h-6" />
+          <Separator
+            orientation="vertical"
+            className="h-6 bg-muted-foreground"
+          />
         </div>
         <UserButton
           afterSignOutUrl="/"

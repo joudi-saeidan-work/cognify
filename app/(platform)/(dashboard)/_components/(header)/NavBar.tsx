@@ -13,7 +13,7 @@ import AssistanceButton from "../(ai-agents)/assitance-button";
 import { Separator } from "@/components/ui/separator";
 // Main NavBar component definition
 const NavBar = () => {
-  const [zoomLevel, setZoomLevel] = useState(64); // Default font size percentage
+  const [zoomLevel, setZoomLevel] = useState(110); // Default font size percentage
   const [colorBlindMode, setColorBlindMode] = useState(false);
   const { theme } = useTheme();
 

@@ -5,6 +5,7 @@ import { startCase } from "lodash";
 import { Metadata } from "next";
 import BoardNavbarContainer from "./_components/board-navbar-container";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -52,12 +53,11 @@ const BoardIdLayout = async ({
   if (!board) {
     notFound();
   }
-
   return (
     <div className="max-w-9xl mx-auto dark:bg-[#27272a] bg-muted/90 h-full relative rounded-xl overflow-y-auto">
       {/* Cover Image */}
       {/* give the user the option to remove/change the cover images  */}
-      <div className="relative w-full h-[180px] bg-black/30 overflow-hidden">
+      {/* <div className="relative w-full h-[180px] bg-black/30 overflow-hidden">
         <Image
           src={board.imageFullUrl}
           alt={board.title}
@@ -65,13 +65,21 @@ const BoardIdLayout = async ({
           className="object-cover opacity-75"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
+      </div> */}
+      {/* Gradient Cover */}
+      <div className="relative w-full h-[180px] overflow-hidden">
+        <div
+          className={cn(
+            "absolute inset-0",
+            "bg-gradient-to-br from-[#2A3950] to-[#E6E6E6]"
+          )}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
       </div>
 
       {/* Board Content */}
-      <div className="relative dark:bg-[#27272a] bg-muted/90 h-full">
-        <BoardNavbarContainer data={board} />
-        <div className="h-full">{children}</div>
-      </div>
+      <BoardNavbarContainer data={board} />
+      <div className="h-full">{children}</div>
     </div>
   );
 };

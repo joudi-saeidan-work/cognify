@@ -84,15 +84,15 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
 
     return (
       // need to put color here
-      <div className="pt-2 px-2">
+      <div className="pt-2 px-2 ">
         <Button
-          className={`h-auto px-2 py-1.5 w-full justify-start text-sm ${getTextColor()}`}
+          className={` whitespace-pre-wrap h-auto px-2 py-1.5 w-full justify-start text-sm ${getTextColor()}`}
           style={{ backgroundColor: color || undefined }}
           size="sm"
           variant="ghost"
           onClick={enableEditing}
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 " />
           write or type "/" for commands
         </Button>
       </div>

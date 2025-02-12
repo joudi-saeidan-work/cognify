@@ -13,7 +13,7 @@ const ResetControls = ({ setZoomLevel, setColorBlindMode }: ResetProps) => {
   const { setTheme } = useTheme();
   // Function to reset all settings
   const handleReset = () => {
-    setZoomLevel(90); // Reset zoom
+    setZoomLevel(110); // Reset zoom
     setTheme("light"); // Reset to light theme
     setColorBlindMode(false); // Reset color-blind mode
     document.body.classList.remove("accessible");
