@@ -16,28 +16,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { title, image } = data;
-
-  const [imageId, imageThumbUrl, imageFullUrl, imageLinkHTML, imageUserName] =
-    image.split("|"); //since we have seperated the urls by | we need to extract the most important bits that we are going to add in our db
-
-  console.log({
-    imageId,
-    imageThumbUrl,
-    imageFullUrl,
-    imageLinkHTML,
-    imageUserName,
-  });
-
-  if (
-    !imageId ||
-    !imageThumbUrl ||
-    !imageFullUrl ||
-    !imageLinkHTML ||
-    !imageUserName
-  ) {
-    return { error: "Missing Fields. Failed to create board." };
-  }
+  const { title } = data;
   let board;
 
   try {
@@ -45,11 +24,6 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       data: {
         title,
         orgId,
-        imageId,
-        imageThumbUrl,
-        imageFullUrl,
-        imageLinkHTML,
-        imageUserName,
       },
     });
     await createAuditLog({

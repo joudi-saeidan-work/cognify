@@ -16,14 +16,33 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { title, id } = data;
+  const { title, id, image, color } = data;
+
+  const [imageId, imageThumbUrl, imageFullUrl, imageLinkHTML, imageUserName] =
+    image?.split("|") ?? []; //since we have seperated the urls by | we need to extract the most important bits that we are going to add in our db
+
+  console.log({
+    imageId,
+    imageThumbUrl,
+    imageFullUrl,
+    imageLinkHTML,
+    imageUserName,
+  });
 
   let board;
 
   try {
     board = await db.board.update({
       where: { id, orgId },
-      data: { title },
+      data: {
+        title,
+        color,
+        imageId,
+        imageThumbUrl,
+        imageFullUrl,
+        imageLinkHTML,
+        imageUserName,
+      },
     });
     await createAuditLog({
       entityTitle: board.title,
