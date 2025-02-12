@@ -11,7 +11,8 @@ import { deleteBoard } from "@/actions/delete-board";
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { ElementRef, useRef } from "react";
-import { FormPopOver } from "@/components/form/form-popover";
+import { createBoard } from "@/actions/create-board";
+import { useRouter } from "next/navigation";
 
 interface BoardOptionsProps {
   id: string;
@@ -19,14 +20,33 @@ interface BoardOptionsProps {
 
 const BoardOptions = ({ id }: BoardOptionsProps) => {
   const closeRef = useRef<ElementRef<"button">>(null);
+  const router = useRouter();
 
-  const { execute, isLoading } = useAction(deleteBoard, {
-    onError: (error) => toast.error(error),
-  });
+  const { execute: executeDeleteBoard, isLoading: isLoadingDelete } = useAction(
+    deleteBoard,
+    {
+      onError: (error) => toast.error(error),
+    }
+  );
 
   const onDelete = () => {
-    execute({ id });
+    executeDeleteBoard({ id });
     closeRef.current?.click();
+  };
+
+  const { execute: executeCreateBoard, isLoading } = useAction(createBoard, {
+    onSuccess: (data) => {
+      toast.success(`Board Created!`);
+      router.push(`/board/${data.id}`);
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  const onCreate = () => {
+    const title = "Untitled";
+    executeCreateBoard({ title });
   };
 
   return (
@@ -41,15 +61,14 @@ const BoardOptions = ({ id }: BoardOptionsProps) => {
       </PopoverTrigger>
       <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
         <PopoverClose ref={closeRef} asChild></PopoverClose>
-        <FormPopOver sideOffset={10} side="right">
-          <Button
-            className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm hover:bg-neutral-500/10"
-            variant="ghost"
-          >
-            <Plus className="h-4 w-4" />
-            Create Board
-          </Button>
-        </FormPopOver>
+        <Button
+          className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm hover:bg-neutral-500/10"
+          variant="ghost"
+          onClick={onCreate}
+        >
+          <Plus className="h-4 w-4" />
+          Create Board
+        </Button>
         <Button
           onClick={onDelete}
           disabled={isLoading}

@@ -18,6 +18,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   }
   const { title, id, image, color } = data;
 
+  if (image && color) {
+    return { error: "You can only set either an image or a color, not both." };
+  }
+
   const [imageId, imageThumbUrl, imageFullUrl, imageLinkHTML, imageUserName] =
     image?.split("|") ?? []; //since we have seperated the urls by | we need to extract the most important bits that we are going to add in our db
 

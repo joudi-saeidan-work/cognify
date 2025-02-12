@@ -51,7 +51,7 @@ export const FormPopOver = ({
     const image = formData.get("image") as string;
     console.log({ image });
 
-    execute({ title, image });
+    execute({ title });
   };
   return (
     <Popover>

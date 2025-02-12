@@ -1,64 +1,89 @@
-import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
-import { db } from "@/lib/db";
-import { FormPopOver } from "@/components/form/form-popover";
-import { Hint } from "@/components/hint";
-import { HelpCircle, User2 } from "lucide-react";
-import Link from "next/link";
-import { Skeleton } from "@/components/ui/skeleton";
+"use client"; // ✅ This is a client component
 
-export const BoardList = async () => {
-  const { orgId } = await auth();
-  if (!orgId) {
-    redirect("/select-org");
-  }
+import { useState } from "react";
+import { LayoutDashboardIcon, Star, User2 } from "lucide-react";
+import { Board } from "@prisma/client"; // ✅ Import Board type from Prisma
+import BoardItem from "./board-item";
+import CreateBoard from "./create-board";
+import { Button } from "@/components/ui/button";
 
-  const boards = await db.board.findMany({
-    where: { orgId },
-    orderBy: { createdAt: "desc" },
-  });
+// ✅ Define props type
+interface BoardListProps {
+  boards: Board[];
+}
+
+const BoardList: React.FC<BoardListProps> = ({ boards }) => {
+  const [favoriteBoards, setFavoriteBoards] = useState<string[]>([]);
+  const [showFavorites, setShowFavorites] = useState(false); // track if we want to show fav boards
+
+  const toggleFavorite = (id: string) => {
+    setFavoriteBoards(
+      (prev) =>
+        prev.includes(id)
+          ? prev.filter((boardId) => boardId !== id) // Remove if already favorite
+          : [...prev, id] // Add if not favorite
+    );
+  };
+
+  const displayedBoards = showFavorites
+    ? boards.filter((board) => favoriteBoards.includes(board.id))
+    : boards;
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center font-semibold text-2xl text-muted-foreground">
+      {/* Header */}
+      <div className="flex items-center font-semibold text-2xl text-muted-foreground pb-5">
         <User2 className="h-10 w-10 mr-2" />
         Your Boards
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-        {boards.map((board) => (
-          <Link
-            key={board.id}
-            href={`/board/${board.id}`}
-            style={{ backgroundImage: `url(${board.imageThumbUrl})` }}
-            className="group relative aspect-video bg-no-repeat bg-center bg-cover bg-sky-700 rounded-sm h-full w-full p-2 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition" />
-            <p className="relative  font-semibold text-white">{board.title}</p>
-          </Link>
-        ))}
-        <FormPopOver sideOffset={10} side="right">
-          <div
-            role="button"
-            className="aspect-video relative h-full w-full bg-muted rounded-sm flex flex-col gap-y-1 justify-center items-center hover:opacity-75 transition"
-          >
-            <p className="text-sm">Create new board</p>
-          </div>
-        </FormPopOver>
+
+      {/* Toggle Buttons */}
+      <div className="flex gap-x-5 font-semibold text-muted-foreground">
+        {/* All Boards Button */}
+        <Button
+          variant="ghost"
+          className={`text-lg hover:bg-transparent flex items-center gap-x-2 ${
+            !showFavorites ? "text-blue-500" : "text-gray-500"
+          }`}
+          onClick={() => setShowFavorites(false)} //
+        >
+          <LayoutDashboardIcon className="w-5 h-5" />
+          All
+        </Button>
+
+        {/* Favorites Button */}
+        <Button
+          variant="ghost"
+          className={`text-lg hover:bg-transparent flex items-center gap-x-2 ${
+            showFavorites ? "text-yellow-400" : "text-gray-500"
+          }`}
+          onClick={() => setShowFavorites(true)}
+        >
+          <Star className="w-5 h-5" />
+          Favorites
+        </Button>
+      </div>
+
+      {/* Board List (Filtered Based on `showFavorites`) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {displayedBoards.length > 0 ? (
+          displayedBoards.map((board) => (
+            <BoardItem
+              key={board.id}
+              board={board}
+              favorites={favoriteBoards}
+              toggleFavorite={toggleFavorite}
+            />
+          ))
+        ) : (
+          <p className="text-gray-500 text-center col-span-full">
+            {showFavorites ? "No favorite boards yet." : ""}
+          </p>
+        )}
+        {!showFavorites && <CreateBoard />}
       </div>
     </div>
   );
 };
 
-BoardList.Skeleton = function SkeletonBoardList() {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-      <Skeleton className="aspect-video h-full w-full p-2"></Skeleton>
-      <Skeleton className="aspect-video h-full w-full p-2"></Skeleton>
-      <Skeleton className="aspect-video h-full w-full p-2"></Skeleton>
-      <Skeleton className="aspect-video h-full w-full p-2"></Skeleton>
-      <Skeleton className="aspect-video h-full w-full p-2"></Skeleton>
-      <Skeleton className="aspect-video h-full w-full p-2"></Skeleton>
-      <Skeleton className="aspect-video h-full w-full p-2"></Skeleton>
-    </div>
-  );
-};
+export default BoardList;

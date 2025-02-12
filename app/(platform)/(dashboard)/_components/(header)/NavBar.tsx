@@ -1,7 +1,6 @@
 import { Plus } from "lucide-react"; // Imports the "Plus" icon, which will be used as an icon in the mobile "Create" button.
 import { Logo } from "@/components/logo"; // Imports the Logo component to display a brand or app logo in the navbar.
 import { Button } from "@/components/ui/button"; // Imports a reusable Button component for consistent button styles across the app.
-import { FormPopOver } from "@/components/form/form-popover";
 import { useState, useEffect } from "react";
 import ZoomControls from "./ZoomControls";
 import ResetControls from "./ResetControls";

@@ -26,7 +26,6 @@ const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
   const { theme } = useTheme();
   const router = useRouter();
   const { userId, orgId } = useAuth();
-
   const handleOnClick = () => {
     if (userId && orgId) {
       const path = `/organization/${orgId}`;
