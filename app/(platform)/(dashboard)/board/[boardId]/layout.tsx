@@ -1,11 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
-import { startCase } from "lodash";
 import { Metadata } from "next";
 import BoardNavbarContainer from "./_components/board-navbar-container";
-import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { ImageIcon } from "lucide-react";
+import { FormPopOver } from "@/components/form/form-popover";
+import { CoverImage } from "./_components/cover-image";
 
 export async function generateMetadata({
   params,
@@ -53,33 +54,22 @@ const BoardIdLayout = async ({
   if (!board) {
     notFound();
   }
+  const hasCoverImage = board.imageId && board.color;
+
   return (
     <div className="max-w-9xl mx-auto dark:bg-[#27272a] bg-muted/90 h-full relative rounded-xl overflow-y-auto">
-      {/* Cover Image */}
-      {/* give the user the option to remove/change the cover images  */}
-      {/* <div className="relative w-full h-[180px] bg-black/30 overflow-hidden">
-        <Image
-          src={board.imageFullUrl}
-          alt={board.title}
-          fill
-          className="object-cover opacity-75"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
-      </div> */}
-      {/* Gradient Cover */}
-      <div className="relative w-full h-[180px] overflow-hidden">
-        <div
-          className={cn(
-            "absolute inset-0",
-            "bg-gradient-to-br from-[#2A3950] to-[#E6E6E6]"
-          )}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/30" />
-      </div>
+      {hasCoverImage && <CoverImage board={board} />}
+      <FormPopOver>
+        <Button variant="ghost" className="sticky right-0">
+          <ImageIcon className="h-4 w-4" />
+        </Button>
+      </FormPopOver>
 
       {/* Board Content */}
-      <BoardNavbarContainer data={board} />
-      <div className="h-full">{children}</div>
+      <div className="sticky top-0 z-10 bg-muted shadow-md">
+        <BoardNavbarContainer data={board} />
+      </div>
+      <div className="h-full pt-[60px]">{children}</div>
     </div>
   );
 };

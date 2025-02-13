@@ -74,6 +74,7 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
           defaultValue={title}
           className="resize-none shadow-none text-lg font-bold px-[7px] py-1 h-7 focus-visible:outline-none focus-visible:ring-transparent border-none"
           color={"transparent"}
+          errors={fieldErrors}
         />
       </form>
     );

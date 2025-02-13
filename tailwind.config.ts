@@ -10,9 +10,6 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // custom cover images colors
-        // gradients
-
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -94,5 +91,47 @@ const config: Config = {
     },
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+  safelist: [
+    // Gradient classes
+    "bg-gradient-to-br",
+    "bg-gradient-to-b",
+    "bg-[radial-gradient(circle_at_center,#6EE7B7_0%,#3B82F6_100%)]",
+
+    // From/To gradient colors
+    "from-[#2A3950]",
+    "to-[#E6E6E6]",
+    "from-[#F5F5F5]",
+    "to-[#E6E6E6]",
+    "from-[#F472B6]",
+    "to-[#FBBF24]",
+    "from-[#9333EA]",
+    "to-[#EC4899]",
+    "from-[#34D399]",
+    "to-[#3B82F6]",
+    "from-[#FB923C]",
+    "to-[#9333EA]",
+
+    // Solid colors
+    "bg-[#3B82F6]",
+    "bg-[#EF4444]",
+    "bg-[#FBBF24]",
+    "bg-[#F5F5DC]",
+    "bg-[#FDE8E8]",
+    "bg-[#FEF3DC]",
+    "bg-[#FFF9D5]",
+    "bg-[#D6F8D6]",
+    "bg-[#D7F2F8]",
+    "bg-[#DEE8FA]",
+    "bg-[#E9DFF9]",
+    "bg-[#EAEAEA]",
+    "bg-[#FCD4D4]",
+    "bg-[#FDEAC5]",
+    "bg-[#FFF4B8]",
+    "bg-[#C8F3C8]",
+    "bg-[#C7EDF5]",
+    "bg-[#C9E3F5]",
+    "bg-[#E4D6F6]",
+    "bg-[#E7E7E7]",
+  ],
 };
 export default config;
