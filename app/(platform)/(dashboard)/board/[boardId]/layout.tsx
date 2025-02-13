@@ -54,18 +54,12 @@ const BoardIdLayout = async ({
   if (!board) {
     notFound();
   }
-  const hasCoverImage = board.imageId && board.color;
+  const hasCoverImage = board.imageId || board.color;
+  console.log("has cover image", hasCoverImage);
 
   return (
     <div className="max-w-9xl mx-auto dark:bg-[#27272a] bg-muted/90 h-full relative rounded-xl overflow-y-auto">
       {hasCoverImage && <CoverImage board={board} />}
-      <FormPopOver>
-        <Button variant="ghost" className="sticky right-0">
-          <ImageIcon className="h-4 w-4" />
-        </Button>
-      </FormPopOver>
-
-      {/* Board Content */}
       <div className="sticky top-0 z-10 bg-muted shadow-md">
         <BoardNavbarContainer data={board} />
       </div>

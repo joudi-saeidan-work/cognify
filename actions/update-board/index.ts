@@ -40,12 +40,23 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       where: { id, orgId },
       data: {
         title,
-        color,
-        imageId,
-        imageThumbUrl,
-        imageFullUrl,
-        imageLinkHTML,
-        imageUserName,
+        ...(color
+          ? {
+              color,
+              imageId: null,
+              imageThumbUrl: null,
+              imageFullUrl: null,
+              imageLinkHTML: null,
+              imageUserName: null,
+            }
+          : {
+              color: null,
+              imageId,
+              imageThumbUrl,
+              imageFullUrl,
+              imageLinkHTML,
+              imageUserName,
+            }),
         isFavorite,
       },
     });
@@ -61,5 +72,4 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   revalidatePath(`/board/${id}`);
   return { data: board };
 };
-
 export const updateBoard = createSafeAction(UpdateBoard, handler);

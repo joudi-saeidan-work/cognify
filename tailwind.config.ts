@@ -110,6 +110,12 @@ const config: Config = {
     "to-[#3B82F6]",
     "from-[#FB923C]",
     "to-[#9333EA]",
+    "from-[#DEE8FA]",
+    "to-[#A4B8F2]",
+    "from-[#E9DFF9]",
+    "to-[#C7A6F2]",
+    "from-[#EAEAEA]",
+    "to-[#B3B3B3]",
 
     // Solid colors
     "bg-[#3B82F6]",
