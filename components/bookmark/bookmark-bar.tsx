@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Folder, Plus, ChevronLeft, Link } from "lucide-react";
+import { Folder, Plus, ChevronLeft } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -69,6 +69,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
     executeCreateBookmark({
       title: newItemData.title,
       url: newItemData.url,
+      folderId: activeFolder || null,
     });
   };
 
