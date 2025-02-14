@@ -69,7 +69,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
     executeCreateBookmark({
       title: newItemData.title,
       url: newItemData.url,
-      folderId: activeFolder || null,
+      folderId: activeFolder || undefined,
     });
   };
 
