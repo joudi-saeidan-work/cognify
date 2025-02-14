@@ -97,27 +97,28 @@ model AuditLog {
 
 model BookmarkFolder {
   id        String     @id @default(uuid())
-  name      String
+  title      String
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  userId    String
   orgId     String
-  bookmarks Bookmark[]
+  bookmarks Bookmark[] // like a shelf that holds bookmarks
 
-  @@index([userId])
   @@index([orgId])
 }
 
 model Bookmark {
-  id        String         @id @default(uuid())
+  id        String          @id @default(uuid())
   title     String
   url       String
+  orgId     String
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
-  folderId  String
-  folder    BookmarkFolder @relation(fields: [folderId], references: [id], onDelete: Cascade)
+  folderId  String?        // a bookmark can be in a folder or not
+  folder    BookmarkFolder? @relation(fields: [folderId], references: [id], onDelete: Cascade)
+ 
 
   @@index([folderId])
+  @@index([orgId])
 }
 
 // npx prisma migrate reset  -> resets your whole data base make sure not to do this in prod

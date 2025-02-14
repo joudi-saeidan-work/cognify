@@ -11,21 +11,27 @@ import AssistanceButton from "../../../_components/(ai-agents)/assitance-button"
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { dark } from "@clerk/themes";
-import { Home, Share } from "lucide-react";
+import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { BookmarkBar } from "@/components/bookmark/BookmarkBar";
+import BookmarkBar from "@/components/bookmark/bookmark-bar";
 
 interface BoardNavBarProps {
   data: Board;
   folders: (BookmarkFolder & { bookmarks: Bookmark[] })[];
+  bookmarksWithoutFolders: Bookmark[];
 }
 
-const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
-  const [zoomLevel, setZoomLevel] = useState(110); // Default font size percentage
-  const [colorBlindMode, setColorBlindMode] = useState(false);
+const BoardNavbar = ({
+  data,
+  folders,
+  bookmarksWithoutFolders,
+}: BoardNavBarProps) => {
   const { theme } = useTheme();
   const router = useRouter();
   const { userId, orgId } = useAuth();
+  const [zoomLevel, setZoomLevel] = useState(110); // Default font size percentage
+  const [colorBlindMode, setColorBlindMode] = useState(false);
+
   const handleOnClick = () => {
     if (userId && orgId) {
       const path = `/organization/${orgId}`;
@@ -67,7 +73,7 @@ const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
           <AssistanceButton />
-          <BookmarkBar folders={folders} />
+          <BookmarkBar folders={folders} bookmarks={bookmarksWithoutFolders} />
 
           <Separator
             orientation="vertical"
@@ -95,8 +101,8 @@ const BoardNavbar = ({ data, folders }: BoardNavBarProps) => {
             baseTheme: theme === "dark" ? dark : undefined,
             elements: {
               avatarBox: {
-                height: 30,
-                width: 30,
+                height: 32,
+                width: 32,
               },
             },
           }}

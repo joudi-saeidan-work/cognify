@@ -7,10 +7,6 @@ interface BoardNavBarProps {
   data: Board;
 }
 
-interface NavbarProps extends BoardNavBarProps {
-  folders: (BookmarkFolder & { bookmarks: Bookmark[] })[];
-}
-
 const BoardNavbarContainer = async ({ data }: BoardNavBarProps) => {
   const { userId, orgId } = await auth();
 
@@ -18,14 +14,28 @@ const BoardNavbarContainer = async ({ data }: BoardNavBarProps) => {
     return null;
   }
 
-  const folders = await db.bookmarkFolder.findMany({
-    where: { orgId },
-    include: {
-      bookmarks: true,
-    },
-  });
+  const [folders, bookmarksWithoutFolders] = await Promise.all([
+    db.bookmarkFolder.findMany({
+      where: { orgId },
+      include: {
+        bookmarks: true,
+      },
+    }),
+    db.bookmark.findMany({
+      where: {
+        orgId: orgId,
+        folderId: null, // This finds bookmarks that don't belong to any folder
+      },
+    }),
+  ]);
 
-  return <BoardNavbar data={data} folders={folders} />;
+  return (
+    <BoardNavbar
+      data={data}
+      folders={folders}
+      bookmarksWithoutFolders={bookmarksWithoutFolders}
+    />
+  );
 };
 
 export default BoardNavbarContainer;

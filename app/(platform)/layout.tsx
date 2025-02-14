@@ -10,14 +10,12 @@ export default function PlatformLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <ClerkProvider>
-        <QueryProvider>
-          <Toaster />
-          <ModalProvider />
-          {children}
-        </QueryProvider>
-      </ClerkProvider>
-    </>
+    <ClerkProvider dynamic>
+      <QueryProvider>
+        <Toaster />
+        <ModalProvider />
+        {children}
+      </QueryProvider>
+    </ClerkProvider>
   );
 }
