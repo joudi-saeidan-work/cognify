@@ -3,9 +3,6 @@ import { db } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import BoardNavbarContainer from "./_components/board-navbar-container";
-import { Button } from "@/components/ui/button";
-import { ImageIcon } from "lucide-react";
-import { FormPopOver } from "@/components/form/form-popover";
 import { CoverImage } from "./_components/cover-image";
 
 export async function generateMetadata({

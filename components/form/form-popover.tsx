@@ -14,6 +14,7 @@ interface PopOverProps {
   side?: "left" | "right" | "top" | "bottom";
   align?: "start" | "center" | "end";
   sideOffset?: number;
+  board?: any;
 }
 
 export const FormPopOver = ({
@@ -21,6 +22,7 @@ export const FormPopOver = ({
   side = "bottom",
   align,
   sideOffset = 0,
+  board,
 }: PopOverProps) => {
   const closeRef = useRef<ElementRef<"button">>(null);
 
@@ -35,7 +37,7 @@ export const FormPopOver = ({
       >
         <div className="text-sm font-medium text-neutral-600 pb-4">
           <PopoverClose ref={closeRef} />
-          <FormPicker />
+          <FormPicker data={board} />
         </div>
       </PopoverContent>
     </Popover>

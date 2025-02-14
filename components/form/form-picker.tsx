@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check, X } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useFormStatus } from "react-dom";
@@ -13,21 +13,42 @@ import { useAction } from "@/hooks/use-actions";
 
 import { toast } from "sonner";
 import { updateBoard } from "@/actions/update-board";
+import { Button } from "../ui/button";
+import { Board } from "@prisma/client";
 
 type SelectedOption = {
   type: "image" | "color";
   value: (typeof defaultImages)[number] | string; // Allow full image object or color string
 };
 
-export const FormPicker = () => {
+interface FormPickerProps {
+  data: Board;
+}
+export const FormPicker = ({ data }: FormPickerProps) => {
   const params = useParams();
   const { pending } = useFormStatus();
 
+  // Set initial state based on existing data
   const [selectedOption, setSelectedOption] = useState<SelectedOption | null>(
-    null
+    () => {
+      if (data.imageFullUrl) {
+        return {
+          type: "image",
+          value: `${data.imageId}|${data.imageThumbUrl}|${data.imageFullUrl}|${data.imageLinkHTML}|${data.imageUserName}`,
+        };
+      }
+      if (data.color) {
+        return { type: "color", value: data.color };
+      }
+      return null;
+    }
   );
 
+  // Track whether this is a user-initiated change
+  const [hasUserInteracted, setHasUserInteracted] = useState(false);
+
   const limitedImages = defaultImages.slice(0, 9);
+  const id = params.boardId as string;
 
   const { execute: executeUpdateBoard } = useAction(updateBoard, {
     onSuccess: () => {
@@ -39,9 +60,8 @@ export const FormPicker = () => {
   });
 
   useEffect(() => {
-    if (selectedOption) {
-      const id = params.boardId as string;
-
+    // Only execute if there's been user interaction
+    if (hasUserInteracted && selectedOption) {
       if (selectedOption.type === "image") {
         executeUpdateBoard({
           id,
@@ -54,10 +74,33 @@ export const FormPicker = () => {
         });
       }
     }
-  }, [selectedOption, params.boardId]);
+  }, [selectedOption, hasUserInteracted]);
+
+  const handleOptionSelect = (option: SelectedOption) => {
+    setHasUserInteracted(true);
+    setSelectedOption(option);
+  };
 
   return (
     <div className="relative">
+      {selectedOption && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute -top-7 -right-2 font-semibold text-xs text-muted-foreground"
+          onClick={() => {
+            setSelectedOption(null);
+            executeUpdateBoard({
+              id,
+              image: "|||||",
+              color: undefined,
+            });
+          }}
+        >
+          <X className="w-4 h-4 text-muted-foreground" />
+          Remove Cover
+        </Button>
+      )}
       <div className="flex flex-col gap-2">
         <div>
           <p className="text-xs font-semibold mb-2">Colors</p>
@@ -73,7 +116,7 @@ export const FormPicker = () => {
                   )}
                   onClick={() => {
                     if (pending) return;
-                    setSelectedOption({
+                    handleOptionSelect({
                       type: "color",
                       value: color.background,
                     });
@@ -105,7 +148,7 @@ export const FormPicker = () => {
                   )}
                   onClick={() => {
                     if (pending) return;
-                    setSelectedOption({
+                    handleOptionSelect({
                       type: "color",
                       value: color.background,
                     });
@@ -136,7 +179,7 @@ export const FormPicker = () => {
                 onClick={() => {
                   if (pending) return;
                   const imageValue = `${image.id}|${image.urls.thumb}|${image.urls.full}|${image.links.html}|${image.user.name}`;
-                  setSelectedOption({
+                  handleOptionSelect({
                     type: "image",
                     value: imageValue,
                   });

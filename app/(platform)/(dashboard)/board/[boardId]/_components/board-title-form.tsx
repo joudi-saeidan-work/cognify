@@ -92,10 +92,14 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
 
           {/* Add Cover Button - Only shows on hover */}
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <FormPopOver>
+            <FormPopOver board={data}>
               <Button variant="ghost" size="sm" className="h-auto p-1">
                 <ImageIcon className="h-4 w-4" />
-                <span>Add Cover</span>
+                {data.color || data.imageFullUrl ? (
+                  <span>Change Cover</span>
+                ) : (
+                  <span>Add Cover</span>
+                )}
               </Button>
             </FormPopOver>
           </div>
