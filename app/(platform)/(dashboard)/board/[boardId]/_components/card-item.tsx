@@ -94,7 +94,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
     return (
       <>
         <div
-          className="relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-none w-full"
+          className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-none w-full"
           style={data.color ? { backgroundColor: data.color } : undefined}
         >
           <form ref={formRef} action={onSubmit} className="bg-red">
@@ -125,7 +125,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
           role="input"
-          className="relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-sm w-full bg-background"
+          className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-sm w-full bg-background"
           style={{
             ...provided.draggableProps.style,
             ...(data.color && data.color !== "bg-background"

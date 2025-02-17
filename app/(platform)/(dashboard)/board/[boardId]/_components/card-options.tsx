@@ -93,7 +93,7 @@ const CardOptions = ({ data }: CardOptionsProps) => {
         <Button
           size="sm"
           variant="ghost"
-          className={`absolute left-0 h-4 w-4 text-neutral-700 hover:bg-transparent ${getTextColor()}`}
+          className={`opacity-0 group-hover:opacity-100 absolute left-0 h-4 w-4 text-neutral-700 hover:bg-transparent ${getTextColor()}`}
           title="Actions"
         >
           <GripVertical className="w-4 h-4" />

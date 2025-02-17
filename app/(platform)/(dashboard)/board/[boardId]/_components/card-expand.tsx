@@ -53,7 +53,7 @@ const CardExpand = ({ id }: CardExpandProps) => {
       <Button
         size="sm"
         variant="ghost"
-        className={`absolute right-2 h-4 w-4 text-foreground hover:bg-transparent ${getTextColor()}`}
+        className={`opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 h-4 w-4 hover:bg-transparent ${getTextColor()}`}
         title="Open Note"
         onClick={handleExpandToNote}
       >
@@ -67,7 +67,7 @@ const CardExpand = ({ id }: CardExpandProps) => {
         <Button
           size="sm"
           variant="ghost"
-          className={`absolute right-2 h-4 w-4 hover:bg-transparent ${getTextColor()}`}
+          className={`opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 h-4 w-4 hover:bg-transparent ${getTextColor()}`}
           title="Expand"
         >
           <Maximize2 className="w-4 h-4"></Maximize2>

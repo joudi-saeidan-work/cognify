@@ -74,7 +74,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
             ref={ref}
             placeholder="write anything ..."
             errors={fieldErrors}
-            className="resize-none relative flex flex-col justify-between  border-none hover:border-black/20 py-2 px-3 text-sm rounded-md shadow-none w-full"
+            className={`resize-none relative flex flex-col justify-between  border-none hover:border-black/20 py-2 px-3 text-sm rounded-md shadow-none w-full ${getTextColor()}`}
           />
           <input hidden id="listId" name="listId" value={listId} readOnly />
           <div />
