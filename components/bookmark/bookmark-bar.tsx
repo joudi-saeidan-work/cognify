@@ -74,7 +74,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
   };
 
   return (
-    <div className="flex items-center gap-2 p-2 border-b">
+    <div className="flex items-center gap-2 p-2">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="sm">

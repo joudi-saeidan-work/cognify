@@ -59,28 +59,67 @@ const BoardOptions = ({ id }: BoardOptionsProps) => {
           <MoreHorizontal className="h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
-        <PopoverClose ref={closeRef} asChild></PopoverClose>
-        <Button
-          className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm hover:bg-neutral-500/10"
-          variant="ghost"
-          onClick={onCreate}
-        >
-          <Plus className="h-4 w-4" />
-          Create Board
-        </Button>
-        <Button
-          onClick={onDelete}
-          disabled={isLoading}
-          className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm text-red-500 hover:bg-neutral-500/10"
-          variant="ghost"
-        >
-          <Trash className="h-4 w-4" />
-          Delete Board
-        </Button>
+      <PopoverContent
+        className="w-64 px-0 py-3 shadow-md rounded-lg bg-white"
+        side="bottom"
+        align="start"
+      >
+        <PopoverClose asChild />
+        <div className="px-5">
+          <h3 className="text-start text-neutral-900 pb-3">Board Settings</h3>
+
+          <div className="space-y-3">
+            <SettingItem label="Cover Image" />
+            <SettingItem label="Zoom Controls" />
+            <SettingItem label="Theme" />
+            <SettingItem label="Bookmark" />
+            <SettingItem label="Assistance" />
+            <SettingItem label="Avatar" />
+          </div>
+
+          {/* Divider */}
+          <div className="border-t my-3" />
+
+          {/* Delete Board */}
+          <Button
+            onClick={onDelete}
+            disabled={isLoading}
+            className="flex items-center gap-2 w-full px-3 py-1.5 justify-start text-sm text-red-500 hover:bg-neutral-500/10"
+            variant="ghost"
+          >
+            <Trash className="h-4 w-4" />
+            Delete Board
+          </Button>
+
+          {/* Create Board  */}
+          <Button
+            onClick={onCreate}
+            className="flex items-center gap-2 w-full px-3 py-1.5 justify-start text-sm hover:bg-neutral-500/10"
+            variant="ghost"
+          >
+            <Plus className="h-4 w-4" />
+            Create Board
+          </Button>
+        </div>
       </PopoverContent>
     </Popover>
   );
 };
+
+interface SettingsProps {
+  label: string;
+}
+const SettingItem = ({ label }: SettingsProps) => (
+  <div className="flex items-center justify-between text-sm font-medium text-neutral-900">
+    {label} <ToggleButton />
+  </div>
+);
+
+const ToggleButton = () => (
+  <label className="relative flex w-10 h-5 bg-gray-300 rounded-full cursor-pointer">
+    <input type="checkbox" className="sr-only peer" />
+    <span className="absolute w-4 h-4 bg-rose-300 rounded-full left-0.5 top-0.5 peer-checked:bg-rose-600 peer-checked:left-5 transition" />
+  </label>
+);
 
 export default BoardOptions;
