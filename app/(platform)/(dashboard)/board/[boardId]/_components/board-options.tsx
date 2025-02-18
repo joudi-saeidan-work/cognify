@@ -16,9 +16,21 @@ import { useRouter } from "next/navigation";
 
 interface BoardOptionsProps {
   id: string;
+  visibilitySettings: {
+    showAssistant: boolean;
+    showAvatar: boolean;
+    showZoomControls: boolean;
+    showBookmarks: boolean;
+    showThemes: boolean;
+  };
+  onSettingsChange: (settings: string, value: boolean) => void;
 }
 
-const BoardOptions = ({ id }: BoardOptionsProps) => {
+const BoardOptions = ({
+  id,
+  visibilitySettings,
+  onSettingsChange,
+}: BoardOptionsProps) => {
   const closeRef = useRef<ElementRef<"button">>(null);
   const router = useRouter();
 
@@ -69,12 +81,28 @@ const BoardOptions = ({ id }: BoardOptionsProps) => {
           <h3 className="text-start text-neutral-900 pb-3">Board Settings</h3>
 
           <div className="space-y-3">
-            <SettingItem label="Cover Image" />
-            <SettingItem label="Zoom Controls" />
-            <SettingItem label="Theme" />
-            <SettingItem label="Bookmark" />
-            <SettingItem label="Assistance" />
-            <SettingItem label="Avatar" />
+            <SettingItem
+              label="Zoom Controls"
+              checked={visibilitySettings.showZoomControls}
+              onChange={(checked) =>
+                onSettingsChange("showZoomControls", checked)
+              }
+            />
+            <SettingItem
+              label="Theme"
+              checked={visibilitySettings.showThemes}
+              onChange={(checked) => onSettingsChange("showThemes", checked)}
+            />
+            <SettingItem
+              label="Bookmark"
+              checked={visibilitySettings.showBookmarks}
+              onChange={(checked) => onSettingsChange("showBookmarks", checked)}
+            />
+            <SettingItem
+              label="Assistance"
+              checked={visibilitySettings.showAssistant}
+              onChange={(checked) => onSettingsChange("showAssistant", checked)}
+            />
           </div>
 
           {/* Divider */}
@@ -108,16 +136,31 @@ const BoardOptions = ({ id }: BoardOptionsProps) => {
 
 interface SettingsProps {
   label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
 }
-const SettingItem = ({ label }: SettingsProps) => (
+
+interface ToggleButtonProps {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}
+
+const SettingItem = ({ label, checked, onChange }: SettingsProps) => (
   <div className="flex items-center justify-between text-sm font-medium text-neutral-900">
-    {label} <ToggleButton />
+    {label} <ToggleButton checked={checked} onChange={onChange} />
   </div>
 );
 
-const ToggleButton = () => (
+const ToggleButton = ({ checked, onChange }: ToggleButtonProps) => (
   <label className="relative flex w-10 h-5 bg-gray-300 rounded-full cursor-pointer">
-    <input type="checkbox" className="sr-only peer" />
+    <input
+      type="checkbox"
+      checked={checked}
+      onChange={(e) => {
+        onChange(e.target.checked);
+      }}
+      className="sr-only peer"
+    />
     <span className="absolute w-4 h-4 bg-rose-300 rounded-full left-0.5 top-0.5 peer-checked:bg-rose-600 peer-checked:left-5 transition" />
   </label>
 );

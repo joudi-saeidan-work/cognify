@@ -29,8 +29,23 @@ const BoardNavbar = ({
   const { theme } = useTheme();
   const router = useRouter();
   const { userId, orgId } = useAuth();
-  const [zoomLevel, setZoomLevel] = useState(110); // Default font size percentage
+  const [zoomLevel, setZoomLevel] = useState(110);
   const [colorBlindMode, setColorBlindMode] = useState(false);
+
+  const [visibilitySettings, setVisibilitySettings] = useState({
+    showAssistant: true,
+    showAvatar: true,
+    showZoomControls: true,
+    showBookmarks: true,
+    showThemes: true,
+  });
+
+  const handleToggle = (setting: string, value: boolean) => {
+    setVisibilitySettings((prev) => ({
+      ...prev,
+      [setting]: value,
+    }));
+  };
 
   const handleOnClick = () => {
     if (userId && orgId) {
@@ -65,48 +80,73 @@ const BoardNavbar = ({
         <div className="flex items-center gap-x-2">
           {/* Board icon/color */}
           <BordTitleForm data={data} />
-          <BoardOptions id={data.id} />
+          <BoardOptions
+            id={data.id}
+            visibilitySettings={visibilitySettings}
+            onSettingsChange={handleToggle}
+          />
         </div>
       </div>
 
       {/* Right section */}
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
-          <AssistanceButton />
-          <BookmarkBar folders={folders} bookmarks={bookmarksWithoutFolders} />
+          {visibilitySettings.showAssistant ? <AssistanceButton /> : ""}
+          {visibilitySettings.showBookmarks ? (
+            <>
+              <BookmarkBar
+                folders={folders}
+                bookmarks={bookmarksWithoutFolders}
+              />
 
-          <Separator
-            orientation="vertical"
-            className="h-6 bg-muted-foreground"
-          />
+              <Separator
+                orientation="vertical"
+                className="h-6 bg-muted-foreground"
+              />
+            </>
+          ) : (
+            ""
+          )}
         </div>
-        <ThemeToggle
-          colorBlindMode={colorBlindMode}
-          setColorBlindMode={setColorBlindMode}
-        />
-        <div className="hidden md:flex items-center gap-x-4">
-          <ResetControls
-            setZoomLevel={setZoomLevel}
+        {visibilitySettings.showThemes ? (
+          <ThemeToggle
+            colorBlindMode={colorBlindMode}
             setColorBlindMode={setColorBlindMode}
           />
-          <ZoomControls zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
-          <Separator
-            orientation="vertical"
-            className="h-6 bg-muted-foreground"
-          />
-        </div>
-        <UserButton
-          afterSignOutUrl="/"
-          appearance={{
-            baseTheme: theme === "dark" ? dark : undefined,
-            elements: {
-              avatarBox: {
-                height: 32,
-                width: 32,
+        ) : (
+          ""
+        )}
+        {visibilitySettings.showZoomControls ? (
+          <div className="hidden md:flex items-center gap-x-4">
+            <ResetControls
+              setZoomLevel={setZoomLevel}
+              setColorBlindMode={setColorBlindMode}
+            />
+            <ZoomControls zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
+            <Separator
+              orientation="vertical"
+              className="h-6 bg-muted-foreground"
+            />
+          </div>
+        ) : (
+          ""
+        )}
+        {visibilitySettings.showAvatar ? (
+          <UserButton
+            afterSignOutUrl="/"
+            appearance={{
+              baseTheme: theme === "dark" ? dark : undefined,
+              elements: {
+                avatarBox: {
+                  height: 32,
+                  width: 32,
+                },
               },
-            },
-          }}
-        />
+            }}
+          />
+        ) : (
+          ""
+        )}
       </div>
     </div>
   );
