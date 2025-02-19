@@ -63,6 +63,7 @@ model Card{
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
+  dueDate           DateTime?
 
   @@index([listId])
 }
@@ -96,12 +97,12 @@ model AuditLog {
 } 
 
 model BookmarkFolder {
-  id        String     @id @default(uuid())
-  title      String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  orgId     String
-  bookmarks Bookmark[] // like a shelf that holds bookmarks
+  id          String     @id @default(uuid())
+  title       String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  orgId       String
+  bookmarks   Bookmark[] // like a shelf that holds bookmarks
 
   @@index([orgId])
 }

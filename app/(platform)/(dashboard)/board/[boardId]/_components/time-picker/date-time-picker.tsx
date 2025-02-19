@@ -14,12 +14,38 @@ import {
 } from "@/components/ui/popover";
 import { Card } from "@prisma/client";
 import { TimePicker } from "./time-picker";
+import { useEffect } from "react";
+import { useAction } from "@/hooks/use-actions";
+import { toast } from "sonner";
+import { updateCard } from "@/actions/update-card";
+import { useParams } from "next/navigation";
 
 interface DateTimePickerProps {
   data: Card;
 }
 export function DateTimePicker({ data }: DateTimePickerProps) {
   const [date, setDate] = React.useState<Date>();
+
+  const { execute, isLoading } = useAction(updateCard, {
+    onSuccess: (data) => {
+      toast.success("Date added!");
+    },
+    onError: (error) => {
+      toast.error("Date not added!");
+    },
+  });
+
+  const params = useParams();
+
+  useEffect(() => {
+    if (date) {
+      execute({
+        id: data.id,
+        boardId: params.boardId as string,
+        dueDate: date,
+      });
+    }
+  }, [date]);
 
   const getTextColor = () => {
     if (data?.color && data?.color !== "bg-background")
@@ -30,7 +56,7 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        {date ? (
+        {data.dueDate ? (
           <button
             className={`inline-flex items-center rounded-full px-1 py-0 bg-gray-100 text-gray-600`}
             style={{
@@ -41,7 +67,7 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
             }}
           >
             <span className="text-sm font-medium">
-              {format(date, "MMM d, yyyy, hh:mm aaa")}
+              {format(data.dueDate, "MMM d, yyyy, hh:mm aaa")}
             </span>
             <Bell className="ml-1 h-3 w-3" />
           </button>
