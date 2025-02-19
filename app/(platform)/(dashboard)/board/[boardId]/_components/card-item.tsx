@@ -12,6 +12,7 @@ import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { useTheme } from "next-themes";
+import { DateTimePicker } from "./time-picker/date-time-picker";
 
 interface CardItemProps {
   data: Card;
@@ -84,10 +85,10 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   const getTextColor = () => {
     // Only apply dark text if we have a custom color set
     if (data.color && data.color !== "bg-background") {
-      return "text-neutral-700";
+      return "text-black font-medium";
     }
     // Otherwise use theme-aware text color
-    return "text-foreground";
+    return "text-black font-medium";
   };
 
   if (isEditing) {
@@ -139,6 +140,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           >
             {data.title}
           </span>
+          <DateTimePicker data={data} />
           <CardExpand id={data.id} />
           <CardOptions data={data} />
         </div>
