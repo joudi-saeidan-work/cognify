@@ -328,3 +328,22 @@ pre {
 .fc-timegrid-col-header {
   font-size: 1rem !important;
 }
+
+/* Week view header styling */
+.fc-timeGridWeek-view .fc-col-header-cell-cushion {
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fc-timeGridWeek-view .fc-col-header-cell {
+  padding: 8px 0;
+}
+
+/* Make the weekday name slightly smaller than the date */
+.fc-timeGridWeek-view .fc-col-header-cell-cushion::before {
+  content: attr(data-weekday);
+  font-size: 0.85em;
+  font-weight: 500;
+}

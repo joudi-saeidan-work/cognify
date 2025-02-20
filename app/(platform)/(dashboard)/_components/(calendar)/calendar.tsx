@@ -194,16 +194,36 @@ const Calendar = () => {
                         eventDisplay: "list-item",
                         displayEventEnd: false,
                         displayEventTime: true,
+                        dayHeaderContent: (args) => {
+                          return (
+                            <div className="flex flex-col items-center">
+                              <span className="text-xs uppercase text-muted-foreground">
+                                {args.date.toLocaleDateString("en-US", {
+                                  weekday: "short",
+                                })}
+                              </span>
+                            </div>
+                          );
+                        },
                       },
                       timeGridWeek: {
                         eventDisplay: "block",
                         displayEventEnd: true,
                         displayEventTime: true,
                         displayEventStart: true,
-                        eventTimeFormat: {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          meridiem: "short",
+                        dayHeaderContent: (args) => {
+                          return (
+                            <div className="flex flex-col items-center">
+                              <span className="text-xs uppercase text-muted-foreground">
+                                {args.date.toLocaleDateString("en-US", {
+                                  weekday: "short",
+                                })}
+                              </span>
+                              <span className="text-2xl">
+                                {args.date.getDate()}
+                              </span>
+                            </div>
+                          );
                         },
                       },
                       timeGridDay: {
@@ -211,10 +231,19 @@ const Calendar = () => {
                         displayEventEnd: true,
                         displayEventTime: true,
                         displayEventStart: true,
-                        eventTimeFormat: {
-                          hour: "numeric",
-                          minute: "2-digit",
-                          meridiem: "short",
+                        dayHeaderContent: (args) => {
+                          return (
+                            <div className="flex flex-col items-center">
+                              <span className="text-xs uppercase text-muted-foreground">
+                                {args.date.toLocaleDateString("en-US", {
+                                  weekday: "short",
+                                })}
+                              </span>
+                              <span className="text-2xl">
+                                {args.date.getDate()}
+                              </span>
+                            </div>
+                          );
                         },
                       },
                     }}
