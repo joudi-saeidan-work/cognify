@@ -119,10 +119,11 @@ const Calendar = () => {
         <SheetContent
           side="right"
           className="w-full max-w-8xl min-w-[90vw] h-screen p-6 overflow-y-auto"
+          showClose={false}
         >
           {isSheetOpen && (
             <div
-              className="fixed top-1/2 -translate-y-1/2 right-[calc(90vw-12px)] flex flex-col space-y-4"
+              className="hidden lg:flex fixed top-1/2 -translate-y-1/2 right-[calc(90vw-12px)] flex-col space-y-4"
               style={{ zIndex: 99999, pointerEvents: "auto" }}
             >
               <Button
