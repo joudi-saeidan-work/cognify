@@ -142,7 +142,7 @@ const Calendar = () => {
               height="100%"
               plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
               headerToolbar={{
-                left: "prevButton,nextButton,todayButton",
+                left: "prevButton,todayButton,nextButton",
                 center: "title",
                 right: "dayGridMonth,timeGridWeek,timeGridDay",
               }}
