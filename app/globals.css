@@ -428,3 +428,17 @@ pre {
   opacity: 0.5 !important;
   cursor: not-allowed !important;
 }
+
+/* Keep the same color on hover for active button */
+.fc-button-active:hover {
+  background-color: #1e293b !important;
+  color: white !important;
+  border-color: #1e293b !important;
+}
+
+/* Ensure hover doesn't change opacity for active button */
+.fc-button-active:hover:not(:disabled) {
+  opacity: 1 !important;
+  background-color: #1e293b !important;
+  color: white !important;
+}

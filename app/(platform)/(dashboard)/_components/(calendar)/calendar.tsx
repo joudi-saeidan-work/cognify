@@ -171,7 +171,7 @@ const Calendar = () => {
           <div className="flex flex-col h-full">
             <div className="flex flex-1 flex-col lg:flex-row gap-8 min-h-0">
               {activeView === "calendar" && (
-                <div className="flex-1 h-[calc(100dvh-6rem)] overflow-auto min-w-0">
+                <div className="flex-1 h-[calc(100dvh-4rem)] overflow-auto min-w-0">
                   <FullCalendar
                     ref={calendarRef}
                     height="100%"
@@ -218,7 +218,7 @@ const Calendar = () => {
                           return (
                             <div className="flex flex-col items-center">
                               <span className="text-xs uppercase text-muted-foreground">
-                                {args.date.toLocaleDateString("en-UK", {
+                                {args.date.toLocaleDateString("en-US", {
                                   weekday: "short",
                                 })}
                               </span>
@@ -234,6 +234,8 @@ const Calendar = () => {
                             </div>
                           );
                         },
+                        slotDuration: "00:15:00",
+                        snapDuration: "00:15:00",
                       },
                       timeGridDay: {
                         eventDisplay: "block",
@@ -247,7 +249,7 @@ const Calendar = () => {
                           return (
                             <div className="flex flex-col items-center">
                               <span className="text-xs uppercase text-muted-foreground">
-                                {args.date.toLocaleDateString("en-UK", {
+                                {args.date.toLocaleDateString("en-US", {
                                   weekday: "short",
                                 })}
                               </span>
@@ -263,6 +265,8 @@ const Calendar = () => {
                             </div>
                           );
                         },
+                        slotDuration: "00:15:00",
+                        snapDuration: "00:15:00",
                       },
                     }}
                     slotEventOverlap={false}
@@ -304,6 +308,12 @@ const Calendar = () => {
                           calendarApi?.today();
                         },
                       },
+                    }}
+                    slotLabelInterval="01:00"
+                    slotLabelFormat={{
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
                     }}
                   />
                 </div>
