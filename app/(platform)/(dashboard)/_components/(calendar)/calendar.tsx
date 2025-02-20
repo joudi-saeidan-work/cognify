@@ -123,30 +123,44 @@ const Calendar = () => {
           side="right"
           className="w-full max-w-8xl min-w-[90vw] h-screen p-6 overflow-y-auto"
         >
-          {/* Toggle Buttons - Positioned outside the sheet
-          <div className="absolute -left-6 top-1/4 -translate-y-1/2 flex flex-col space-y-4 z-60">
-            <Button variant="ghost" onClick={() => setIsSheetOpen(false)}>
-              <ChevronLeftIcon className="h-6 w-6" />
-            </Button>
-            <Button variant="ghost">
-              <CalendarIcon className="h-6 w-6" />
-            </Button>
-            <Button variant="ghost">
-              <CheckCircleIcon className="h-6 w-6" />
-            </Button>
-            <Button variant="ghost">
-              <BellIcon className="h-6 w-6" />
-            </Button>
-          </div> */}
-
+          {isSheetOpen && (
+            <div
+              className="fixed top-1/2 -translate-y-1/2 right-[calc(90vw-12px)] flex flex-col space-y-4"
+              style={{ zIndex: 99999, pointerEvents: "auto" }}
+            >
+              <Button
+                variant="ghost"
+                onClick={() => setIsSheetOpen(false)}
+                className="bg-background shadow-lg hover:bg-accent border relative z-[99999]"
+              >
+                <ChevronLeftIcon className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                className="bg-background shadow-lg hover:bg-accent border relative z-[99999]"
+              >
+                <CalendarIcon className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                className="bg-background shadow-lg hover:bg-accent border relative z-[99999]"
+              >
+                <CheckCircleIcon className="h-6 w-6" />
+              </Button>
+              <Button
+                variant="ghost"
+                className="bg-background shadow-lg hover:bg-accent border relative z-[99999]"
+              >
+                <BellIcon className="h-6 w-6" />
+              </Button>
+            </div>
+          )}
           <div className="flex flex-col h-full">
-            {/* Toggle Button */}
             <Button onClick={toggleSidebar} className="mb-4 self-start">
               {isSidebarVisible ? "Hide Events" : "Show Events"}
             </Button>
 
             <div className="flex flex-1 flex-col lg:flex-row gap-8 min-h-0">
-              {/* Sidebar */}
               {isSidebarVisible && (
                 <div className="lg:w-1/4 min-h-[300px] lg:min-h-0">
                   <div className="pb-6">
@@ -184,7 +198,6 @@ const Calendar = () => {
                 </div>
               )}
 
-              {/* Calendar */}
               <div className="flex-1 h-[80vh] min-w-0 ">
                 <FullCalendar
                   ref={calendarRef}
@@ -239,38 +252,8 @@ const Calendar = () => {
               </div>
             </div>
           </div>
-          {isSheetOpen && (
-            <div className="fixed top-1/2 -translate-y-1/2 -left-1 flex flex-col space-y-4 z-[1000]">
-              <Button
-                variant="ghost"
-                onClick={() => setIsSheetOpen(false)}
-                className="bg-background shadow-lg hover:bg-accent border"
-              >
-                <ChevronLeftIcon className="h-6 w-6" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="bg-background shadow-lg hover:bg-accent border"
-              >
-                <CalendarIcon className="h-6 w-6" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="bg-background shadow-lg hover:bg-accent border"
-              >
-                <CheckCircleIcon className="h-6 w-6" />
-              </Button>
-              <Button
-                variant="ghost"
-                className="bg-background shadow-lg hover:bg-accent border"
-              >
-                <BellIcon className="h-6 w-6" />
-              </Button>
-            </div>
-          )}
         </SheetContent>
       </Sheet>
-      {/* Move Dialog outside of SheetContent */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
