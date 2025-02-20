@@ -281,8 +281,50 @@ pre {
   color: var(--accent-foreground);
 }
 
-.truncate {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+.fc .fc-daygrid-day-number {
+  font-size: 1.1rem;
+  padding: 8px;
+  color: theme("colors.gray.700");
+  width: 100%;
+  text-align: center;
+}
+
+.fc .fc-daygrid-day-top {
+  display: flex;
+  justify-content: center;
+  flex-direction: row-reverse;
+}
+
+/* FullCalendar mobile event display */
+@media (max-width: 768px) {
+  .fc-daygrid-event .fc-event-time {
+    display: none !important;
+  }
+
+  .fc-daygrid-event {
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Time grid (Week/Day view) styles */
+.fc-timegrid {
+  font-size: 1rem; /* Base font size for time grid */
+}
+
+.fc-timegrid-slot-label {
+  font-size: 0.875rem !important; /* Time labels on the left */
+}
+
+.fc-timegrid-axis-cushion {
+  font-size: 0.875rem !important; /* "all-day" text */
+}
+
+.fc-timegrid-event .fc-event-time,
+.fc-timegrid-event .fc-event-title {
+  font-size: 0.875rem !important; /* Event times and titles */
+}
+
+/* Header day names */
+.fc-timegrid-col-header {
+  font-size: 1rem !important;
 }

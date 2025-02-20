@@ -77,7 +77,7 @@ const Calendar = () => {
       const calendarApi = selectedDate.view.calendar; // Get the calendar API instance
       calendarApi.unselect(); // Clear any selected date/time
 
-      // Create a new event
+      // Create a new event with explicit start and end times
       const newEvent = {
         id: `${selectedDate?.start.toISOString()}-${newEventTitle}`, // Unique ID for the event
         title: newEventTitle,
@@ -118,7 +118,7 @@ const Calendar = () => {
         </SheetTrigger>
         <SheetContent
           side="right"
-          className="w-full max-w-8xl min-w-[90vw] h-screen p-6 overflow-y-auto"
+          className="w-full max-w-8xl min-w-[90vw] h-[100dvh] p-6 overflow-y-auto"
           showClose={false}
         >
           {isSheetOpen && (
@@ -171,7 +171,7 @@ const Calendar = () => {
           <div className="flex flex-col h-full">
             <div className="flex flex-1 flex-col lg:flex-row gap-8 min-h-0">
               {activeView === "calendar" && (
-                <div className="flex-1 h-[80vh] min-w-0">
+                <div className="flex-1 h-[calc(100dvh-6rem)] overflow-auto min-w-0">
                   <FullCalendar
                     ref={calendarRef}
                     height="100%"
@@ -185,17 +185,54 @@ const Calendar = () => {
                     editable={true}
                     selectable={true}
                     selectMirror={true}
-                    dayMaxEvents={true}
+                    dayMaxEvents={3}
                     select={handleDateSelect}
                     eventClick={handleEventClick}
                     eventsSet={(events) => setCurrentEvent(events)}
+                    views={{
+                      dayGridMonth: {
+                        eventDisplay: "list-item",
+                        displayEventEnd: false,
+                        displayEventTime: true,
+                      },
+                      timeGridWeek: {
+                        eventDisplay: "block",
+                        displayEventEnd: true,
+                        displayEventTime: true,
+                        displayEventStart: true,
+                        eventTimeFormat: {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          meridiem: "short",
+                        },
+                      },
+                      timeGridDay: {
+                        eventDisplay: "block",
+                        displayEventEnd: true,
+                        displayEventTime: true,
+                        displayEventStart: true,
+                        eventTimeFormat: {
+                          hour: "numeric",
+                          minute: "2-digit",
+                          meridiem: "short",
+                        },
+                      },
+                    }}
+                    slotEventOverlap={false}
+                    eventTimeFormat={{
+                      hour: "numeric",
+                      minute: "2-digit",
+                      meridiem: "short",
+                    }}
                     initialEvents={
                       typeof window !== "undefined"
                         ? JSON.parse(localStorage.getItem("events") || "[]")
                         : []
                     }
-                    eventClassNames="cursor-pointer"
-                    dayHeaderClassNames="font-semibold"
+                    eventClassNames="cursor-pointer text-sm font-medium"
+                    dayHeaderClassNames="text-base font-semibold"
+                    dayCellClassNames="text-lg"
+                    titleFormat={{ month: "long", year: "numeric" }}
                     buttonIcons={false}
                     themeSystem="standard"
                     customButtons={{
