@@ -29,6 +29,7 @@ const Calendar = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [newEventTitle, setNewEventTitle] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<DateSelectArg | null>(null);
+  const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const calendarRef = useRef<FullCalendar | null>(null);
 
   // Load events from local storage when the component is mounted
@@ -47,6 +48,11 @@ const Calendar = () => {
       localStorage.setItem("events", JSON.stringify(currentEvents));
     }
   }, [currentEvents]);
+
+  // Toggle sidebar visibility
+  const toggleSidebar = () => {
+    setIsSidebarVisible(!isSidebarVisible);
+  };
 
   // Open dialog when a date is selected
   const handleDateSelect = (selected: DateSelectArg) => {
@@ -99,44 +105,57 @@ const Calendar = () => {
           View Calendar
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-screen max-w-none h-screen max-h-none rounded-none overflow-y-auto sm:px-4 sm:py-6">
+      <DialogContent className="max-w-8xl mx-auto h-auto rounded-lg overflow-y-auto px-4 py-6">
         <div className="flex flex-col lg:flex-row gap-8 min-h-[80vh]">
+          {/* Toggle Button */}
+          <Button onClick={toggleSidebar} className="mb-4">
+            {isSidebarVisible ? "Hide Events" : "Show Events"}
+          </Button>
+
           {/* Sidebar */}
-          <div className="lg:w-1/4">
-            <div className="pb-6">
-              <h2 className="text-2xl font-bold mb-6 text-primary">
-                Calendar Events
-              </h2>
-              <ul className="space-y-3">
-                {currentEvents.length <= 0 && (
-                  <div className="italic text-center text-muted-foreground py-4">
-                    No events scheduled
-                  </div>
-                )}
-                {currentEvents.map((event: EventApi) => (
-                  <li
-                    key={event.id}
-                    className="group p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
-                    onClick={() => handleEventClick({ event } as EventClickArg)}
-                  >
-                    <div className="font-medium text-primary">
-                      {event.title}
+          {isSidebarVisible && (
+            <div className="w-full lg:w-1/4">
+              <div className="pb-6">
+                <h2 className="text-2xl font-bold mb-6 text-primary">
+                  Calendar Events
+                </h2>
+                <ul className="space-y-3">
+                  {currentEvents.length <= 0 && (
+                    <div className="italic text-center text-muted-foreground py-4">
+                      No events scheduled
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {formatDate(event.start!, {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+                  )}
+                  {currentEvents.map((event: EventApi) => (
+                    <li
+                      key={event.id}
+                      className="group p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
+                      onClick={() =>
+                        handleEventClick({ event } as EventClickArg)
+                      }
+                    >
+                      <p className="text-sm font-medium text-primary truncate">
+                        {event.title}
+                      </p>
+                      <div className="text-sm text-muted-foreground">
+                        {formatDate(event.start!, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Calendar */}
-          <div className="lg:w-3/4 w-full min-h-[600px]">
+          <div
+            className={`w-full ${
+              isSidebarVisible ? "lg:w-3/4" : "lg:w-full"
+            } min-h-[600px]`}
+          >
             <FullCalendar
               ref={calendarRef}
               height="100%"

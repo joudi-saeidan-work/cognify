@@ -280,3 +280,9 @@ pre {
   background-color: var(--accent);
   color: var(--accent-foreground);
 }
+
+.truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
