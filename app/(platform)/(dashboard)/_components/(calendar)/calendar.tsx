@@ -41,8 +41,10 @@ const Calendar = () => {
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [newEventTitle, setNewEventTitle] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<DateSelectArg | null>(null);
-  const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(true);
   const [isSheetOpen, setIsSheetOpen] = useState<boolean>(false);
+  const [activeView, setActiveView] = useState<
+    "calendar" | "events" | "notifications"
+  >("calendar");
   const calendarRef = useRef<FullCalendar | null>(null);
 
   // Load events from local storage when the component is mounted
@@ -61,11 +63,6 @@ const Calendar = () => {
       localStorage.setItem("events", JSON.stringify(currentEvents));
     }
   }, [currentEvents]);
-
-  // Toggle sidebar visibility
-  const toggleSidebar = () => {
-    setIsSidebarVisible(!isSidebarVisible);
-  };
 
   // Open dialog when a date is selected
   const handleDateSelect = (selected: DateSelectArg) => {
@@ -111,7 +108,7 @@ const Calendar = () => {
   };
 
   return (
-    <div className="">
+    <div>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" className="gap-2">
@@ -137,119 +134,135 @@ const Calendar = () => {
               </Button>
               <Button
                 variant="ghost"
-                className="bg-background shadow-lg hover:bg-accent border relative z-[99999]"
+                onClick={() => setActiveView("calendar")}
+                className={`bg-background shadow-lg hover:bg-accent border relative z-[99999] ${
+                  activeView === "calendar" ? "bg-muted-foreground" : ""
+                }`}
               >
                 <CalendarIcon className="h-6 w-6" />
               </Button>
               <Button
                 variant="ghost"
-                className="bg-background shadow-lg hover:bg-accent border relative z-[99999]"
+                onClick={() => setActiveView("events")}
+                className={`bg-background shadow-lg hover:bg-accent border relative z-[99999] ${
+                  activeView === "events" ? "bg-muted-foreground" : ""
+                }`}
               >
                 <CheckCircleIcon className="h-6 w-6" />
               </Button>
               <Button
                 variant="ghost"
-                className="bg-background shadow-lg hover:bg-accent border relative z-[99999]"
+                onClick={() => setActiveView("notifications")}
+                className={`bg-background shadow-lg hover:bg-accent border relative z-[99999] ${
+                  activeView === "notifications" ? "bg-muted-foreground" : ""
+                }`}
               >
                 <BellIcon className="h-6 w-6" />
               </Button>
             </div>
           )}
           <div className="flex flex-col h-full">
-            <Button onClick={toggleSidebar} className="mb-4 self-start">
-              {isSidebarVisible ? "Hide Events" : "Show Events"}
-            </Button>
-
             <div className="flex flex-1 flex-col lg:flex-row gap-8 min-h-0">
-              {isSidebarVisible && (
-                <div className="lg:w-1/4 min-h-[300px] lg:min-h-0">
-                  <div className="pb-6">
-                    <h2 className="text-2xl font-bold mb-6 text-primary">
-                      Calendar Events
-                    </h2>
-                    <ul className="space-y-3">
-                      {currentEvents.length <= 0 && (
-                        <div className="italic text-center text-muted-foreground py-4">
-                          No events scheduled
-                        </div>
-                      )}
-                      {currentEvents.map((event: EventApi) => (
-                        <li
-                          key={event.id}
-                          className="group p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
-                          onClick={() =>
-                            handleEventClick({ event } as EventClickArg)
-                          }
-                        >
-                          <p className="text-sm font-medium text-primary truncate">
-                            {event.title}
-                          </p>
-                          <div className="text-sm text-muted-foreground">
-                            {formatDate(event.start!, {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+              {activeView === "calendar" && (
+                <div className="flex-1 h-[80vh] min-w-0">
+                  <FullCalendar
+                    ref={calendarRef}
+                    height="100%"
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    headerToolbar={{
+                      left: "prevButton,todayButton,nextButton",
+                      center: "title",
+                      right: "dayGridMonth,timeGridWeek,timeGridDay",
+                    }}
+                    initialView="dayGridMonth"
+                    editable={true}
+                    selectable={true}
+                    selectMirror={true}
+                    dayMaxEvents={true}
+                    select={handleDateSelect}
+                    eventClick={handleEventClick}
+                    eventsSet={(events) => setCurrentEvent(events)}
+                    initialEvents={
+                      typeof window !== "undefined"
+                        ? JSON.parse(localStorage.getItem("events") || "[]")
+                        : []
+                    }
+                    eventClassNames="cursor-pointer"
+                    dayHeaderClassNames="font-semibold"
+                    buttonIcons={false}
+                    themeSystem="standard"
+                    customButtons={{
+                      prevButton: {
+                        text: "<",
+                        click: () => {
+                          const calendarApi = calendarRef.current?.getApi();
+                          calendarApi?.prev();
+                        },
+                      },
+                      nextButton: {
+                        text: ">",
+                        click: () => {
+                          const calendarApi = calendarRef.current?.getApi();
+                          calendarApi?.next();
+                        },
+                      },
+                      todayButton: {
+                        text: "Today",
+                        click: () => {
+                          const calendarApi = calendarRef.current?.getApi();
+                          calendarApi?.today();
+                        },
+                      },
+                    }}
+                  />
                 </div>
               )}
 
-              <div className="flex-1 h-[80vh] min-w-0 ">
-                <FullCalendar
-                  ref={calendarRef}
-                  height="100%"
-                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                  headerToolbar={{
-                    left: "prevButton,todayButton,nextButton",
-                    center: "title",
-                    right: "dayGridMonth,timeGridWeek,timeGridDay",
-                  }}
-                  initialView="dayGridMonth"
-                  editable={true}
-                  selectable={true}
-                  selectMirror={true}
-                  dayMaxEvents={true}
-                  select={handleDateSelect}
-                  eventClick={handleEventClick}
-                  eventsSet={(events) => setCurrentEvent(events)}
-                  initialEvents={
-                    typeof window !== "undefined"
-                      ? JSON.parse(localStorage.getItem("events") || "[]")
-                      : []
-                  }
-                  eventClassNames="cursor-pointer"
-                  dayHeaderClassNames="font-semibold"
-                  buttonIcons={false}
-                  themeSystem="standard"
-                  customButtons={{
-                    prevButton: {
-                      text: "<",
-                      click: () => {
-                        const calendarApi = calendarRef.current?.getApi();
-                        calendarApi?.prev();
-                      },
-                    },
-                    nextButton: {
-                      text: ">",
-                      click: () => {
-                        const calendarApi = calendarRef.current?.getApi();
-                        calendarApi?.next();
-                      },
-                    },
-                    todayButton: {
-                      text: "Today",
-                      click: () => {
-                        const calendarApi = calendarRef.current?.getApi();
-                        calendarApi?.today();
-                      },
-                    },
-                  }}
-                />
-              </div>
+              {activeView === "events" && (
+                <div className="w-full">
+                  <h2 className="text-2xl font-bold mb-6 text-primary">
+                    Calendar Events
+                  </h2>
+                  <ul className="space-y-3">
+                    {currentEvents.length <= 0 && (
+                      <div className="italic text-center text-muted-foreground py-4">
+                        No events scheduled
+                      </div>
+                    )}
+                    {currentEvents.map((event: EventApi) => (
+                      <li
+                        key={event.id}
+                        className="group p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
+                        onClick={() =>
+                          handleEventClick({ event } as EventClickArg)
+                        }
+                      >
+                        <p className="text-sm font-medium text-primary truncate">
+                          {event.title}
+                        </p>
+                        <div className="text-sm text-muted-foreground">
+                          {formatDate(event.start!, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {activeView === "notifications" && (
+                <div className="w-full">
+                  <h2 className="text-2xl font-bold mb-6 text-primary">
+                    Notifications
+                  </h2>
+                  <div className="italic text-center text-muted-foreground py-4">
+                    Notifications coming soon
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </SheetContent>
