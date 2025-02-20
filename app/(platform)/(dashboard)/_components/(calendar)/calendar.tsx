@@ -136,8 +136,10 @@ const Calendar = () => {
               <Button
                 variant="ghost"
                 onClick={() => setActiveView("calendar")}
-                className={`bg-background shadow-lg hover:bg-accent border relative z-[99999] ${
-                  activeView === "calendar" ? "bg-muted-foreground" : ""
+                className={`bg-background shadow-lg hover:bg-accent/80 border relative z-[99999] ${
+                  activeView === "calendar"
+                    ? "bg-slate-300 dark:bg-slate-700 border-slate-400 dark:border-slate-600"
+                    : ""
                 }`}
               >
                 <CalendarIcon className="h-6 w-6" />
@@ -145,8 +147,10 @@ const Calendar = () => {
               <Button
                 variant="ghost"
                 onClick={() => setActiveView("events")}
-                className={`bg-background shadow-lg hover:bg-accent border relative z-[99999] ${
-                  activeView === "events" ? "bg-muted-foreground" : ""
+                className={`bg-background shadow-lg hover:bg-accent/80 border relative z-[99999] ${
+                  activeView === "events"
+                    ? "bg-slate-300 dark:bg-slate-700 border-slate-400 dark:border-slate-600"
+                    : ""
                 }`}
               >
                 <CheckCircleIcon className="h-6 w-6" />
@@ -154,8 +158,10 @@ const Calendar = () => {
               <Button
                 variant="ghost"
                 onClick={() => setActiveView("notifications")}
-                className={`bg-background shadow-lg hover:bg-accent border relative z-[99999] ${
-                  activeView === "notifications" ? "bg-muted-foreground" : ""
+                className={`bg-background shadow-lg hover:bg-accent/80 border relative z-[99999] ${
+                  activeView === "notifications"
+                    ? "bg-slate-300 dark:bg-slate-700 border-slate-400 dark:border-slate-600"
+                    : ""
                 }`}
               >
                 <BellIcon className="h-6 w-6" />
