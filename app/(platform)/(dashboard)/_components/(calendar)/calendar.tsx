@@ -212,14 +212,23 @@ const Calendar = () => {
                         displayEventTime: true,
                         displayEventStart: true,
                         dayHeaderContent: (args) => {
+                          const isToday =
+                            args.date.toDateString() ===
+                            new Date().toDateString();
                           return (
                             <div className="flex flex-col items-center">
                               <span className="text-xs uppercase text-muted-foreground">
-                                {args.date.toLocaleDateString("en-US", {
+                                {args.date.toLocaleDateString("en-UK", {
                                   weekday: "short",
                                 })}
                               </span>
-                              <span className="text-2xl">
+                              <span
+                                className={`text-2xl flex items-center justify-center ${
+                                  isToday
+                                    ? "bg-blue-600 text-white rounded-full w-10 h-10"
+                                    : ""
+                                }`}
+                              >
                                 {args.date.getDate()}
                               </span>
                             </div>
@@ -232,14 +241,23 @@ const Calendar = () => {
                         displayEventTime: true,
                         displayEventStart: true,
                         dayHeaderContent: (args) => {
+                          const isToday =
+                            args.date.toDateString() ===
+                            new Date().toDateString();
                           return (
                             <div className="flex flex-col items-center">
                               <span className="text-xs uppercase text-muted-foreground">
-                                {args.date.toLocaleDateString("en-US", {
+                                {args.date.toLocaleDateString("en-UK", {
                                   weekday: "short",
                                 })}
                               </span>
-                              <span className="text-2xl">
+                              <span
+                                className={`text-2xl flex items-center justify-center ${
+                                  isToday
+                                    ? "bg-blue-600 text-white rounded-full w-10 h-10"
+                                    : ""
+                                }`}
+                              >
                                 {args.date.getDate()}
                               </span>
                             </div>

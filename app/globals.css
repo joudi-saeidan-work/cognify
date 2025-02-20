@@ -347,3 +347,84 @@ pre {
   font-size: 0.85em;
   font-weight: 500;
 }
+
+/* Remove default today highlighting */
+.fc .fc-day-today {
+  background-color: transparent !important;
+}
+
+/* Style for today's date in month view */
+.fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background-color: #1a73e8;
+  color: white;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Center the day numbers in month view */
+.fc-daygrid-day-number {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Button group container styles */
+.fc-button-group {
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: flex;
+  gap: 1px;
+}
+
+/* Base button styles */
+.fc-button {
+  border: 1px solid #e2e8f0 !important;
+  background-color: white !important;
+  color: #64748b !important;
+  padding: 0.5rem 1rem !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  box-shadow: none !important;
+  text-transform: capitalize !important;
+}
+
+/* Hover state */
+.fc-button:hover {
+  background-color: #f8fafc !important;
+}
+
+/* Active/Selected state */
+.fc-button-active {
+  background-color: #1e293b !important;
+  color: white !important;
+  border-color: #1e293b !important;
+}
+
+/* First and last buttons in a group */
+.fc-button-group > .fc-button:first-child {
+  border-top-left-radius: 0.5rem !important;
+  border-bottom-left-radius: 0.5rem !important;
+}
+
+.fc-button-group > .fc-button:last-child {
+  border-top-right-radius: 0.5rem !important;
+  border-bottom-right-radius: 0.5rem !important;
+}
+
+/* Today button specific styles */
+.fc-today-button {
+  border-radius: 0.5rem !important;
+}
+
+/* Disabled state */
+.fc-button:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
