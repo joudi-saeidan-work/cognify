@@ -12,7 +12,7 @@ import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { useTheme } from "next-themes";
-import { DateTimePicker } from "./time-picker/date-time-picker";
+import { DateTimePicker } from "../(date-time-picker)/date-time-picker";
 
 interface CardItemProps {
   data: Card;

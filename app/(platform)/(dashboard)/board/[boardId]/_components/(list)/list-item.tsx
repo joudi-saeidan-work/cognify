@@ -2,9 +2,9 @@
 import { ListWithCards } from "@/types";
 import { ListHeader } from "./list-header";
 import { ElementRef, useRef, useState } from "react";
-import { CardForm } from "./card-form";
+import { CardForm } from "../(card)/card-form";
 import { cn } from "@/lib/utils";
-import { CardItem } from "./card-item";
+import { CardItem } from "../(card)/card-item";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { useTheme } from "next-themes";
 

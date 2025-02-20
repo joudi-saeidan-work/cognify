@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
-import BoardNavbar from "./board-navbar";
 import { Board, BookmarkFolder, Bookmark } from "@prisma/client";
 import { db } from "@/lib/db";
+import BoardNavbar from "./board-navbar";
 
 interface BoardNavBarProps {
   data: Board;

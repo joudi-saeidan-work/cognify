@@ -58,12 +58,11 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
       <PopoverTrigger asChild>
         {data.dueDate ? (
           <button
-            className={`inline-flex items-center rounded-full px-1 py-0 bg-gray-100 text-gray-600`}
+            className={`inline-flex items-center rounded-full px-1 py-0 bg-background text-gray-600`}
             style={{
-              // backgroundColor: "#f5f7f9",
-              // color: "#4a5568",
               width: "fit-content",
               marginLeft: "1rem",
+              backgroundColor: data.color || undefined,
             }}
           >
             <span className="text-sm font-medium">

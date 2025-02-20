@@ -2,9 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
-import BoardNavbarContainer from "./_components/board-navbar-container";
-import { CoverImage } from "./_components/cover-image";
-
+import { CoverImage } from "./_components/(board-header)/cover-image";
+import BoardNavbarContainer from "./_components/(board-header)/board-navbar-container";
 export async function generateMetadata({
   params,
 }: {

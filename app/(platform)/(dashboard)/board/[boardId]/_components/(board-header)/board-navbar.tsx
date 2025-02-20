@@ -1,19 +1,21 @@
 "use client";
 import { Board, Bookmark, BookmarkFolder } from "@prisma/client";
-import { BordTitleForm } from "./board-title-form";
 import BoardOptions from "./board-options";
 import { ThemeToggle } from "@/components/ThemeModeToggle";
 import { Separator } from "@/components/ui/separator";
 import { UserButton, useAuth } from "@clerk/nextjs";
-import ZoomControls from "../../../_components/(header)/ZoomControls";
-import ResetControls from "../../../_components/(header)/ResetControls";
-import AssistanceButton from "../../../_components/(ai-agents)/assitance-button";
+
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { dark } from "@clerk/themes";
 import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BookmarkBar from "@/components/bookmark/bookmark-bar";
+import { BordTitleForm } from "./board-title-form";
+import AssistanceButton from "@/app/(platform)/(dashboard)/_components/(ai-agents)/assitance-button";
+import ResetControls from "@/app/(platform)/(dashboard)/_components/(header)/ResetControls";
+import ZoomControls from "@/app/(platform)/(dashboard)/_components/(header)/ZoomControls";
+import Calendar from "@/app/(platform)/(dashboard)/_components/(calendar)/calendar";
 
 interface BoardNavBarProps {
   data: Board;
@@ -91,6 +93,7 @@ const BoardNavbar = ({
       {/* Right section */}
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
+          <Calendar />
           {visibilitySettings.showAssistant ? <AssistanceButton /> : ""}
           {visibilitySettings.showBookmarks ? (
             <>
