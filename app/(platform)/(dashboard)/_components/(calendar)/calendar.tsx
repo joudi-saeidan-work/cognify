@@ -330,26 +330,45 @@ const Calendar = () => {
                         No events scheduled
                       </div>
                     )}
-                    {currentEvents.map((event: EventApi) => (
-                      <li
-                        key={event.id}
-                        className="group p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
-                        onClick={() =>
-                          handleEventClick({ event } as EventClickArg)
-                        }
-                      >
-                        <p className="text-sm font-medium text-primary truncate">
-                          {event.title}
-                        </p>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(event.start!, {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </div>
-                      </li>
-                    ))}
+                    {[...currentEvents]
+                      .sort((a, b) => {
+                        const aStart = a.start?.getTime() || 0;
+                        const bStart = b.start?.getTime() || 0;
+                        return aStart - bStart;
+                      })
+                      .map((event: EventApi) => (
+                        <li
+                          key={event.id}
+                          className="group p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
+                          onClick={() =>
+                            handleEventClick({ event } as EventClickArg)
+                          }
+                        >
+                          <p className="text-sm font-medium text-primary truncate">
+                            {event.title}
+                          </p>
+                          <div className="text-sm text-muted-foreground">
+                            {formatDate(event.start!, {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })}
+                            {!event.allDay && event.start && (
+                              <span className="ml-2">
+                                {event.start.toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                                {event.end &&
+                                  ` - ${event.end.toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}`}
+                              </span>
+                            )}
+                          </div>
+                        </li>
+                      ))}
                   </ul>
                 </div>
               )}
