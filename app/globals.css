@@ -348,9 +348,8 @@ pre {
   font-weight: 500;
 }
 
-/* Remove default today highlighting */
 .fc .fc-day-today {
-  background-color: transparent !important;
+  background-color: #eef6ff !important; /* Modern light blue */
 }
 
 /* Style for today's date in month view */
