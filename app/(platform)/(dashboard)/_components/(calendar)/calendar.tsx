@@ -410,8 +410,8 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                     select={handleDateSelect}
                     eventClick={handleEventClick}
                     events={currentEvents}
-                    // eventDrop={handleEventChange}
-                    // eventResize={handleEventChange}
+                    eventDrop={handleEventChange}
+                    eventResize={handleEventChange}
                     views={{
                       dayGridMonth: {
                         eventDisplay: "list-item",
