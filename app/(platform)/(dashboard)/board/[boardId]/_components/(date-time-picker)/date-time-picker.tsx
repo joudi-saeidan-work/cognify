@@ -27,6 +27,13 @@ interface DateTimePickerProps {
 export function DateTimePicker({ data }: DateTimePickerProps) {
   const { dispatch } = useEvents();
 
+  // Add this useEffect to update state when data changes
+  React.useEffect(() => {
+    setDate(data.dueDate ? new Date(data.dueDate) : null);
+    setStartDate(data.start ? new Date(data.start) : null);
+    setEndDate(data.end ? new Date(data.end) : null);
+  }, [data.dueDate, data.start, data.end]);
+
   const [date, setDate] = React.useState<Date | null>(
     data.dueDate ? new Date(data.dueDate) : null
   );
@@ -68,43 +75,48 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
   const handleDateChange = (newDate: Date | undefined) => {
     if (newDate) {
       // Create pure date (midnight UTC)
-      const pureDate = new Date(
-        Date.UTC(
-          newDate.getUTCFullYear(),
-          newDate.getUTCMonth(),
-          newDate.getUTCDate()
-        )
-      );
+      newDate.setUTCHours(0, 0, 0, 0);
 
       // Preserve existing times but apply to new date
-      const newStart = startDate
+      const start = startDate
         ? new Date(
-            pureDate.getUTCFullYear(),
-            pureDate.getUTCMonth(),
-            pureDate.getUTCDate(),
+            newDate.getUTCFullYear(),
+            newDate.getUTCMonth(),
+            newDate.getUTCDate(),
             startDate.getUTCHours(),
             startDate.getUTCMinutes()
           )
         : null;
+      console.log("start", start);
 
-      const newEnd = endDate
+      const end = endDate
         ? new Date(
-            pureDate.getUTCFullYear(),
-            pureDate.getUTCMonth(),
-            pureDate.getUTCDate(),
+            newDate.getUTCFullYear(),
+            newDate.getUTCMonth(),
+            newDate.getUTCDate(),
             endDate.getUTCHours(),
             endDate.getUTCMinutes()
           )
         : null;
+      console.log("end", end);
+      console.log("updating dates.. ", {
+        id: data.id,
+        boardId: params.boardId as string,
+        title: data.title,
+        dueDate: newDate || null,
+        start: start || null,
+        end: end || null,
+        allDay: data.allDay,
+      });
 
       executeCardUpdate({
         id: data.id,
         boardId: params.boardId as string,
         title: data.title,
-        dueDate: pureDate || null,
-        start: newStart || null,
-        end: newEnd || null,
-        allDay: !newStart,
+        dueDate: newDate || null,
+        start: start || null,
+        end: end || null,
+        allDay: data.allDay,
       });
     }
   };
@@ -199,31 +211,58 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
                   allDay={allDay}
                   startDate={startDate}
                   setStartDate={(newStartDate) => {
+                    console.log("setting start date", newStartDate);
                     setStartDate(newStartDate);
                     if (!newStartDate) {
                       setEndDate(null);
                     }
+
+                    // Combine the date from dueDate with time from newStartDate
+                    let combinedStart = null;
+                    if (newStartDate && date) {
+                      combinedStart = new Date(date);
+                      combinedStart.setHours(
+                        newStartDate.getHours(),
+                        newStartDate.getMinutes(),
+                        0,
+                        0
+                      );
+                    }
+
                     executeCardUpdate({
                       id: data.id,
                       boardId: params.boardId as string,
                       dueDate: date,
                       title: data.title,
-                      start: newStartDate,
+                      start: combinedStart,
                       end: newStartDate ? endDate : null,
-                      allDay: !newStartDate,
+                      allDay: data.allDay,
                     });
                   }}
                   endDate={endDate}
                   setEndDate={(newEndDate) => {
                     setEndDate(newEndDate);
+
+                    // Combine the date from dueDate with time from newStartDate
+                    let combinedEnd = null;
+                    if (newEndDate && date) {
+                      combinedEnd = new Date(date);
+                      combinedEnd.setHours(
+                        newEndDate.getHours(),
+                        newEndDate.getMinutes(),
+                        0,
+                        0
+                      );
+                    }
+
                     executeCardUpdate({
                       id: data.id,
                       boardId: params.boardId as string,
                       dueDate: date,
                       title: data.title,
                       start: startDate,
-                      end: newEndDate,
-                      allDay: !startDate,
+                      end: combinedEnd,
+                      allDay: data.allDay,
                     });
                   }}
                 />
