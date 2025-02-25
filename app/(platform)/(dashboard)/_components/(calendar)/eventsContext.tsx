@@ -49,8 +49,12 @@ export const EventsProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const useEvents = () => {
-  // a way to access the context
+interface EventsContextType {
+  state: EventsState;
+  dispatch: React.Dispatch<Action>;
+}
+
+export const useEvents = (): EventsContextType => {
   const context = useContext(EventsContext);
   if (!context) {
     throw new Error("useEvents must be used within an EventsProvider");

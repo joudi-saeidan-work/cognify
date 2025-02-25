@@ -127,19 +127,17 @@ const Calendar = ({ boardId }: { boardId: string }) => {
         payload: {
           id: data.id,
           title: data.title,
-          start: data.dueDate,
-          end: data.dueDate,
-          allDay: false,
-          backgroundColor: data.color,
+          dueDate: data.dueDate?.toISOString(),
+          start: data.start?.toISOString(),
+          end: data.end?.toISOString(),
+          allDay: !data.start,
+          backgroundColor: data.color || undefined,
         },
       });
       handleCloseDialog();
     },
     onError: (error) => {
       toast.error(error);
-      if (newEvent.listId) {
-        dispatch({ type: "DELETE_EVENT", payload: newEvent.listId });
-      }
     },
   });
 
@@ -173,14 +171,16 @@ const Calendar = ({ boardId }: { boardId: string }) => {
 
     // Optimistically update the state
     const newEvent = {
+      id: crypto.randomUUID(), // Add temporary ID
       title: newEventTitle,
       listId: targetList.id,
-      dueDate: dueDate,
+      dueDate: dueDate?.toISOString(),
+      allDay: true, // New events start as all-day
     };
     dispatch({ type: "ADD_EVENT", payload: newEvent });
 
     try {
-      const result = await executeCreateCard({
+      executeCreateCard({
         title: newEventTitle,
         boardId: targetBoard.id,
         listId: targetList.id,
@@ -191,11 +191,13 @@ const Calendar = ({ boardId }: { boardId: string }) => {
       dispatch({
         type: "UPDATE_EVENT",
         payload: {
+          id: newEvent.id,
           title: newEventTitle,
-          boardId: targetBoard.id,
-          listId: targetList.id,
-          dueDate: dueDate,
-          allDay: false,
+          dueDate: dueDate?.toISOString(),
+          start: dueDate?.toISOString(),
+          end: dueDate?.toISOString(),
+          allDay: true,
+          backgroundColor: undefined,
         },
       });
 
@@ -237,46 +239,6 @@ const Calendar = ({ boardId }: { boardId: string }) => {
       }
     }
   };
-
-  // is it updating or deleting the card?
-  useEffect(() => {
-    type CardDetail = {
-      cardId: string;
-      dueDate: Date | null;
-      title: string;
-      color?: string;
-      description?: string;
-    };
-    const handleCardUpdate = (e: CustomEvent<CardDetail>) => {
-      const { cardId, dueDate, title, color, description } = e.detail;
-
-      // only render events with dates
-      if (!dueDate) {
-        dispatch({ type: "DELETE_EVENT", payload: cardId });
-        return;
-      }
-
-      // Update or add the event
-      dispatch({
-        type: "UPDATE_EVENT",
-        payload: {
-          id: cardId,
-          title,
-          description,
-          start: dueDate,
-          end: dueDate,
-          allDay: false,
-          backgroundColor: color || undefined,
-        },
-      });
-    };
-
-    const handleDeleteCard = (e: CustomEvent<{ cardId: string }>) => {
-      const { cardId } = e.detail;
-      console.log(`Deleting card with id: ${cardId}`);
-      dispatch({ type: "DELETE_EVENT", payload: cardId });
-    };
-  }, [dispatch]);
 
   const sortedEvents = useMemo(() => {
     return [...currentEvents].sort((a, b) => {
