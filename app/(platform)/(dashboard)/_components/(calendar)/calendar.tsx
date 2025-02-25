@@ -77,14 +77,23 @@ const Calendar = ({ boardId }: { boardId: string }) => {
         if (!response.ok) throw new Error("Failed to fetch events");
 
         const cards = await response.json();
-        const events = cards.map((card: Card) => ({
-          id: card.id,
-          title: card.title,
-          start: card.dueDate ? new Date(card.dueDate) : undefined,
-          end: card.dueDate ? new Date(card.dueDate) : undefined,
-          allDay: false,
-          backgroundColor: card.color || undefined,
-        }));
+        const events = cards.map((card: Card) => {
+          const dueDate = card.dueDate ? new Date(card.dueDate) : undefined;
+          const start = card.start ? new Date(card.start) : undefined;
+          const end = card.end ? new Date(card.end) : undefined;
+
+          // Reset dueDate time to midnight
+          if (dueDate) dueDate.setUTCHours(0, 0, 0, 0);
+
+          return {
+            id: card.id,
+            title: card.title,
+            start: start || dueDate, // Use time-specific start if available
+            end: end || dueDate, // Use time-specific end if available
+            allDay: !card.start, // All-day if no start time specified
+            backgroundColor: card.color || undefined,
+          };
+        });
 
         // Update state with events
         dispatch({ type: "SET_EVENTS", payload: events });
@@ -165,9 +174,22 @@ const Calendar = ({ boardId }: { boardId: string }) => {
       return;
     }
 
-    const dueDate = selectedDate?.start
+    // Get dates from calendar selection
+    const isAllDayEvent = selectedDate?.allDay;
+    const start = selectedDate?.start
       ? new Date(selectedDate.start)
       : undefined;
+    const end = selectedDate?.end ? new Date(selectedDate.end) : undefined;
+
+    // Set dueDate to midnight UTC of the start date
+    const dueDate = start ? new Date(start) : undefined;
+    if (dueDate) dueDate.setUTCHours(0, 0, 0, 0);
+
+    // For all-day events (month view), clear time components
+    if (isAllDayEvent) {
+      if (start) start.setUTCHours(0, 0, 0, 0);
+      if (end) end.setUTCHours(0, 0, 0, 0);
+    }
 
     // Optimistically update the state
     const newEvent = {
@@ -175,7 +197,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
       title: newEventTitle,
       listId: targetList.id,
       dueDate: dueDate?.toISOString(),
-      allDay: true, // New events start as all-day
+      allDay: isAllDayEvent,
     };
     dispatch({ type: "ADD_EVENT", payload: newEvent });
 
@@ -194,9 +216,9 @@ const Calendar = ({ boardId }: { boardId: string }) => {
           id: newEvent.id,
           title: newEventTitle,
           dueDate: dueDate?.toISOString(),
-          start: dueDate?.toISOString(),
-          end: dueDate?.toISOString(),
-          allDay: true,
+          start: start?.toISOString(),
+          end: end?.toISOString(),
+          allDay: isAllDayEvent,
           backgroundColor: undefined,
         },
       });

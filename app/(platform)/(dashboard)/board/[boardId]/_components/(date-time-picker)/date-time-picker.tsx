@@ -66,21 +66,47 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
   const allDay = !startDate;
 
   const handleDateChange = (newDate: Date | undefined) => {
-    setDate(newDate || null);
-    if (!newDate) {
-      setStartDate(null);
-      setEndDate(null);
-    }
+    if (newDate) {
+      // Create pure date (midnight UTC)
+      const pureDate = new Date(
+        Date.UTC(
+          newDate.getUTCFullYear(),
+          newDate.getUTCMonth(),
+          newDate.getUTCDate()
+        )
+      );
 
-    executeCardUpdate({
-      id: data.id,
-      boardId: params.boardId as string,
-      dueDate: newDate || undefined,
-      title: data.title,
-      start: startDate || undefined,
-      end: endDate || undefined,
-      allDay: !startDate, // allDay is true when there's no start time
-    });
+      // Preserve existing times but apply to new date
+      const newStart = startDate
+        ? new Date(
+            pureDate.getUTCFullYear(),
+            pureDate.getUTCMonth(),
+            pureDate.getUTCDate(),
+            startDate.getUTCHours(),
+            startDate.getUTCMinutes()
+          )
+        : null;
+
+      const newEnd = endDate
+        ? new Date(
+            pureDate.getUTCFullYear(),
+            pureDate.getUTCMonth(),
+            pureDate.getUTCDate(),
+            endDate.getUTCHours(),
+            endDate.getUTCMinutes()
+          )
+        : null;
+
+      executeCardUpdate({
+        id: data.id,
+        boardId: params.boardId as string,
+        title: data.title,
+        dueDate: pureDate || null,
+        start: newStart || null,
+        end: newEnd || null,
+        allDay: !newStart,
+      });
+    }
   };
 
   const handleClear = () => {
