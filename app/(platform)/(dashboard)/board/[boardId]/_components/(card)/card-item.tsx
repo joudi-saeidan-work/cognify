@@ -50,18 +50,6 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   // rename Card Action
   const { execute: executeUpdateCard, fieldErrors } = useAction(updateCard, {
     onSuccess: (updatedCard) => {
-      const event = new CustomEvent("updateCard", {
-        detail: {
-          cardId: data.id,
-          title: updatedCard.title,
-          color: data.color,
-          description: data.description,
-          dueDate: data.dueDate,
-        },
-      });
-      window.dispatchEvent(event);
-      queryClient.invalidateQueries({ queryKey: ["card", data.id] });
-      queryClient.invalidateQueries({ queryKey: ["card-logs", data.id] });
       toast.success(`Renamed to "${updatedCard.title}"`);
       setNewTitle(updatedCard.title); // update title
       disableEditing(); // exit editing mode
@@ -92,10 +80,27 @@ export const CardItem = ({ data, index }: CardItemProps) => {
     const updatedTitle = formData.get("title") as string;
     const boardId = params.boardId as string;
     if (updatedTitle === data.title) {
-      setIsEditing(false); // exit editing mode if title hasn't changed
+      setIsEditing(false);
       return;
     }
-    executeUpdateCard({ title: updatedTitle, boardId, id: data.id });
+
+    // Include existing time values in the update
+    executeUpdateCard({
+      title: updatedTitle,
+      boardId,
+      id: data.id,
+    });
+    dispatch({
+      type: "UPDATE_EVENT",
+      payload: {
+        id: data.id,
+        title: updatedTitle,
+        start: data.start || undefined,
+        end: data.end || undefined,
+        dueDate: data.dueDate || undefined,
+        allDay: data.allDay || false,
+      },
+    });
   };
 
   // handle onkeydown
@@ -118,30 +123,6 @@ export const CardItem = ({ data, index }: CardItemProps) => {
     // Otherwise use theme-aware text color
     return "text-black font-medium";
   };
-
-  // Listens to any updates on the events that are in the calendar
-  // (ToDo) we should also the delete the actual card from the database
-  // // Listen for calendar event updates
-  // useEffect(() => {
-  //   const handleCalendarUpdate = (e: CustomEvent) => {
-  //     const { cardId, dueDate } = e.detail;
-  //     if (cardId === data.id) {
-  //       // Update the card's due date in your state/UI
-  //       queryClient.invalidateQueries({ queryKey: ["card", data.id] });
-  //     }
-  //   };
-
-  //   window.addEventListener(
-  //     "calendarEventUpdated",
-  //     handleCalendarUpdate as EventListener
-  //   );
-  //   return () => {
-  //     window.removeEventListener(
-  //       "calendarEventUpdated",
-  //       handleCalendarUpdate as EventListener
-  //     );
-  //   };
-  // }, [data.id, queryClient]);
 
   if (isEditing) {
     return (

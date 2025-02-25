@@ -48,6 +48,7 @@ import { useAction } from "@/hooks/use-actions";
 import { createCard } from "@/actions/create-card";
 import { toast } from "sonner";
 import { deleteCard } from "@/actions/delete-card";
+import { updateCard } from "@/actions/update-card";
 const Calendar = ({ boardId }: { boardId: string }) => {
   const { state: currentEvents, dispatch } = useEvents();
   const [boards, setBoards] = useState<(Board & { lists: List[] })[]>([]);
@@ -127,7 +128,6 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     }
   }, [boards]);
 
-  // Modify handleAddEvent
   const { execute: executeCreateCard } = useAction(createCard, {
     onSuccess: (data) => {
       toast.success(`Card "${data.title}" created`);
@@ -144,6 +144,15 @@ const Calendar = ({ boardId }: { boardId: string }) => {
         },
       });
       handleCloseDialog();
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  const { execute: executeUpdateCard } = useAction(updateCard, {
+    onSuccess: (data) => {
+      toast.success(`Card "${data.title}" updated`);
     },
     onError: (error) => {
       toast.error(error);
@@ -188,14 +197,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
       console.log("this is all day event");
       if (start) start.setUTCHours(0, 0, 0, 0);
       if (end) end.setUTCHours(0, 0, 0, 0);
-      const newEvent = {
-        id: crypto.randomUUID(), // Add temporary ID
-        title: newEventTitle,
-        listId: targetList.id,
-        dueDate: dueDate?.toISOString(),
-        allDay: isAllDayEvent,
-      };
-      dispatch({ type: "ADD_EVENT", payload: newEvent });
+
       executeCreateCard({
         title: newEventTitle,
         boardId: targetBoard.id,
@@ -206,19 +208,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     } else {
       // Update state with the returned card data
       console.log("this is not all day event");
-      dispatch({
-        type: "ADD_EVENT",
-        payload: {
-          id: crypto.randomUUID(),
-          title: newEventTitle,
-          listId: targetList.id,
-          dueDate: dueDate?.toISOString(),
-          start: start?.toISOString(),
-          end: end?.toISOString(),
-          allDay: isAllDayEvent,
-          backgroundColor: undefined,
-        },
-      });
+
       executeCreateCard({
         title: newEventTitle,
         boardId: targetBoard.id,
@@ -280,6 +270,62 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     setSelectedDate(selected);
     console.log("selected", selected);
     setIsDialogOpen(true);
+  };
+
+  const handleEventChange = async (info: { event: EventApi }) => {
+    // Get dates from calendar selection
+    const isAllDayEvent = info.event.allDay; // this is true if the event is all day
+    const start = info.event.start ? info.event.start : undefined;
+    const end = info.event.end ? info.event.end : undefined;
+
+    // Set dueDate to midnight UTC of the start date
+    const dueDate = start ? new Date(start) : undefined;
+    if (dueDate) dueDate.setUTCHours(0, 0, 0, 0);
+
+    // For all-day events (month view), clear time components
+    if (isAllDayEvent) {
+      console.log("this is all day event");
+      if (start) start.setUTCHours(0, 0, 0, 0);
+      if (end) end.setUTCHours(0, 0, 0, 0);
+      const newEvent = {
+        id: info.event.id, // Add temporary ID
+        title: info.event.title,
+        dueDate: dueDate?.toISOString(),
+        allDay: isAllDayEvent,
+      };
+      dispatch({ type: "UPDATE_EVENT", payload: newEvent });
+      executeUpdateCard({
+        id: info.event.id,
+        title: info.event.title,
+        boardId: boardId,
+        dueDate: dueDate,
+        allDay: isAllDayEvent,
+      });
+    } else {
+      // Update state with the returned card data
+      console.log("this is not all day event");
+      dispatch({
+        type: "UPDATE_EVENT",
+        payload: {
+          id: crypto.randomUUID(),
+          title: newEventTitle,
+          dueDate: dueDate?.toISOString(),
+          start: start?.toISOString(),
+          end: end?.toISOString(),
+          allDay: isAllDayEvent,
+          backgroundColor: undefined,
+        },
+      });
+      executeUpdateCard({
+        id: info.event.id,
+        title: info.event.title,
+        boardId: boardId,
+        dueDate: dueDate,
+        allDay: isAllDayEvent,
+        start: start,
+        end: end,
+      });
+    }
   };
 
   return (
