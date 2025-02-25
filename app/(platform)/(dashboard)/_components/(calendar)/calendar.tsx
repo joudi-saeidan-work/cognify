@@ -398,7 +398,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                     height="100%"
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     headerToolbar={{
-                      left: "prevButton,todayButton,nextButton refresh",
+                      left: "prevButton,todayButton,nextButton",
                       center: "title",
                       right: "dayGridMonth,timeGridWeek,timeGridDay",
                     }}
