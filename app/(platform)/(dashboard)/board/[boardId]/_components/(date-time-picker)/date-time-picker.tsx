@@ -156,42 +156,47 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        {/* If there's a due date, show the date button */}
-        {data.dueDate ? (
-          <button
-            className={`inline-flex items-center rounded-full px-1 py-0 bg-background text-gray-600`}
-            style={{
-              width: "fit-content",
-              marginLeft: "0.75rem",
-              backgroundColor: data.color || undefined,
-            }}
-          >
-            <CalendarIcon className="mr-1 h-3 w-3 -mt-[1px]" />
-            <span className="text-sm font-medium">
-              {data.start ? (
-                <>
-                  {format(data.dueDate, data.end ? "MMM d" : "MMM d, yyyy")}
-                  <span className="ml-1">
-                    {format(data.start, "h:mm")}
-                    {data.end && `–${format(data.end, "h:mm")}`}
-                    {format(data.start, "a")}
-                  </span>
-                </>
-              ) : (
-                format(data.dueDate, "MMM d, yyyy")
-              )}
-            </span>
-          </button>
-        ) : (
-          // If no due date, show just the calendar icon
-          <Button
-            size="sm"
-            variant="ghost"
-            className={`opacity-0 group-hover:opacity-100 transition-opacity absolute right-7 h-4 w-4 hover:bg-transparent ${getTextColor()}`}
-          >
-            <CalendarIcon className="h-4 w-4" />
-          </Button>
-        )}
+        <div className="relative">
+          {data.dueDate ? (
+            <button
+              className={`inline-flex items-center rounded-full px-1 py-0 bg-background text-gray-600`}
+              style={{
+                width: "fit-content",
+                marginLeft: "0.75rem",
+                backgroundColor: data.color || undefined,
+              }}
+            >
+              <CalendarIcon className="mr-1 h-3 w-3 -mt-[1px]" />
+              <span className="text-sm font-medium">
+                {data.start ? (
+                  <>
+                    {format(data.dueDate, data.end ? "MMM d" : "MMM d, yyyy")}
+                    <span className="ml-1">
+                      {format(data.start, "h:mm")}
+                      {data.end && `–${format(data.end, "h:mm")}`}
+                      {format(data.start, "a")}
+                    </span>
+                  </>
+                ) : (
+                  format(data.dueDate, "MMM d, yyyy")
+                )}
+              </span>
+            </button>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              className={`opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent ${getTextColor()}`}
+              style={{
+                position: "absolute",
+                right: "1rem",
+                transform: "translateY(-50%)",
+              }}
+            >
+              <CalendarIcon className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
         <div className="max-h-[350px] overflow-y-auto">
