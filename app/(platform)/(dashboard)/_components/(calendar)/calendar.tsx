@@ -175,11 +175,9 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     }
 
     // Get dates from calendar selection
-    const isAllDayEvent = selectedDate?.allDay;
-    const start = selectedDate?.start
-      ? new Date(selectedDate.start)
-      : undefined;
-    const end = selectedDate?.end ? new Date(selectedDate.end) : undefined;
+    const isAllDayEvent = selectedDate?.allDay; // this is true if the event is all day
+    const start = selectedDate?.start ? selectedDate.start : undefined;
+    const end = selectedDate?.end ? selectedDate.end : undefined;
 
     // Set dueDate to midnight UTC of the start date
     const dueDate = start ? new Date(start) : undefined;
@@ -187,34 +185,33 @@ const Calendar = ({ boardId }: { boardId: string }) => {
 
     // For all-day events (month view), clear time components
     if (isAllDayEvent) {
+      console.log("this is all day event");
       if (start) start.setUTCHours(0, 0, 0, 0);
       if (end) end.setUTCHours(0, 0, 0, 0);
-    }
-
-    // Optimistically update the state
-    const newEvent = {
-      id: crypto.randomUUID(), // Add temporary ID
-      title: newEventTitle,
-      listId: targetList.id,
-      dueDate: dueDate?.toISOString(),
-      allDay: isAllDayEvent,
-    };
-    dispatch({ type: "ADD_EVENT", payload: newEvent });
-
-    try {
+      const newEvent = {
+        id: crypto.randomUUID(), // Add temporary ID
+        title: newEventTitle,
+        listId: targetList.id,
+        dueDate: dueDate?.toISOString(),
+        allDay: isAllDayEvent,
+      };
+      dispatch({ type: "ADD_EVENT", payload: newEvent });
       executeCreateCard({
         title: newEventTitle,
         boardId: targetBoard.id,
         listId: targetList.id,
         dueDate: dueDate,
+        allDay: isAllDayEvent,
       });
-
+    } else {
       // Update state with the returned card data
+      console.log("this is not all day event");
       dispatch({
-        type: "UPDATE_EVENT",
+        type: "ADD_EVENT",
         payload: {
-          id: newEvent.id,
+          id: crypto.randomUUID(),
           title: newEventTitle,
+          listId: targetList.id,
           dueDate: dueDate?.toISOString(),
           start: start?.toISOString(),
           end: end?.toISOString(),
@@ -222,15 +219,17 @@ const Calendar = ({ boardId }: { boardId: string }) => {
           backgroundColor: undefined,
         },
       });
-
-      handleCloseDialog();
-    } catch (error) {
-      console.error("Failed to create event:", error);
-      // Remove the temporary event
-      if (newEvent.listId) {
-        dispatch({ type: "DELETE_EVENT", payload: newEvent.listId });
-      }
+      executeCreateCard({
+        title: newEventTitle,
+        boardId: targetBoard.id,
+        listId: targetList.id,
+        dueDate: dueDate,
+        allDay: isAllDayEvent,
+        start: start,
+        end: end,
+      });
     }
+    handleCloseDialog();
   };
 
   // Close the dialog after the event is added
