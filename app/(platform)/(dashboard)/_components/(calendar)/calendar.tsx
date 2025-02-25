@@ -4,7 +4,13 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -13,12 +19,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import {
   DateSelectArg,
   EventApi,
   EventClickArg,
   formatDate,
+  EventInput,
 } from "@fullcalendar/core/index.js";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,9 +42,23 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Board, Card, List } from "@prisma/client";
+import { useEvents } from "./eventsContext";
+import { useAction } from "@/hooks/use-actions";
+import { createCard } from "@/actions/create-card";
+import { toast } from "sonner";
+import { deleteCard } from "@/actions/delete-card";
+const Calendar = ({ boardId }: { boardId: string }) => {
+  const { state: currentEvents, dispatch } = useEvents();
+  const [boards, setBoards] = useState<(Board & { lists: List[] })[]>([]);
+  const [selectedBoard, setSelectedBoard] = useState<string>("");
+  const [selectedList, setSelectedList] = useState<string>("");
 
-const Calendar = () => {
-  const [currentEvents, setCurrentEvent] = useState<EventApi[]>([]);
+  // always default to the current board if possible
+  const defaultBoard =
+    (boards.find((board) => board.id === boardId) || boards[0]) ?? null;
+  const defaultList = defaultBoard?.lists?.[0] ?? null;
+
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [newEventTitle, setNewEventTitle] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<DateSelectArg | null>(null);
@@ -47,46 +68,144 @@ const Calendar = () => {
   >("calendar");
   const calendarRef = useRef<FullCalendar | null>(null);
 
-  // Load events from local storage when the component is mounted
+  // Load events from local storage or API when component mounts
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedEvents = localStorage.getItem("events");
-      if (savedEvents) {
-        setCurrentEvent(JSON.parse(savedEvents));
+    const loadEvents = async () => {
+      try {
+        // Fetch events directly from the API
+        const response = await fetch(`/api/boards/${boardId}/cards`);
+        if (!response.ok) throw new Error("Failed to fetch events");
+
+        const cards = await response.json();
+        const events = cards.map((card: Card) => ({
+          id: card.id,
+          title: card.title,
+          start: card.dueDate ? new Date(card.dueDate) : undefined,
+          end: card.dueDate ? new Date(card.dueDate) : undefined,
+          allDay: false,
+          backgroundColor: card.color || undefined,
+        }));
+
+        // Update state with events
+        dispatch({ type: "SET_EVENTS", payload: events });
+      } catch (error) {
+        console.error("Failed to load events:", error);
+      }
+    };
+
+    loadEvents();
+  }, [boardId, dispatch]);
+
+  useEffect(() => {
+    async function fetchBoards() {
+      try {
+        const response = await fetch("/api/get-boards");
+        const data = await response.json();
+        setBoards(data);
+      } catch (error) {
+        console.error("Error fetching boards:", error);
       }
     }
+    fetchBoards();
   }, []);
 
-  // Save events to local storage when the current events change
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("events", JSON.stringify(currentEvents));
+    if (boards.length > 0 && !selectedBoard) {
+      setSelectedBoard(defaultBoard?.id || boards[0].id);
     }
-  }, [currentEvents]);
+    if (defaultBoard?.lists?.length && !selectedList) {
+      setSelectedList(defaultList?.id || defaultBoard.lists[0].id);
+    }
+  }, [boards]);
 
-  // Open dialog when a date is selected
-  const handleDateSelect = (selected: DateSelectArg) => {
-    setSelectedDate(selected);
-    setIsDialogOpen(true);
-  };
-
-  // Handle adding a new event
-  const handleAddEvent = (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent page refresh
-    if (selectedDate && newEventTitle) {
-      const calendarApi = selectedDate.view.calendar; // Get the calendar API instance
-      calendarApi.unselect(); // Clear any selected date/time
-
-      // Create a new event with explicit start and end times
-      const newEvent = {
-        id: `${selectedDate?.start.toISOString()}-${newEventTitle}`, // Unique ID for the event
-        title: newEventTitle,
-        start: selectedDate?.start,
-        end: selectedDate?.end,
-        allDay: selectedDate?.allDay,
-      };
-      calendarApi.addEvent(newEvent);
+  // Modify handleAddEvent
+  const { execute: executeCreateCard } = useAction(createCard, {
+    onSuccess: (data) => {
+      toast.success(`Card "${data.title}" created`);
+      dispatch({
+        type: "UPDATE_EVENT",
+        payload: {
+          id: data.id,
+          title: data.title,
+          start: data.dueDate,
+          end: data.dueDate,
+          allDay: false,
+          backgroundColor: data.color,
+        },
+      });
       handleCloseDialog();
+    },
+    onError: (error) => {
+      toast.error(error);
+      if (newEvent.listId) {
+        dispatch({ type: "DELETE_EVENT", payload: newEvent.listId });
+      }
+    },
+  });
+
+  const { execute: executeDeleteCard } = useAction(deleteCard, {
+    onSuccess: (data) => {
+      toast.success(`Card "${data.title}" deleted `);
+      dispatch({ type: "DELETE_EVENT", payload: data.id });
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+  const handleAddEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedBoard || !selectedList) {
+      toast.error("Please select both a board and list");
+      return;
+    }
+
+    const targetBoard = boards.find((b) => b.id === selectedBoard);
+    const targetList = targetBoard?.lists?.find((l) => l.id === selectedList);
+
+    if (!targetBoard || !targetList) {
+      toast.error("Invalid board/list selection");
+      return;
+    }
+
+    const dueDate = selectedDate?.start
+      ? new Date(selectedDate.start)
+      : undefined;
+
+    // Optimistically update the state
+    const newEvent = {
+      title: newEventTitle,
+      listId: targetList.id,
+      dueDate: dueDate,
+    };
+    dispatch({ type: "ADD_EVENT", payload: newEvent });
+
+    try {
+      const result = await executeCreateCard({
+        title: newEventTitle,
+        boardId: targetBoard.id,
+        listId: targetList.id,
+        dueDate: dueDate,
+      });
+
+      // Update state with the returned card data
+      dispatch({
+        type: "UPDATE_EVENT",
+        payload: {
+          title: newEventTitle,
+          boardId: targetBoard.id,
+          listId: targetList.id,
+          dueDate: dueDate,
+          allDay: false,
+        },
+      });
+
+      handleCloseDialog();
+    } catch (error) {
+      console.error("Failed to create event:", error);
+      // Remove the temporary event
+      if (newEvent.listId) {
+        dispatch({ type: "DELETE_EVENT", payload: newEvent.listId });
+      }
     }
   };
 
@@ -96,15 +215,88 @@ const Calendar = () => {
     setNewEventTitle(""); // Reset the event title
   };
 
-  // Handle event click (delete event)
-  const handleEventClick = (selected: EventClickArg) => {
+  // Modify handleEventClick
+  // (ToDo) we should also the delete the actual card from the database
+  // need when we click on the event instead of deleting it it should show a popover
+  // of the card details (title,list board, due date) and find another way to delete the card
+  const handleEventClick = async (selected: EventClickArg) => {
     if (
       window.confirm(
-        `Are you sure you want to delete this event? "${selected.event?.title}"?`
+        `Are you sure you want to delete "${selected.event?.title}"?`
       )
     ) {
-      selected.event.remove();
+      try {
+        const response = await executeDeleteCard({
+          id: selected.event.id as string,
+          boardId: boardId,
+        });
+
+        // Update state and local storage
+      } catch (error) {
+        console.error("Failed to delete card:", error);
+      }
     }
+  };
+
+  // is it updating or deleting the card?
+  useEffect(() => {
+    type CardDetail = {
+      cardId: string;
+      dueDate: Date | null;
+      title: string;
+      color?: string;
+      description?: string;
+    };
+    const handleCardUpdate = (e: CustomEvent<CardDetail>) => {
+      const { cardId, dueDate, title, color, description } = e.detail;
+
+      // only render events with dates
+      if (!dueDate) {
+        dispatch({ type: "DELETE_EVENT", payload: cardId });
+        return;
+      }
+
+      // Update or add the event
+      dispatch({
+        type: "UPDATE_EVENT",
+        payload: {
+          id: cardId,
+          title,
+          description,
+          start: dueDate,
+          end: dueDate,
+          allDay: false,
+          backgroundColor: color || undefined,
+        },
+      });
+    };
+
+    const handleDeleteCard = (e: CustomEvent<{ cardId: string }>) => {
+      const { cardId } = e.detail;
+      console.log(`Deleting card with id: ${cardId}`);
+      dispatch({ type: "DELETE_EVENT", payload: cardId });
+    };
+  }, [dispatch]);
+
+  const sortedEvents = useMemo(() => {
+    return [...currentEvents].sort((a, b) => {
+      const aStart =
+        a.start instanceof Date
+          ? a.start.getTime()
+          : new Date(a.start as string).getTime();
+      const bStart =
+        b.start instanceof Date
+          ? b.start.getTime()
+          : new Date(b.start as string).getTime();
+      return aStart - bStart;
+    });
+  }, [currentEvents]);
+
+  // Open dialog when a date is selected
+  const handleDateSelect = (selected: DateSelectArg) => {
+    setSelectedDate(selected);
+    console.log("selected", selected);
+    setIsDialogOpen(true);
   };
 
   return (
@@ -177,7 +369,7 @@ const Calendar = () => {
                     height="100%"
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     headerToolbar={{
-                      left: "prevButton,todayButton,nextButton",
+                      left: "prevButton,todayButton,nextButton refresh",
                       center: "title",
                       right: "dayGridMonth,timeGridWeek,timeGridDay",
                     }}
@@ -188,7 +380,9 @@ const Calendar = () => {
                     dayMaxEvents={3}
                     select={handleDateSelect}
                     eventClick={handleEventClick}
-                    eventsSet={(events) => setCurrentEvent(events)}
+                    events={currentEvents}
+                    // eventDrop={handleEventChange}
+                    // eventResize={handleEventChange}
                     views={{
                       dayGridMonth: {
                         eventDisplay: "list-item",
@@ -275,11 +469,6 @@ const Calendar = () => {
                       minute: "2-digit",
                       meridiem: "short",
                     }}
-                    initialEvents={
-                      typeof window !== "undefined"
-                        ? JSON.parse(localStorage.getItem("events") || "[]")
-                        : []
-                    }
                     eventClassNames="cursor-pointer text-sm font-medium"
                     dayHeaderClassNames="text-base font-semibold"
                     dayCellClassNames="text-lg"
@@ -325,50 +514,52 @@ const Calendar = () => {
                     Calendar Events
                   </h2>
                   <ul className="space-y-3">
-                    {currentEvents.length <= 0 && (
+                    {sortedEvents.length <= 0 && (
                       <div className="italic text-center text-muted-foreground py-4">
                         No events scheduled
                       </div>
                     )}
-                    {[...currentEvents]
-                      .sort((a, b) => {
-                        const aStart = a.start?.getTime() || 0;
-                        const bStart = b.start?.getTime() || 0;
-                        return aStart - bStart;
-                      })
-                      .map((event: EventApi) => (
-                        <li
-                          key={event.id}
-                          className="group p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
-                          onClick={() =>
-                            handleEventClick({ event } as EventClickArg)
-                          }
-                        >
-                          <p className="text-sm font-medium text-primary truncate">
-                            {event.title}
-                          </p>
-                          <div className="text-sm text-muted-foreground">
-                            {formatDate(event.start!, {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                            {!event.allDay && event.start && (
-                              <span className="ml-2">
-                                {event.start.toLocaleTimeString([], {
+                    {sortedEvents.map(({ id, title, start, end, allDay }) => (
+                      <li
+                        key={id}
+                        className="group p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer"
+                        onClick={() =>
+                          handleEventClick({
+                            event: { id, title, start, end, allDay },
+                          } as EventClickArg)
+                        }
+                      >
+                        <p className="text-sm font-medium text-primary truncate">
+                          {title}
+                        </p>
+                        <div className="text-sm text-muted-foreground">
+                          {formatDate(start!, {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                          {!allDay && start && (
+                            <span className="ml-2">
+                              {(start instanceof Date
+                                ? start
+                                : new Date(start as string)
+                              ).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                              {end &&
+                                ` - ${(end instanceof Date
+                                  ? end
+                                  : new Date(end as string)
+                                ).toLocaleTimeString([], {
                                   hour: "2-digit",
                                   minute: "2-digit",
-                                })}
-                                {event.end &&
-                                  ` - ${event.end.toLocaleTimeString([], {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}`}
-                              </span>
-                            )}
-                          </div>
-                        </li>
-                      ))}
+                                })}`}
+                            </span>
+                          )}
+                        </div>
+                      </li>
+                    ))}
                   </ul>
                 </div>
               )}
@@ -399,6 +590,60 @@ const Calendar = () => {
               onChange={(e) => setNewEventTitle(e.target.value)}
               className="text-lg py-5"
             />
+            <div className="grid grid-cols-2 gap-4">
+              <Select
+                value={selectedBoard}
+                onValueChange={(value) => setSelectedBoard(value)}
+              >
+                <SelectTrigger className="border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <SelectValue placeholder="Select a Board" />
+                </SelectTrigger>
+                <SelectContent>
+                  {boards.map((board) => (
+                    <SelectItem key={board.id} value={board.id}>
+                      {board.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={selectedList}
+                onValueChange={(value) => setSelectedList(value)}
+                disabled={!selectedBoard}
+              >
+                <SelectTrigger className="border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <SelectValue
+                    placeholder={
+                      selectedBoard &&
+                      boards.find((b) => b.id === selectedBoard)?.lists
+                        ?.length === 0
+                        ? "No lists available"
+                        : "Select a List"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {(() => {
+                    const selectedBoardData = boards.find(
+                      (b) => b.id === selectedBoard
+                    );
+                    if (!selectedBoardData?.lists?.length) {
+                      return (
+                        <SelectItem value="no-lists" disabled>
+                          This board has no lists. Please create a list first.
+                        </SelectItem>
+                      );
+                    }
+                    return selectedBoardData.lists.map((list) => (
+                      <SelectItem key={list.id} value={list.id}>
+                        {list.title}
+                      </SelectItem>
+                    ));
+                  })()}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex justify-end gap-2">
               <Button
                 type="button"

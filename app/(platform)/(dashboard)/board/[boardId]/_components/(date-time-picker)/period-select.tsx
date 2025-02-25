@@ -1,74 +1,69 @@
 "use client";
 
 import * as React from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Period, display12HourValue, setDateByType } from "./time-picker-utils";
+import { Period } from "./time-picker-utils";
+import { cn } from "@/lib/utils";
 
-export interface PeriodSelectorProps {
+interface TimePeriodSelectProps {
   period: Period;
-  setPeriod: (m: Period) => void;
-  date: Date | undefined;
-  setDate: (date: Date | undefined) => void;
-  onRightFocus?: () => void;
+  setPeriod: (period: Period) => void;
+  date: Date | null;
+  setDate: (date: Date | null) => void;
   onLeftFocus?: () => void;
+  onRightFocus?: () => void;
+  className?: string;
 }
 
 export const TimePeriodSelect = React.forwardRef<
   HTMLButtonElement,
-  PeriodSelectorProps
->(({ period, setPeriod, date, setDate, onLeftFocus, onRightFocus }, ref) => {
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (e.key === "ArrowRight") onRightFocus?.();
-    if (e.key === "ArrowLeft") onLeftFocus?.();
-  };
+  TimePeriodSelectProps
+>(
+  (
+    { period, setPeriod, date, setDate, onLeftFocus, onRightFocus, className },
+    ref
+  ) => {
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+      if (e.key === "ArrowRight") onRightFocus?.();
+      if (e.key === "ArrowLeft") onLeftFocus?.();
+    };
 
-  const handleValueChange = (value: Period) => {
-    setPeriod(value);
-
-    /**
-     * trigger an update whenever the user switches between AM and PM;
-     * otherwise user must manually change the hour each time
-     */
-    if (date) {
-      const tempDate = new Date(date);
-      const hours = display12HourValue(date.getHours());
-      setDate(
-        setDateByType(
-          tempDate,
-          hours.toString(),
-          "12hours",
-          period === "AM" ? "PM" : "AM"
-        )
-      );
-    }
-  };
-
-  return (
-    <div className="flex h-10 items-center">
-      <Select
-        value={period}
-        onValueChange={(value: Period) => handleValueChange(value)}
+    return (
+      <div
+        ref={ref as React.RefObject<HTMLDivElement>}
+        className={cn(
+          "flex rounded-md bg-transparent p-0.5 gap-0.5",
+          className
+        )}
       >
-        <SelectTrigger
-          ref={ref}
-          className="w-[65px] focus:bg-accent focus:text-accent-foreground"
+        <button
+          type="button"
+          onClick={() => setPeriod("AM")}
           onKeyDown={handleKeyDown}
+          className={cn(
+            "w-[48px] text-sm rounded transition-colors duration-200",
+            period === "AM"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          )}
         >
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="AM">AM</SelectItem>
-          <SelectItem value="PM">PM</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-  );
-});
+          AM
+        </button>
+        <button
+          type="button"
+          onClick={() => setPeriod("PM")}
+          onKeyDown={handleKeyDown}
+          className={cn(
+            "w-[48px] text-sm rounded transition-colors duration-200",
+            period === "PM"
+              ? "bg-primary/10 text-primary"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          PM
+        </button>
+      </div>
+    );
+  }
+);
 
 TimePeriodSelect.displayName = "TimePeriodSelect";

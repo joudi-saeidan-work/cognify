@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 
 import { ModalProvider } from "@/components/providers/modal-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { EventsProvider } from "./(dashboard)/_components/(calendar)/eventsContext";
 
 export default function PlatformLayout({
   children,
@@ -14,7 +15,7 @@ export default function PlatformLayout({
       <QueryProvider>
         <Toaster />
         <ModalProvider />
-        {children}
+        <EventsProvider>{children}</EventsProvider>
       </QueryProvider>
     </ClerkProvider>
   );

@@ -16,5 +16,8 @@ export const UpdateCard = z.object({
   ),
 
   id: z.string(),
-  dueDate: z.date().optional(),
+  dueDate: z.date().nullable().optional(),
+  start: z.date().nullable().optional(),
+  end: z.date().nullable().optional(),
+  allDay: z.boolean().optional(),
 });

@@ -93,7 +93,7 @@ const BoardNavbar = ({
       {/* Right section */}
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
-          <Calendar />
+          <Calendar boardId={data.id} />
           {visibilitySettings.showAssistant ? <AssistanceButton /> : ""}
           {visibilitySettings.showBookmarks ? (
             <>

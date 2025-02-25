@@ -19,19 +19,23 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { id, boardId, ...values } = data;
+  const { id, boardId, title, description, dueDate, start, end, allDay } = data;
   let card;
 
   try {
-    const embedding = await getEmbeddingForCard(
-      values.title,
-      values.description
-    );
+    const embedding = await getEmbeddingForCard(title, description);
 
     card = await db.$transaction(async (tx) => {
       const updatedCard = await tx.card.update({
         where: { id, list: { board: { orgId } } },
-        data: { ...values },
+        data: {
+          title,
+          description,
+          dueDate,
+          start,
+          end,
+          allDay,
+        },
       });
 
       await createAuditLog({

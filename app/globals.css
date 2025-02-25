@@ -441,3 +441,12 @@ pre {
   background-color: #1e293b !important;
   color: white !important;
 }
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

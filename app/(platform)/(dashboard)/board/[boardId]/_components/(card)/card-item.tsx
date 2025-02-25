@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { useTheme } from "next-themes";
 import { DateTimePicker } from "../(date-time-picker)/date-time-picker";
+import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/eventsContext";
 
 interface CardItemProps {
   data: Card;
@@ -20,6 +21,7 @@ interface CardItemProps {
 }
 
 export const CardItem = ({ data, index }: CardItemProps) => {
+  const { dispatch } = useEvents();
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(data.title);
 
@@ -48,11 +50,37 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   // rename Card Action
   const { execute: executeUpdateCard, fieldErrors } = useAction(updateCard, {
     onSuccess: (updatedCard) => {
+      const event = new CustomEvent("updateCard", {
+        detail: {
+          cardId: data.id,
+          title: updatedCard.title,
+          color: data.color,
+          description: data.description,
+          dueDate: data.dueDate,
+        },
+      });
+      window.dispatchEvent(event);
       queryClient.invalidateQueries({ queryKey: ["card", data.id] });
       queryClient.invalidateQueries({ queryKey: ["card-logs", data.id] });
       toast.success(`Renamed to "${updatedCard.title}"`);
       setNewTitle(updatedCard.title); // update title
       disableEditing(); // exit editing mode
+
+      // Dispatch update to shared state
+      dispatch({
+        type: "UPDATE_EVENT",
+        payload: {
+          id: data.id,
+          title: updatedCard.title,
+          start: updatedCard.dueDate
+            ? new Date(updatedCard.dueDate)
+            : undefined,
+          end: updatedCard.dueDate ? new Date(updatedCard.dueDate) : undefined,
+          allDay: false,
+          backgroundColor: data.color || undefined,
+          dueDate: updatedCard.dueDate,
+        },
+      });
     },
     onError: (error) => {
       toast.error(error);
@@ -90,6 +118,30 @@ export const CardItem = ({ data, index }: CardItemProps) => {
     // Otherwise use theme-aware text color
     return "text-black font-medium";
   };
+
+  // Listens to any updates on the events that are in the calendar
+  // (ToDo) we should also the delete the actual card from the database
+  // // Listen for calendar event updates
+  // useEffect(() => {
+  //   const handleCalendarUpdate = (e: CustomEvent) => {
+  //     const { cardId, dueDate } = e.detail;
+  //     if (cardId === data.id) {
+  //       // Update the card's due date in your state/UI
+  //       queryClient.invalidateQueries({ queryKey: ["card", data.id] });
+  //     }
+  //   };
+
+  //   window.addEventListener(
+  //     "calendarEventUpdated",
+  //     handleCalendarUpdate as EventListener
+  //   );
+  //   return () => {
+  //     window.removeEventListener(
+  //       "calendarEventUpdated",
+  //       handleCalendarUpdate as EventListener
+  //     );
+  //   };
+  // }, [data.id, queryClient]);
 
   if (isEditing) {
     return (

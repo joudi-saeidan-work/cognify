@@ -20,7 +20,18 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { title, color, boardId, listId, description, dueDate } = data;
+  const {
+    title,
+    color,
+    boardId,
+    listId,
+    description,
+    dueDate,
+    start,
+    end,
+    allDay,
+  } = data;
+
   let list;
   let card;
 
@@ -67,6 +78,9 @@ const handler = async (data: InputType): Promise<ReturnType> => {
           order: newOrder,
           description,
           dueDate,
+          start,
+          end,
+          allDay,
         },
       });
       await createAuditLog({

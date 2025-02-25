@@ -43,6 +43,10 @@ const handler = async (data: InputType): Promise<ReturnType> => {
         order: newOrder,
         color: cardToCopy.color,
         listId: cardToCopy.listId,
+        dueDate: cardToCopy.dueDate,
+        start: cardToCopy.start,
+        end: cardToCopy.end,
+        allDay: cardToCopy.allDay,
       },
     });
 

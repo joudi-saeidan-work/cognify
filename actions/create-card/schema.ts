@@ -11,5 +11,8 @@ export const CreateCard = z.object({
   listId: z.string(),
   color: z.string().optional(),
   description: z.string().optional(),
-  dueDate: z.date().optional(),
+  dueDate: z.date().nullable().optional(),
+  start: z.date().nullable().optional(),
+  end: z.date().nullable().optional(),
+  allDay: z.boolean().optional(),
 });

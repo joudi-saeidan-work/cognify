@@ -76,6 +76,14 @@ const CardOptions = ({ data }: CardOptionsProps) => {
     const boardId = params.boardId as string;
     const id = data.id;
     console.log(`delete id: ${id}`);
+    const event = new CustomEvent("deleteCard", {
+      detail: {
+        cardId: id,
+      },
+    });
+
+    // dispatch the event to the window
+    window.dispatchEvent(event);
 
     executeDeleteCard({ id, boardId });
   };
