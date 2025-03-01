@@ -125,6 +125,20 @@ model Bookmark {
   @@index([orgId])
 }
 
+model Recording {
+  id          String   @id @default(uuid())
+  orgId       String
+  title       String?  // Optional title derived from transcription
+  audioUrl    String   @db.Text  // URL to the stored audio file
+  transcript  String?  @db.Text  // The transcribed text
+  status      String   // 'pending', 'processed', 'failed'
+  duration    Int      // Duration in seconds
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([orgId])
+}
+
 // npx prisma migrate reset  -> resets your whole data base make sure not to do this in prod
 // npx prisma db push -> assign new prisma schema to mysql db 
 // npx prisma generate -> updates prisma with our new types
