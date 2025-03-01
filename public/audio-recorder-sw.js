@@ -14,8 +14,6 @@ const ASSETS = [
   "/icons/favicon-16x16.png",
   "/icons/favicon-32x32.png",
   "/icons/favicon.ico",
-  "/icons/maskable.png",
-
   // Sound effects
   // "/sounds/start-recording.mp3",
   // "/sounds/stop-recording.mp3",
@@ -33,17 +31,22 @@ self.addEventListener("install", (event) => {
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     (async () => {
-      // Try to get the resource from the cache first
-      const cachedResponse = await caches.match(event.request);
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
       try {
+        // Only cache GET requests
+        if (event.request.method !== "GET") {
+          return fetch(event.request);
+        }
+
+        // Try to get from cache first
+        const cachedResponse = await caches.match(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+
         // If not in cache, try to fetch it
         const response = await fetch(event.request);
 
-        // If the response was successful, clone it and store it in the cache
+        // Cache successful GET responses
         if (response.status === 200) {
           const cache = await caches.open(CACHE_NAME);
           cache.put(event.request, response.clone());

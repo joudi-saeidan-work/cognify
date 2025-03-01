@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { AudioRecorder } from "./_components/audio-recorder";
 
-const HomePage = () => {
+const AudioRecorderPage = () => {
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/audio-recorder-sw.js");
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then(() => console.log("Service Worker registered"))
+        .catch(console.error);
     }
 
     window.addEventListener("beforeinstallprompt", (e) => {
@@ -23,4 +26,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default AudioRecorderPage;
