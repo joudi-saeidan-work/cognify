@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-import withPWA from "next-pwa";
+import withPWAInit from "@ducanh2912/next-pwa";
 
 const nextConfig = {
   images: {
@@ -12,9 +12,15 @@ const nextConfig = {
   },
 };
 
-export default withPWA({
+const withPWA = withPWAInit({
   dest: "public",
-  register: true, // register the service worker
-  skipWaiting: true, // skip waiting for the service worker to be installed
-  disable: process.env.NODE_ENV === "development", // disable PWA in development
-})(nextConfig);
+  cacheOnFrontEndNav: true,
+  aggressiveFrontEndNavCaching: true,
+  reloadOnOnline: true,
+  disable: false,
+  workboxOptions: {
+    disableDevLogs: true,
+  },
+});
+
+export default withPWA(nextConfig);
