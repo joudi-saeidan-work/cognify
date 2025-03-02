@@ -65,7 +65,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     const newOrder = lastCard ? lastCard.order + 1 : 1;
 
     // creates card embedding
-    const embedding = await getEmbeddingForCard(title, description);
+    const embedding = await getEmbeddingForCard(title, description, dueDate);
 
     // if for some reason the card did not get created we don't want to create an embedding for it..
 
@@ -107,7 +107,8 @@ export const createCard = createSafeAction(CreateCard, handler);
 
 export async function getEmbeddingForCard(
   title: string | undefined,
-  description: string | undefined
+  description: string | undefined,
+  dueDate: Date | null | undefined
 ) {
-  return getEmbedding(title + "\n\n" + description) ?? "";
+  return getEmbedding(title + "\n\n" + description + "\n\n" + dueDate) ?? "";
 }

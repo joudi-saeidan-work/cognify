@@ -98,7 +98,7 @@ export async function POST(req: Request) {
           relevantNotes
             .map(
               (note) =>
-                `Title: ${note.title}\n\nDescription:\n${note.description}`
+                `Title: ${note.title}\n\nDescription:\n${note.description} \n\nDue Date: ${note.dueDate}`
             )
             .join("\n\n")
         : "No relevant notes found.");
