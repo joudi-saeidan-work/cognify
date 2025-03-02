@@ -45,7 +45,8 @@
   ],
   "theme_color": "#FFFFFF",
   "background_color": "#FFFFFF",
-  "start_url": "/",
+  "start_url": "/audio-recorder",
+  "scope": "/audio-recorder",
   "display": "standalone",
   "orientation": "portrait"
 }
