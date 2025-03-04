@@ -262,10 +262,22 @@ export const AudioRecorder = (): JSX.Element => {
       if (!transcribeResponse.ok) {
         throw new Error("Transcription failed");
       }
+      //ToDo uncomment this after testing
+      // const { text } = await transcribeResponse.json();
+      // console.log("Transcribed text:", text);
 
-      const { text } = await transcribeResponse.json();
-      console.log("Transcribed text:", text);
+      // TODO: remove this after testing
+      const text = `
+      Alright, so here's the plan. I've been thinking about this for a while, and I finally decided I'm gonna start my own podcast. Nothing too crazy at first—just something casual, maybe once a week, where I talk about tech, creativity, and whatever random things come to mind.
 
+First step, I need to get my setup right. I already have a decent mic, but I might need some better soundproofing—probably just some foam panels or even some blankets to reduce echo. I also need to figure out which recording software I want to use. Audacity is free, but I might try Adobe Audition if I want more control over the sound.
+
+Next, I'll need to come up with a solid format. I don't want it to just be me rambling, so I'll probably structure it around specific topics each week—maybe do some interviews later on. I should also work on an intro, maybe some background music to make it feel polished.
+
+And of course, promotion. No point in making a podcast if nobody listens, right? So I'll start posting clips on social media—probably TikTok and Instagram since short-form content does well there. Might even make a YouTube channel if it picks up.
+
+      Anyway, that's where I'm at right now. I'm excited to see how it goes! Hopefully, in a few months, I'll have something solid to show for it
+      `;
       // Step 2: Process with audio recorder
       const braindumpResponse = await fetch("/api/audio-recorder", {
         method: "POST",
@@ -294,9 +306,9 @@ export const AudioRecorder = (): JSX.Element => {
       const contentString = braindumpData.content;
 
       // Parse the extracted content
-      const parsed = parseAIResponse(contentString);
+      const parsed = parseAIResponse(contentString.trim());
       console.log("Parsed content: ", parsed);
-      setEditableContent(contentString);
+      setEditableContent(parsed);
       console.log("editable content after parsing", contentString);
       createTask();
       return text;
@@ -379,6 +391,7 @@ export const AudioRecorder = (): JSX.Element => {
         }
       );
     }
+    console.log("descriptionContent", descriptionContent);
 
     const descriptionJSON = JSON.stringify({
       type: "doc",
@@ -390,7 +403,13 @@ export const AudioRecorder = (): JSX.Element => {
       return;
     }
 
-    console.log("Creating card with:", editableContent);
+    console.log("Creating card with:", {
+      title: editableContent.title,
+      boardId: selectedBoard,
+      listId: selectedList,
+      organizationId: selectedOrganization,
+      description: descriptionJSON,
+    });
 
     executeCreateCard({
       title: editableContent.title,
