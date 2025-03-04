@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Board, List } from "@prisma/client";
 import { useAction } from "@/hooks/use-actions";
 import { createCard } from "@/actions/create-card";
+import { Settings } from "lucide-react";
 
 // indexedDB is a low-level API for storing data locally in the browser
 // it's not as easy to use as localStorage, but it's more powerful and flexible
@@ -76,6 +77,17 @@ export const AudioRecorder = (): JSX.Element => {
 
   const [isCardCreationComplete, setIsCardCreationComplete] = useState(true);
 
+  const [showSettings, setShowSettings] = useState(
+    !selectedOrganization || !selectedBoard || !selectedList
+  );
+
+  // Add this useEffect to maintain the auto-open behavior
+  useEffect(() => {
+    if (!selectedOrganization || !selectedBoard || !selectedList) {
+      setShowSettings(true);
+    }
+  }, [selectedOrganization, selectedBoard, selectedList]);
+
   // Move this to the top level with your other hooks
   const { execute: executeCreateCard } = useAction(createCard, {
     onSuccess: (data) => {
@@ -84,7 +96,7 @@ export const AudioRecorder = (): JSX.Element => {
     },
     onError: (error) => {
       toast.error(error);
-      console.log("something happened");
+      console.log("something happened", error);
     },
   });
 
@@ -259,25 +271,26 @@ export const AudioRecorder = (): JSX.Element => {
         body: formData,
       });
 
+      console.log("Transcription response status:", transcribeResponse.status);
+
       if (!transcribeResponse.ok) {
-        throw new Error("Transcription failed");
+        const errorBody = await transcribeResponse.text();
+        console.error("Transcription failed with response:", errorBody);
+        throw new Error(
+          `Transcription failed: ${transcribeResponse.statusText}`
+        );
       }
-      //ToDo uncomment this after testing
-      // const { text } = await transcribeResponse.json();
-      // console.log("Transcribed text:", text);
 
-      // TODO: remove this after testing
-      const text = `
-      Alright, so here's the plan. I've been thinking about this for a while, and I finally decided I'm gonna start my own podcast. Nothing too crazy at first—just something casual, maybe once a week, where I talk about tech, creativity, and whatever random things come to mind.
+      const responseData = await transcribeResponse.json();
+      console.log("Raw transcription response:", responseData);
 
-First step, I need to get my setup right. I already have a decent mic, but I might need some better soundproofing—probably just some foam panels or even some blankets to reduce echo. I also need to figure out which recording software I want to use. Audacity is free, but I might try Adobe Audition if I want more control over the sound.
+      const responseText = responseData.text;
+      if (!responseText) {
+        throw new Error("Transcription response missing text field");
+      }
 
-Next, I'll need to come up with a solid format. I don't want it to just be me rambling, so I'll probably structure it around specific topics each week—maybe do some interviews later on. I should also work on an intro, maybe some background music to make it feel polished.
+      console.log("Transcribed text:", responseText);
 
-And of course, promotion. No point in making a podcast if nobody listens, right? So I'll start posting clips on social media—probably TikTok and Instagram since short-form content does well there. Might even make a YouTube channel if it picks up.
-
-      Anyway, that's where I'm at right now. I'm excited to see how it goes! Hopefully, in a few months, I'll have something solid to show for it
-      `;
       // Step 2: Process with audio recorder
       const braindumpResponse = await fetch("/api/audio-recorder", {
         method: "POST",
@@ -288,7 +301,7 @@ And of course, promotion. No point in making a podcast if nobody listens, right?
           messages: [
             {
               role: "user",
-              content: text,
+              content: responseText,
             },
           ],
         }),
@@ -304,14 +317,107 @@ And of course, promotion. No point in making a podcast if nobody listens, right?
 
       // Extract the content string from the object
       const contentString = braindumpData.content;
+      console.log("Raw content string:", contentString);
 
       // Parse the extracted content
-      const parsed = parseAIResponse(contentString.trim());
-      console.log("Parsed content: ", parsed);
-      setEditableContent(parsed);
-      console.log("editable content after parsing", contentString);
-      createTask();
-      return text;
+      try {
+        const parsed = parseAIResponse(contentString.trim());
+        console.log("Parsed content: ", parsed);
+        const titleValue = parsed.title;
+        console.log("Title value: ", titleValue);
+        const descriptionContent = [];
+
+        // Summary section with proper validation
+        if (Boolean(parsed.summary?.trim())) {
+          const cleanSummary = parsed.summary.trim();
+          descriptionContent.push(
+            {
+              type: "heading",
+              attrs: { level: 2 },
+              content: [{ type: "text", text: "Summary" }],
+            },
+            {
+              type: "paragraph",
+              content: [{ type: "text", text: cleanSummary }],
+            }
+          );
+        }
+
+        // Todo list section with improved parsing
+        if (Boolean(parsed.todoList?.trim())) {
+          const tasks = parsed.todoList
+            .split(/,\s*(?![^()]*\))/)
+            .map((task) => task.trim())
+            .filter((task) => task.length > 0);
+
+          if (tasks.length > 0) {
+            descriptionContent.push(
+              {
+                type: "heading",
+                attrs: { level: 2 },
+                content: [{ type: "text", text: "To-Do List" }],
+              },
+              {
+                type: "bulletList",
+                content: tasks.map((task) => ({
+                  type: "listItem",
+                  content: [
+                    {
+                      type: "paragraph",
+                      content: [{ type: "text", text: task }],
+                    },
+                  ],
+                })),
+              }
+            );
+          }
+        }
+
+        // Fallback content if both sections failed
+        if (descriptionContent.length === 0) {
+          descriptionContent.push({
+            type: "paragraph",
+            content: [
+              {
+                type: "text",
+                text: "No actionable content found in recording",
+              },
+            ],
+          });
+        }
+
+        const descriptionJSON = JSON.stringify({
+          type: "doc",
+          content: descriptionContent,
+        });
+
+        if (!selectedOrganization || !selectedBoard || !selectedList) {
+          toast.error("Please select both a board and list");
+          return;
+        }
+
+        console.log("Creating card with:", {
+          title: titleValue,
+          boardId: selectedBoard,
+          listId: selectedList,
+          organizationId: selectedOrganization,
+          description: descriptionJSON,
+        });
+
+        executeCreateCard({
+          title: titleValue,
+          boardId: selectedBoard,
+          listId: selectedList,
+          organizationId: selectedOrganization,
+          description: descriptionJSON,
+        });
+      } catch (parseError) {
+        console.error("Content parsing error:", parseError);
+        toast.error("Failed to parse AI response content");
+        return;
+      }
+
+      return responseText;
     } catch (error) {
       setError(error instanceof Error ? error.message : "Processing failed");
       throw error;
@@ -322,7 +428,11 @@ And of course, promotion. No point in making a podcast if nobody listens, right?
 
   const parseAIResponse = (content: string) => {
     try {
+      console.log("Raw content before parsing:", content);
       const raw = JSON.parse(content);
+
+      console.log("Raw JSON structure:", raw);
+
       const OrganizedThoughtsSchema = z.object({
         title: z.string().min(1).default("Untitled"),
         category: z
@@ -331,7 +441,10 @@ And of course, promotion. No point in making a podcast if nobody listens, right?
         summary: z.string().default(""),
         todoList: z.array(z.string()).default([]),
       });
+
       const parsed = OrganizedThoughtsSchema.parse(raw);
+      console.log("Validated content:", parsed);
+
       return {
         title: parsed.title,
         category: parsed.category,
@@ -339,7 +452,7 @@ And of course, promotion. No point in making a podcast if nobody listens, right?
         todoList: parsed.todoList.join(", "),
       };
     } catch (error) {
-      console.error("Parsing failed:", error);
+      console.error("Parsing failed - Content:", content, "Error:", error);
       toast.error("Failed to process AI response");
       return {
         title: "Invalid Response",
@@ -350,80 +463,19 @@ And of course, promotion. No point in making a podcast if nobody listens, right?
     }
   };
 
-  const createTask = () => {
-    const descriptionContent = [];
-
-    if (editableContent.summary) {
-      descriptionContent.push(
-        {
-          type: "heading",
-          attrs: { level: 2 },
-          content: [{ type: "text", text: "Summary" }],
-        },
-        {
-          type: "paragraph",
-          content: [{ type: "text", text: editableContent.summary }],
-        }
-      );
-    }
-
-    if (editableContent.todoList) {
-      descriptionContent.push(
-        {
-          type: "heading",
-          attrs: { level: 2 },
-          content: [{ type: "text", text: "To-Do List" }],
-        },
-        {
-          type: "bulletList",
-          content: editableContent.todoList
-            .split(/,\s*(?=[^\]]*(?:\[|$))/)
-            .filter((task) => task.trim())
-            .map((task) => ({
-              type: "listItem",
-              content: [
-                {
-                  type: "paragraph",
-                  content: [{ type: "text", text: task.trim() }],
-                },
-              ],
-            })),
-        }
-      );
-    }
-    console.log("descriptionContent", descriptionContent);
-
-    const descriptionJSON = JSON.stringify({
-      type: "doc",
-      content: descriptionContent,
-    });
-
-    if (!selectedOrganization || !selectedBoard || !selectedList) {
-      toast.error("Please select both a board and list");
-      return;
-    }
-
-    console.log("Creating card with:", {
-      title: editableContent.title,
-      boardId: selectedBoard,
-      listId: selectedList,
-      organizationId: selectedOrganization,
-      description: descriptionJSON,
-    });
-
-    executeCreateCard({
-      title: editableContent.title,
-      boardId: selectedBoard,
-      listId: selectedList,
-      organizationId: selectedOrganization,
-      description: descriptionJSON,
-    });
-  };
-
   // Return JSX directly, not inside a nested function
   return (
     <>
       <div className="instant-container">
+        {/* Add settings gear button at top */}
+        <button
+          className="settings-button"
+          onClick={() => setShowSettings(!showSettings)}
+          aria-label="Settings"
+        >
+          <Settings />
+        </button>
+
         <button
           className={`instant-record ${isRecording ? "recording" : ""} ${
             processing ? "processing" : ""
@@ -443,6 +495,7 @@ And of course, promotion. No point in making a podcast if nobody listens, right?
           }
         >
           <div className="pulse-ring"></div>
+          {isRecording && <div className="timer">{recordingDuration}s</div>}
         </button>
 
         {/* Add a visible message explaining why recording is disabled */}
@@ -458,198 +511,254 @@ And of course, promotion. No point in making a podcast if nobody listens, right?
           </div>
         )}
 
-        <style jsx>{`
-          .instant-container {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #1a1a1a;
-            position: relative;
-          }
+        {showSettings && (
+          <div className="mobile-settings-panel">
+            <button
+              className="close-button"
+              onClick={() => setShowSettings(false)}
+            >
+              ×
+            </button>
+            <div className="organization-selectors">
+              <select
+                value={selectedOrganization || ""}
+                onChange={(e) => setSelectedOrganization(e.target.value)}
+              >
+                <option value="">Select Organization</option>
+                {organizations.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
 
-          .instant-record {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: none;
-            background: #4caf50;
-            transition: all 0.3s;
-            position: relative;
-            cursor: pointer;
-          }
+              {selectedOrganization && (
+                <>
+                  {organizations.find((org) => org.id === selectedOrganization)
+                    ?.boards.length ? (
+                    <select
+                      value={selectedBoard}
+                      onChange={(e) => setSelectedBoard(e.target.value)}
+                    >
+                      <option value="">Select Board</option>
+                      {organizations
+                        .find((org) => org.id === selectedOrganization)
+                        ?.boards.map((board) => (
+                          <option key={board.id} value={board.id}>
+                            {board.title}
+                          </option>
+                        ))}
+                    </select>
+                  ) : (
+                    <div className="validation-message">
+                      No boards available in this organization
+                    </div>
+                  )}
 
-          .instant-record.recording {
-            background: #f44336;
-            transform: scale(1.1);
-          }
+                  {selectedBoard && (
+                    <>
+                      {organizations
+                        .find((org) => org.id === selectedOrganization)
+                        ?.boards.find((b) => b.id === selectedBoard)?.lists
+                        .length ? (
+                        <select
+                          value={selectedList}
+                          onChange={(e) => setSelectedList(e.target.value)}
+                        >
+                          <option value="">Select List</option>
+                          {organizations
+                            .find((org) => org.id === selectedOrganization)
+                            ?.boards.find((board) => board.id === selectedBoard)
+                            ?.lists.map((list) => (
+                              <option key={list.id} value={list.id}>
+                                {list.title}
+                              </option>
+                            ))}
+                        </select>
+                      ) : (
+                        <div className="validation-message">
+                          No lists available in this board
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
 
-          .instant-record.processing {
-            background: #ffc107;
-            animation: pulse 1s infinite;
-          }
+      <style jsx>{`
+        .instant-container {
+          position: relative;
+          height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #1a1a1a;
+        }
 
-          .instant-record:disabled {
-            background: #9e9e9e;
-            cursor: not-allowed;
-          }
-
-          .pulse-ring {
-            position: absolute;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            width: 100%;
-            height: 100%;
-            animation: ripple 1.5s infinite;
-            opacity: 0;
-          }
-
-          ${isRecording &&
-          `
-        .instant-container::after {
-          content: "${Math.floor(recordingDuration / 60)}:${String(
-            recordingDuration % 60
-          ).padStart(2, "0")}";
+        .settings-button {
           position: absolute;
-          bottom: 20%;
+          top: 1rem;
+          right: 1rem;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 1.5rem;
+          cursor: pointer;
+          z-index: 1000;
+        }
+
+        .instant-record {
+          width: 64px;
+          height: 64px;
+          font-size: 32px;
+          border-radius: 50%;
+          background: #ff5252;
+          border: none;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          transition: all 0.3s ease;
+        }
+
+        .instant-record:disabled {
+          background: #666;
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+
+        .instant-record.recording {
+          background: #ff0000;
+          animation: pulse 1.5s infinite;
+        }
+
+        .instant-record.processing {
+          background: #ffd700;
+          animation: none;
+        }
+
+        .timer {
+          position: absolute;
+          bottom: -30px;
           left: 50%;
           transform: translateX(-50%);
-          color: rgba(255, 255, 255, 0.8);
-          font-family: monospace;
-          font-size: 1.2rem;
+          color: white;
+          font-size: 14px;
+          font-weight: bold;
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
-      `}
 
-          @keyframes ripple {
-            0% {
-              transform: scale(0.9);
-              opacity: 1;
-            }
-            100% {
-              transform: scale(1.5);
-              opacity: 0;
-            }
+        .pulse-ring {
+          border: 3px solid #ff5252;
+          border-radius: 50%;
+          height: 100%;
+          width: 100%;
+          position: absolute;
+          animation: none;
+          opacity: 0;
+        }
+
+        .recording .pulse-ring {
+          animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1)
+            infinite;
+        }
+
+        @keyframes pulse-ring {
+          0% {
+            transform: scale(0.33);
+            opacity: 0;
           }
-
-          @keyframes pulse {
-            0% {
-              transform: scale(1);
-            }
-            50% {
-              transform: scale(1.1);
-            }
-            100% {
-              transform: scale(1);
-            }
+          80%,
+          100% {
+            opacity: 0;
           }
-
-          .recording-disabled-message {
-            position: absolute;
-            bottom: 30%;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #ff5252;
-            font-size: 0.9rem;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 8px 12px;
-            border-radius: 4px;
-            max-width: 80%;
+          40% {
+            opacity: 0.3;
           }
-        `}</style>
-      </div>
-      <div className="organization-selectors">
-        <select onChange={(e) => setSelectedOrganization(e.target.value)}>
-          <option value="">Select Organization</option>
-          {organizations.map((org) => (
-            <option key={org.id} value={org.id}>
-              {org.name}
-            </option>
-          ))}
-        </select>
+        }
 
-        {selectedOrganization && (
-          <>
-            <select onChange={(e) => setSelectedBoard(e.target.value)}>
-              <option value="">Select Board</option>
-              {organizations
-                .find((org) => org.id === selectedOrganization)
-                ?.boards.map((board) => (
-                  <option key={board.id} value={board.id}>
-                    {board.title}
-                  </option>
-                ))}
-            </select>
-
-            {/* Message when no boards are available */}
-            {organizations.find((org) => org.id === selectedOrganization)
-              ?.boards.length === 0 && (
-              <div className="error-message">
-                No boards available for this organization
-              </div>
-            )}
-          </>
-        )}
-
-        {selectedBoard && (
-          <>
-            <select onChange={(e) => setSelectedList(e.target.value)}>
-              <option value="">Select List</option>
-              {organizations
-                .find((org) => org.id === selectedOrganization)
-                ?.boards.find((board) => board.id === selectedBoard)
-                ?.lists.map((list) => (
-                  <option key={list.id} value={list.id}>
-                    {list.title}
-                  </option>
-                ))}
-            </select>
-
-            {/* Message when no lists are available */}
-            {!organizations
-              .find((org) => org.id === selectedOrganization)
-              ?.boards.find((board) => board.id === selectedBoard)?.lists
-              .length && (
-              <div className="error-message">
-                No lists available in this board
-              </div>
-            )}
-          </>
-        )}
-
-        <style jsx>{`
-          .organization-selectors {
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            background: #2d2d2d;
-            border-radius: 8px;
-            margin-top: 1rem;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
+        @keyframes pulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.4);
           }
-
-          select {
-            padding: 8px;
-            border-radius: 4px;
-            background: #3a3a3a;
-            color: white;
-            border: 1px solid #555;
+          70% {
+            box-shadow: 0 0 0 10px rgba(255, 82, 82, 0);
           }
-
-          .error-message {
-            color: #ff5252;
-            font-size: 0.8rem;
-            margin-top: 4px;
-            background: rgba(255, 82, 82, 0.1);
-            padding: 6px;
-            border-radius: 4px;
-            text-align: center;
+          100% {
+            box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
           }
-        `}</style>
-      </div>
+        }
+
+        .mobile-settings-panel {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: #2d2d2d;
+          padding: 1rem;
+          border-radius: 12px 12px 0 0;
+          box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+          z-index: 999;
+          max-height: 70vh;
+          overflow-y: auto;
+        }
+
+        .close-button {
+          position: absolute;
+          top: 0.5rem;
+          right: 0.5rem;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 1.5rem;
+          cursor: pointer;
+        }
+
+        .organization-selectors {
+          display: flex;
+          flex-direction: column;
+          gap: 0.8rem;
+          margin-top: 1rem;
+        }
+
+        select {
+          width: 100%;
+          padding: 12px;
+          border-radius: 8px;
+          background: #3a3a3a;
+          color: white;
+          border: 1px solid #555;
+          font-size: 1rem;
+          -webkit-appearance: none;
+          appearance: none;
+        }
+
+        .validation-message {
+          color: #ff5252;
+          padding: 12px;
+          background: rgba(255, 82, 82, 0.1);
+          border-radius: 8px;
+          font-size: 0.9rem;
+          text-align: center;
+          margin: 8px 0;
+        }
+
+        .recording-disabled-message {
+          position: absolute;
+          bottom: 100px;
+          left: 50%;
+          transform: translateX(-50%);
+          color: #ff5252;
+          text-align: center;
+          width: 80%;
+          font-size: 0.9rem;
+        }
+      `}</style>
     </>
   );
 };

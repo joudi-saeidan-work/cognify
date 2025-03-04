@@ -99,7 +99,13 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       return card;
     });
   } catch (error) {
-    return { error: "Failed to create" };
+    console.error("Card creation error:", error);
+    return {
+      error:
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred while creating the card",
+    };
   }
   revalidatePath(`/boards/${boardId}`);
   return { data: card };
