@@ -15,4 +15,5 @@ export const CreateCard = z.object({
   start: z.date().nullable().optional(),
   end: z.date().nullable().optional(),
   allDay: z.boolean().optional(),
+  organizationId: z.string().optional(),
 });

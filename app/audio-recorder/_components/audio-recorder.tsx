@@ -3,6 +3,8 @@ import { openDB, DBSchema, IDBPDatabase } from "idb"; // wrapper for indexedDB
 import { z } from "zod";
 import { toast } from "sonner";
 import { Board, List } from "@prisma/client";
+import { useAction } from "@/hooks/use-actions";
+import { createCard } from "@/actions/create-card";
 
 // indexedDB is a low-level API for storing data locally in the browser
 // it's not as easy to use as localStorage, but it's more powerful and flexible
@@ -72,6 +74,20 @@ export const AudioRecorder = (): JSX.Element => {
     string | null
   >(null);
 
+  const [isCardCreationComplete, setIsCardCreationComplete] = useState(true);
+
+  // Move this to the top level with your other hooks
+  const { execute: executeCreateCard } = useAction(createCard, {
+    onSuccess: (data) => {
+      toast.success(`Card "${data.title}" created`);
+      console.log(`Card "${data.title}" created`);
+    },
+    onError: (error) => {
+      toast.error(error);
+      console.log("something happened");
+    },
+  });
+
   // initialize the IndexedDB instance when the component mounts. It creates two tables:
   // - recordings: to store the audio recordings
   // - audioQueue: to store the audio recordings when the user is offline
@@ -125,7 +141,7 @@ export const AudioRecorder = (): JSX.Element => {
     fetchOrganizationsWithBoards();
 
     // Set up polling to fetch data every 60 seconds
-    const intervalId = setInterval(fetchOrganizationsWithBoards, 50000);
+    const intervalId = setInterval(fetchOrganizationsWithBoards, 60000);
 
     // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
@@ -133,48 +149,39 @@ export const AudioRecorder = (): JSX.Element => {
 
   // handles the tap event to start or stop the recording
   const handleTap = async () => {
+    if (!selectedOrganization || !selectedBoard || !selectedList) {
+      toast.error(
+        "Please select an organization, board, and list before recording."
+      );
+      return;
+    }
+
     if (isRecording) {
-      // stops the recording because it's recording
       mediaRecorderRef.current?.stop();
       setIsRecording(false);
       setProcessing(true);
     } else {
-      // if isRecording is false, it means that the user is not currently recording
       try {
-        // request access to the users microphone to capture audio
-        // uses media stream api
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
-        // Initialised the MediaRecorder instance to capture the audio
         const recorder = new MediaRecorder(stream);
-        // stored the media recorder instance in the ref for later use
         mediaRecorderRef.current = recorder;
 
-        // Data handling -> chunks are the audio data that is captured from the microphone
         let chunks: Blob[] = [];
 
-        // ondataavailable is triggered when a new chunk of audio is captured
         recorder.ondataavailable = (e) => chunks.push(e.data);
 
-        // When the recording is stopped
-        // onstop is triggered when the recording is stopped
         recorder.onstop = async () => {
-          // create a blob from the captured audio data
           const blob = new Blob(chunks, { type: "audio/webm" });
-          // create a URL for the blob to play the audio
-          // we can use this URL to play the audio in the browser or download it
           const audioURL = URL.createObjectURL(blob);
 
-          // Play preview (optional)
           const audio = new Audio(audioURL);
           audio.volume = 0.8;
           await audio.play();
 
-          // process the recording
           await processRecording(blob);
 
-          // reset the chunks and stop the stream
           chunks = [];
           stream.getTracks().forEach((track) => track.stop());
         };
@@ -194,7 +201,8 @@ export const AudioRecorder = (): JSX.Element => {
       return;
     }
 
-    // 1. Store locally immediately
+    setIsCardCreationComplete(false);
+
     const id = Date.now();
     await db.add("recordings", {
       id,
@@ -203,7 +211,6 @@ export const AudioRecorder = (): JSX.Element => {
       created: Date.now(),
     });
 
-    // 2. Try to process immediately
     try {
       await transcribeAudio(blob);
 
@@ -221,6 +228,9 @@ export const AudioRecorder = (): JSX.Element => {
 
       if (!navigator.onLine) {
         await db.add("audioQueue", { id, blob });
+        toast.info(
+          "Recording added to queue. It will be processed when online."
+        );
         navigator.serviceWorker.ready.then((registration) => {
           if ("sync" in registration) {
             registration.sync.register("sync-recordings").catch((error) => {
@@ -233,6 +243,7 @@ export const AudioRecorder = (): JSX.Element => {
       }
     } finally {
       setProcessing(false);
+      setIsCardCreationComplete(true);
     }
   };
 
@@ -275,12 +286,19 @@ export const AudioRecorder = (): JSX.Element => {
         throw new Error("AI processing failed");
       }
 
-      const braindumpText = await braindumpResponse.text();
-      console.log("Raw braindump response:", braindumpText);
+      // Parse the response as JSON to get the object
+      const braindumpData = await braindumpResponse.json();
+      console.log("Raw braindump response:", braindumpData);
 
-      // Step 3: Parse and update UI - adjust based on your API's actual response structure
-      const parsed = parseAIResponse(braindumpText);
-      setEditableContent(parsed);
+      // Extract the content string from the object
+      const contentString = braindumpData.content;
+
+      // Parse the extracted content
+      const parsed = parseAIResponse(contentString);
+      console.log("Parsed content: ", parsed);
+      setEditableContent(contentString);
+      console.log("editable content after parsing", contentString);
+      createTask();
       return text;
     } catch (error) {
       setError(error instanceof Error ? error.message : "Processing failed");
@@ -320,6 +338,69 @@ export const AudioRecorder = (): JSX.Element => {
     }
   };
 
+  const createTask = () => {
+    const descriptionContent = [];
+
+    if (editableContent.summary) {
+      descriptionContent.push(
+        {
+          type: "heading",
+          attrs: { level: 2 },
+          content: [{ type: "text", text: "Summary" }],
+        },
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: editableContent.summary }],
+        }
+      );
+    }
+
+    if (editableContent.todoList) {
+      descriptionContent.push(
+        {
+          type: "heading",
+          attrs: { level: 2 },
+          content: [{ type: "text", text: "To-Do List" }],
+        },
+        {
+          type: "bulletList",
+          content: editableContent.todoList
+            .split(/,\s*(?=[^\]]*(?:\[|$))/)
+            .filter((task) => task.trim())
+            .map((task) => ({
+              type: "listItem",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [{ type: "text", text: task.trim() }],
+                },
+              ],
+            })),
+        }
+      );
+    }
+
+    const descriptionJSON = JSON.stringify({
+      type: "doc",
+      content: descriptionContent,
+    });
+
+    if (!selectedOrganization || !selectedBoard || !selectedList) {
+      toast.error("Please select both a board and list");
+      return;
+    }
+
+    console.log("Creating card with:", editableContent);
+
+    executeCreateCard({
+      title: editableContent.title,
+      boardId: selectedBoard,
+      listId: selectedList,
+      organizationId: selectedOrganization,
+      description: descriptionJSON,
+    });
+  };
+
   // Return JSX directly, not inside a nested function
   return (
     <>
@@ -330,9 +411,33 @@ export const AudioRecorder = (): JSX.Element => {
           }`}
           onClick={handleTap}
           aria-label={isRecording ? "Stop recording" : "Start recording"}
+          disabled={
+            !selectedOrganization ||
+            !selectedBoard ||
+            !selectedList ||
+            !isCardCreationComplete
+          }
+          title={
+            !selectedOrganization || !selectedBoard || !selectedList
+              ? "Please select an organization, board, and list before recording"
+              : "Click to start recording"
+          }
         >
           <div className="pulse-ring"></div>
         </button>
+
+        {/* Add a visible message explaining why recording is disabled */}
+        {(!selectedOrganization || !selectedBoard || !selectedList) && (
+          <div className="recording-disabled-message">
+            Please select{" "}
+            {!selectedOrganization
+              ? "an organization"
+              : !selectedBoard
+              ? "a board"
+              : "a list"}{" "}
+            to enable recording
+          </div>
+        )}
 
         <style jsx>{`
           .instant-container {
@@ -363,6 +468,11 @@ export const AudioRecorder = (): JSX.Element => {
           .instant-record.processing {
             background: #ffc107;
             animation: pulse 1s infinite;
+          }
+
+          .instant-record:disabled {
+            background: #9e9e9e;
+            cursor: not-allowed;
           }
 
           .pulse-ring {
@@ -413,12 +523,24 @@ export const AudioRecorder = (): JSX.Element => {
               transform: scale(1);
             }
           }
+
+          .recording-disabled-message {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff5252;
+            font-size: 0.9rem;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 4px;
+            max-width: 80%;
+          }
         `}</style>
       </div>
       <div className="organization-selectors">
-        <select
-          onChange={(e) => setSelectedOrganization(e.target.value || null)}
-        >
+        <select onChange={(e) => setSelectedOrganization(e.target.value)}>
           <option value="">Select Organization</option>
           {organizations.map((org) => (
             <option key={org.id} value={org.id}>
@@ -428,31 +550,86 @@ export const AudioRecorder = (): JSX.Element => {
         </select>
 
         {selectedOrganization && (
-          <select onChange={(e) => setSelectedBoard(e.target.value)}>
-            <option value="">Select Board</option>
-            {organizations
-              .find((org) => org.id === selectedOrganization)
-              ?.boards.map((board) => (
-                <option key={board.id} value={board.id}>
-                  {board.title}
-                </option>
-              ))}
-          </select>
+          <>
+            <select onChange={(e) => setSelectedBoard(e.target.value)}>
+              <option value="">Select Board</option>
+              {organizations
+                .find((org) => org.id === selectedOrganization)
+                ?.boards.map((board) => (
+                  <option key={board.id} value={board.id}>
+                    {board.title}
+                  </option>
+                ))}
+            </select>
+
+            {/* Message when no boards are available */}
+            {organizations.find((org) => org.id === selectedOrganization)
+              ?.boards.length === 0 && (
+              <div className="error-message">
+                No boards available for this organization
+              </div>
+            )}
+          </>
         )}
 
         {selectedBoard && (
-          <select onChange={(e) => setSelectedList(e.target.value)}>
-            <option value="">Select List</option>
-            {organizations
+          <>
+            <select onChange={(e) => setSelectedList(e.target.value)}>
+              <option value="">Select List</option>
+              {organizations
+                .find((org) => org.id === selectedOrganization)
+                ?.boards.find((board) => board.id === selectedBoard)
+                ?.lists.map((list) => (
+                  <option key={list.id} value={list.id}>
+                    {list.title}
+                  </option>
+                ))}
+            </select>
+
+            {/* Message when no lists are available */}
+            {!organizations
               .find((org) => org.id === selectedOrganization)
-              ?.boards.find((board) => board.id === selectedBoard)
-              ?.lists.map((list) => (
-                <option key={list.id} value={list.id}>
-                  {list.title}
-                </option>
-              ))}
-          </select>
+              ?.boards.find((board) => board.id === selectedBoard)?.lists
+              .length && (
+              <div className="error-message">
+                No lists available in this board
+              </div>
+            )}
+          </>
         )}
+
+        <style jsx>{`
+          .organization-selectors {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            background: #2d2d2d;
+            border-radius: 8px;
+            margin-top: 1rem;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+          }
+
+          select {
+            padding: 8px;
+            border-radius: 4px;
+            background: #3a3a3a;
+            color: white;
+            border: 1px solid #555;
+          }
+
+          .error-message {
+            color: #ff5252;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            background: rgba(255, 82, 82, 0.1);
+            padding: 6px;
+            border-radius: 4px;
+            text-align: center;
+          }
+        `}</style>
       </div>
     </>
   );

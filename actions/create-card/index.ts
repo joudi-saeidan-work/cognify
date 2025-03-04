@@ -10,7 +10,6 @@ import { InputType, ReturnType } from "./types";
 import { createSafeAction } from "@/lib/create-safe-actions";
 import { CreateCard } from "./schema";
 import { getEmbedding } from "@/lib/openai";
-import { describe } from "node:test";
 import { notesIndex } from "@/lib/pinecone";
 
 const handler = async (data: InputType): Promise<ReturnType> => {
@@ -30,15 +29,18 @@ const handler = async (data: InputType): Promise<ReturnType> => {
     start,
     end,
     allDay,
+    organizationId,
   } = data;
 
   let list;
   let card;
 
+  const orgIdValue = organizationId ? organizationId : orgId;
+
   // try to find the list where the card is
   try {
     list = await db.list.findUnique({
-      where: { id: listId, board: { orgId } },
+      where: { id: listId, board: { orgId: orgIdValue } },
     });
     if (!list) {
       return {
