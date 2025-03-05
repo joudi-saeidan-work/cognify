@@ -160,7 +160,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
               placeholder={
                 isRecording ? "Listening..." : "Write anything or speak..."
               }
-              className={`resize-none relative flex flex-col justify-between border-none hover:border-black/20 py-2 px-3 text-sm rounded-md shadow-none w-full ${getTextColor()} ${
+              className={`resize-none relative flex flex-col justify-between border-none hover:border-black/20 py-2 px-3 pb-10 text-sm rounded-md shadow-none w-full ${getTextColor()} ${
                 isRecording ? "bg-red-50" : ""
               }`}
               readOnly={isRecording}
