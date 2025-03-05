@@ -373,19 +373,6 @@ export const AudioRecorder = (): JSX.Element => {
           }
         }
 
-        // Fallback content if both sections failed
-        if (descriptionContent.length === 0) {
-          descriptionContent.push({
-            type: "paragraph",
-            content: [
-              {
-                type: "text",
-                text: "No actionable content found in recording",
-              },
-            ],
-          });
-        }
-
         const descriptionJSON = JSON.stringify({
           type: "doc",
           content: descriptionContent,
@@ -463,7 +450,6 @@ export const AudioRecorder = (): JSX.Element => {
     }
   };
 
-  // Return JSX directly, not inside a nested function
   return (
     <>
       <div className="instant-container">
