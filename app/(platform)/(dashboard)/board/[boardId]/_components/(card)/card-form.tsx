@@ -2,13 +2,21 @@
 
 import { FormTextarea } from "@/components/form/form-textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
-import { ElementRef, forwardRef, KeyboardEventHandler, useRef } from "react";
+import { Plus } from "lucide-react";
+import {
+  ElementRef,
+  forwardRef,
+  KeyboardEventHandler,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import { useAction } from "@/hooks/use-actions";
 import { createCard } from "@/actions/create-card";
 import { useParams } from "next/navigation";
 import { useOnClickOutside, useEventListener } from "usehooks-ts";
 import { toast } from "sonner";
+import { LiveRecorder } from "@/app/audio-recorder/_components/live-recorder";
 
 interface CardFormProps {
   listId: string;
@@ -22,8 +30,12 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
   ({ listId, color, disableEditing, enableEditing, isEditing }, ref) => {
     const params = useParams();
     const formRef = useRef<ElementRef<"form">>(null);
+    const [transcription, setTranscription] = useState("");
+    const [isRecording, setIsRecording] = useState(false);
+    const [shouldSubmitOnStop, setShouldSubmitOnStop] = useState(false);
+    const [wasRecording, setWasRecording] = useState(false);
 
-    const { execute, fieldErrors } = useAction(createCard, {
+    const { execute, isLoading: isCreating } = useAction(createCard, {
       onSuccess: (data) => {
         toast.success(`Card "${data.title}" created `);
         formRef.current?.reset();
@@ -49,6 +61,23 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       }
     };
 
+    const onTextareaFocus = () => {
+      // If recording, stop it when user focuses on textarea
+      if (isRecording) {
+        setIsRecording(false);
+      }
+
+      // If was recording and now user clicked on textarea, clear the transcription
+      if (wasRecording) {
+        // Clear transcript only if user manually focuses
+        setTranscription("");
+        if (ref && "current" in ref && ref.current) {
+          ref.current.value = "";
+        }
+        setWasRecording(false);
+      }
+    };
+
     const onSubmit = (formData: FormData) => {
       const title = formData.get("title") as string;
       const listId = formData.get("listId") as string;
@@ -57,6 +86,36 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       execute({ title, boardId, listId });
     };
 
+    // Effect to handle submission when recording stops
+    useEffect(() => {
+      // Only trigger when recording stops AND we have transcription AND shouldSubmitOnStop is true
+      if (
+        !isRecording &&
+        transcription.trim().length > 0 &&
+        shouldSubmitOnStop
+      ) {
+        // Small delay to ensure the transcription is fully processed
+        const timer = setTimeout(() => {
+          if (ref && "current" in ref && ref.current) {
+            ref.current.value = transcription.trim();
+          }
+          formRef.current?.requestSubmit();
+          disableEditing();
+          // Reset the flag
+          setShouldSubmitOnStop(false);
+        }, 500);
+
+        return () => clearTimeout(timer);
+      }
+    }, [isRecording, transcription, shouldSubmitOnStop, disableEditing]);
+
+    // Track when recording state changes
+    useEffect(() => {
+      if (!isRecording && wasRecording !== true) {
+        setWasRecording(true);
+      }
+    }, [isRecording]);
+
     const getTextColor = () => {
       if (color && color != "bg-background") {
         return "text-neutral-700";
@@ -64,36 +123,77 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       return "text-foreground";
     };
 
+    const handleTranscriptionUpdate = (text: string) => {
+      setTranscription(text);
+      if (ref && "current" in ref && ref.current) {
+        ref.current.value = text;
+      }
+
+      // If we have valid transcription, set flag to submit when recording stops
+      if (text.trim().length > 0) {
+        setShouldSubmitOnStop(true);
+      }
+    };
+
+    const handleRecordingStateChange = (recording: boolean) => {
+      setIsRecording(recording);
+
+      // When recording starts, make sure the textarea shows our transcription
+      if (recording && ref && "current" in ref && ref.current) {
+        ref.current.value = transcription;
+        ref.current.readOnly = true; // Disable typing while recording
+      } else if (!recording && ref && "current" in ref && ref.current) {
+        ref.current.readOnly = false; // Enable typing when not recording
+      }
+    };
+
     if (isEditing) {
       return (
         <form className="m-1 py-0.5 space-y-4" action={onSubmit} ref={formRef}>
-          <FormTextarea
-            color={color}
-            id="title"
-            onKeyDown={onTextareaDown}
-            ref={ref}
-            placeholder="write anything ..."
-            errors={fieldErrors}
-            className={`resize-none relative flex flex-col justify-between  border-none hover:border-black/20 py-2 px-3 text-sm rounded-md shadow-none w-full ${getTextColor()}`}
-          />
+          <div className={`relative ${isRecording ? "recording-active" : ""}`}>
+            <FormTextarea
+              color={color}
+              id="title"
+              onKeyDown={onTextareaDown}
+              onFocus={onTextareaFocus}
+              ref={ref}
+              placeholder={
+                isRecording ? "Listening..." : "Write anything or speak..."
+              }
+              className={`resize-none relative flex flex-col justify-between border-none hover:border-black/20 py-2 px-3 text-sm rounded-md shadow-none w-full ${getTextColor()} ${
+                isRecording ? "bg-red-50" : ""
+              }`}
+              readOnly={isRecording}
+            />
+            <div className="absolute right-2 bottom-2 flex items-center">
+              <LiveRecorder
+                onTranscription={handleTranscriptionUpdate}
+                onRecordingChange={handleRecordingStateChange}
+                compact={true}
+              />
+            </div>
+          </div>
           <input hidden id="listId" name="listId" value={listId} readOnly />
-          <div />
         </form>
       );
     }
 
     return (
-      // need to put color here
       <div className="pt-2 px-2 ">
         <Button
-          className={` whitespace-pre-wrap h-auto px-2 py-1.5 w-full justify-start text-sm ${getTextColor()}`}
+          className={`whitespace-pre-wrap h-auto px-2 py-1.5 w-full justify-start text-sm ${getTextColor()}`}
           style={{ backgroundColor: color || undefined }}
           size="sm"
           variant="ghost"
           onClick={enableEditing}
+          disabled={isCreating}
         >
-          <Plus className="h-4 w-4 " />
-          write or type "/" for commands
+          {
+            <>
+              <Plus className="h-4 w-4" />
+              write anything or speak
+            </>
+          }
         </Button>
       </div>
     );

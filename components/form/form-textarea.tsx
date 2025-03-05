@@ -20,6 +20,9 @@ interface FormTextareaProps {
   onKeyDown?: KeyboardEventHandler<HTMLTextAreaElement> | undefined;
   defaultValue?: string;
   color?: string | null;
+  onFocus?: () => void;
+  readOnly?: boolean;
+  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
 }
 
 export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
@@ -37,6 +40,9 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
       onKeyDown,
       defaultValue,
       color,
+      onFocus,
+      readOnly,
+      onChange,
     },
     ref
   ) => {
@@ -57,6 +63,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             onKeyDown={onKeyDown}
             onBlur={onBlur}
             onClick={onClick}
+            onFocus={onFocus}
             ref={ref}
             required={required}
             placeholder={placeholder}
@@ -69,6 +76,8 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             )}
             aria-describedby={`${id}-error`}
             defaultValue={defaultValue}
+            readOnly={readOnly}
+            onChange={onChange}
           />
         </div>
         <FormErrors id={id} errors={errors} />

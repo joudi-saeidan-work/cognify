@@ -1,48 +1,29 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Mic,
-  Upload,
-  Loader2,
-  StopCircle,
-  Volume2,
-  FileAudio,
-} from "lucide-react";
+import { Mic, StopCircle } from "lucide-react";
 
-import TranscribeResult from "./transcriptionResult";
-import { useHasBrowser } from "@/hooks/useHasBrowser";
+interface LiveRecorderProps {
+  onTranscription?: (text: string) => void;
+  onRecordingChange?: (isRecording: boolean) => void;
+  onClose?: () => void;
+  compact?: boolean;
+}
 
-const AudioUploader = () => {
-  // Browser detection
-  const hasBrowser = useHasBrowser();
-
-  //States
-  const [file, setFile] = useState<File | null>(null);
-  const [audioURl, setAudioUrl] = useState<string | null>(null);
+export const LiveRecorder = ({
+  onTranscription,
+  onRecordingChange,
+  onClose,
+  compact = false,
+}: LiveRecorderProps) => {
   const [transcription, setTranscription] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string>("");
   const [isRecording, setIsRecording] = useState(false);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const [isSpeechSupported, setIsSpeechSupported] = useState(false);
+  const [recordingDuration, setRecordingDuration] = useState(0);
+  const [error, setError] = useState<string>("");
 
-  // Refs
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  // manages speech recognition instance
   const recognitionRef = useRef<any>(null);
 
-  // Check for spech recognition support using webspeech api so that it captures ongoing speech and give real time transcription
   useEffect(() => {
-    const speechSupported =
-      "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
-    setIsSpeechSupported(speechSupported);
-  }, [hasBrowser]);
-
-  // Initialise speech recognition
-  useEffect(() => {
-    if (!hasBrowser) return;
-
-    // attach event handlers to manage transcription process
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
@@ -50,7 +31,7 @@ const AudioUploader = () => {
     if (SpeechRecognition) {
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
-      recognition.internResults = true;
+      recognition.interimResults = true;
       recognition.lang = "en-US";
 
       let finalTranscript = "";
@@ -61,57 +42,90 @@ const AudioUploader = () => {
         for (let i = event.resultIndex; i < event.results.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += transcript + "";
+            finalTranscript += transcript + " ";
           } else {
             interimTranscript += transcript;
           }
         }
-        setTranscription(finalTranscript + interimTranscript);
+
+        const currentTranscription = finalTranscript + interimTranscript;
+        setTranscription(currentTranscription);
+
+        if (onTranscription) {
+          onTranscription(currentTranscription);
+        }
       };
 
       recognition.onerror = (event: any) => {
         console.error("Speech recognition error:", event.error);
         setError(`Speech recognition error: ${event.error}`);
-        setIsRecording(false);
+        stopRecording();
       };
-      recognitionRef.current = recognition;
-    }
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-      if (mediaStream) {
-        mediaStream.getTracks().forEach((track) => track.stop());
-      }
-    };
-  }, [hasBrowser]);
-  // ToDo - file handling functions
 
-  // live audio recording
-  const handleStartRecording = async () => {
-    // uses the media api to request access to the users microphone
+      recognitionRef.current = recognition;
+    } else {
+      setError("Speech recognition not supported in this browser");
+    }
+
+    return () => {
+      stopRecording();
+    };
+  }, []);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isRecording) {
+      interval = setInterval(() => {
+        setRecordingDuration((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setRecordingDuration(0);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRecording]);
+
+  // Notify parent component about recording state changes
+  useEffect(() => {
+    if (onRecordingChange) {
+      onRecordingChange(isRecording);
+    }
+  }, [isRecording, onRecordingChange]);
+
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  const startRecording = async () => {
     if (recognitionRef.current && !isRecording) {
       try {
+        setError("");
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
         setMediaStream(stream);
-        // start speech regonition process
         recognitionRef.current.start();
-        // starts recording users speech
         setIsRecording(true);
-        // clear any previous transcriptions
-        setTranscription("");
+        setTranscription(""); // Clear previous transcription
       } catch (error) {
         console.error("Error accessing microphone:", error);
         setError("Microphone access denied or not available");
       }
     }
   };
-  const handleStopRecording = () => {
+
+  const stopRecording = () => {
     if (recognitionRef.current && isRecording) {
-      // stops speech recognition process
-      recognitionRef.current.stop();
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {
+        console.error("Error stopping recognition:", e);
+      }
       setIsRecording(false);
 
       if (mediaStream) {
@@ -120,4 +134,35 @@ const AudioUploader = () => {
       }
     }
   };
+
+  return (
+    <div className="flex items-center space-x-2 pl-1 pr-1">
+      <button
+        className={`flex items-center justify-center h-6 w-6 rounded-full focus:outline-none transition-all duration-200 ${
+          isRecording
+            ? "bg-red-400/90 text-white hover:bg-red-500/90 shadow-sm"
+            : "bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-500"
+        }`}
+        onClick={isRecording ? stopRecording : startRecording}
+        aria-label={isRecording ? "Stop recording" : "Start recording"}
+        title={isRecording ? "Stop recording" : "Start voice input"}
+      >
+        {isRecording ? (
+          <StopCircle className="h-3.5 w-3.5" />
+        ) : (
+          <Mic className="h-3.5 w-3.5" />
+        )}
+      </button>
+
+      {isRecording && (
+        <span className="text-xs font-medium text-slate-400 tracking-wide animate-pulse">
+          {formatTime(recordingDuration)}
+        </span>
+      )}
+
+      {error && <span className="text-xs text-red-400">{error}</span>}
+    </div>
+  );
 };
+
+export default LiveRecorder;
