@@ -35,9 +35,18 @@ import { updateCard } from "@/actions/update-card";
 import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/eventsContext";
 import { Separator } from "@/components/ui/separator";
 import { z } from "zod";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 interface CardOptionsProps {
   data: Card;
+}
+
+// Define the type for AI response
+interface AIResponse {
+  title: string;
+  category: string;
+  summary: string;
+  todoList: string;
 }
 
 const CardOptions = ({ data }: CardOptionsProps) => {
@@ -48,6 +57,8 @@ const CardOptions = ({ data }: CardOptionsProps) => {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { dispatch } = useEvents();
   const [isOpen, setIsOpen] = useState(false);
+  const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
+  const [showAiResponseDialog, setShowAiResponseDialog] = useState(false);
 
   // Add this useEffect to update state when data changes
   useEffect(() => {
@@ -231,93 +242,86 @@ const CardOptions = ({ data }: CardOptionsProps) => {
       throw new Error("AI processing failed");
     }
 
-    // Parse the response as JSON to get the object
     const braindumpData = await braindumpResponse.json();
-    console.log("Raw braindump response:", braindumpData);
-
-    // Extract the content string from the object
     const contentString = braindumpData.content;
-    console.log("Raw content string:", contentString);
 
-    // Parse the extracted content
     try {
       const parsed = parseAIResponse(contentString.trim());
-      console.log("Parsed content: ", parsed);
-      const titleValue = parsed.title;
-      console.log("Title value: ", titleValue);
-      const descriptionContent = [];
+      setAiResponse(parsed);
+      setShowAiResponseDialog(true);
+    } catch (parseError) {
+      console.error("Content parsing error:", parseError);
+      toast.error("Failed to parse AI response content");
+    }
+  };
 
-      // Summary section with proper validation
-      if (Boolean(parsed.summary?.trim())) {
-        const cleanSummary = parsed.summary.trim();
+  const handleAcceptAiResponse = () => {
+    if (!aiResponse) return;
+
+    const titleValue = aiResponse.title;
+    const descriptionContent = [];
+
+    if (Boolean(aiResponse.summary?.trim())) {
+      const cleanSummary = aiResponse.summary.trim();
+      descriptionContent.push(
+        {
+          type: "heading",
+          attrs: { level: 2 },
+          content: [{ type: "text", text: "Summary" }],
+        },
+        {
+          type: "paragraph",
+          content: [{ type: "text", text: cleanSummary }],
+        }
+      );
+    }
+
+    if (Boolean(aiResponse.todoList?.trim())) {
+      const tasks = aiResponse.todoList
+        .split(/,\s*(?![^()]*\))/)
+        .map((task) => task.trim())
+        .filter((task) => task.length > 0);
+
+      if (tasks.length > 0) {
         descriptionContent.push(
           {
             type: "heading",
             attrs: { level: 2 },
-            content: [{ type: "text", text: "Summary" }],
+            content: [{ type: "text", text: "To-Do List" }],
           },
           {
-            type: "paragraph",
-            content: [{ type: "text", text: cleanSummary }],
+            type: "bulletList",
+            content: tasks.map((task) => ({
+              type: "listItem",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [{ type: "text", text: task }],
+                },
+              ],
+            })),
           }
         );
       }
-
-      // Todo list section with improved parsing
-      if (Boolean(parsed.todoList?.trim())) {
-        const tasks = parsed.todoList
-          .split(/,\s*(?![^()]*\))/)
-          .map((task) => task.trim())
-          .filter((task) => task.length > 0);
-
-        if (tasks.length > 0) {
-          descriptionContent.push(
-            {
-              type: "heading",
-              attrs: { level: 2 },
-              content: [{ type: "text", text: "To-Do List" }],
-            },
-            {
-              type: "bulletList",
-              content: tasks.map((task) => ({
-                type: "listItem",
-                content: [
-                  {
-                    type: "paragraph",
-                    content: [{ type: "text", text: task }],
-                  },
-                ],
-              })),
-            }
-          );
-        }
-      }
-
-      const descriptionJSON = JSON.stringify({
-        type: "doc",
-        content: descriptionContent,
-      });
-
-      console.log("Creating card with:", {
-        id: data.id,
-        title: titleValue,
-        boardId: params.boardId as string,
-        description: descriptionJSON,
-      });
-
-      executeCardUpdate({
-        id: data.id,
-        title: titleValue,
-        boardId: params.boardId as string,
-        description: descriptionJSON,
-      });
-    } catch (parseError) {
-      console.error("Content parsing error:", parseError);
-      toast.error("Failed to parse AI response content");
-      return;
     }
 
-    return responseText;
+    const descriptionJSON = JSON.stringify({
+      type: "doc",
+      content: descriptionContent,
+    });
+
+    executeCardUpdate({
+      id: data.id,
+      title: titleValue,
+      boardId: params.boardId as string,
+      description: descriptionJSON,
+    });
+
+    setShowAiResponseDialog(false);
+  };
+
+  const handleRejectAiResponse = () => {
+    setShowAiResponseDialog(false);
   };
 
   const parseAIResponse = (content: string) => {
@@ -364,7 +368,8 @@ const CardOptions = ({ data }: CardOptionsProps) => {
           <Button
             size="sm"
             variant="ghost"
-            className={`opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 rounded-full bg-white/80 hover:bg-white`}
+            // ToDo fix spacing
+            className={`opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 rounded-full bg-white/80 hover:bg-white absolute right-6`}
           >
             <MoreHorizontal className="h-3 w-3" />
           </Button>
@@ -511,6 +516,49 @@ const CardOptions = ({ data }: CardOptionsProps) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      {/* AI Response Dialog */}
+      {showAiResponseDialog && (
+        <Dialog
+          open={showAiResponseDialog}
+          onOpenChange={setShowAiResponseDialog}
+        >
+          <DialogContent className="p-6 space-y-4">
+            <DialogTitle className="text-lg font-semibold">
+              AI Generated Response
+            </DialogTitle>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-semibold">Title:</p>
+                <p className="text-sm text-gray-600">{aiResponse?.title}</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold">Summary:</p>
+                <p className="text-sm text-gray-600">{aiResponse?.summary}</p>
+              </div>
+              <div>
+                <p className="text-sm font-semibold">To-Do List:</p>
+                <p className="text-sm text-gray-600">{aiResponse?.todoList}</p>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                onClick={handleAcceptAiResponse}
+                className="bg-blue-500 text-white"
+              >
+                Accept
+              </Button>
+              <Button
+                onClick={handleRejectAiResponse}
+                variant="secondary"
+                className="bg-gray-300 text-gray-700"
+              >
+                Reject
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

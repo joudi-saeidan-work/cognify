@@ -10,7 +10,7 @@ const openai = createOpenAI({
 const BRAINDUMP_PROMPT = `
 Use no conversational language and only do the following: 
 ## Role
-Your role is to analyze the transcript and return structured data. 
+The transcript is a voice note transcribed into text and your job is to capture what they said and organize so they can immediately understand the important items and tasks that need to be done.
 Your tone should match the tone of the transcript provided, if the person uses simple words use simple words.
 
 ## Processing Rules
@@ -38,9 +38,8 @@ BAD EXAMPLE: "Project Discussion"
 GOOD EXAMPLE: "Q4 Launch Timeline Finalization"
 
 4. SUMMARY CREATION:
-- Preserve ALL dates/numbers in (parentheses)
+- Write the summary as if the user wrote it themselves. Keep it casual, direct, and natural—avoid phrases like 'the speaker' or 'Today's to-do list.' Just summarize their thoughts naturally. Preserve all dates/numbers in (parentheses) and keep it concise
 - Maintain original speaker's tone/simple language
-- Use 2-3 concise paragraphs
 - Include decision owners when mentioned
 - Never add information not in transcript
 
