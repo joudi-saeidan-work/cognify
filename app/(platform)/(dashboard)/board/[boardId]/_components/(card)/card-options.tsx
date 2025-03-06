@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -6,168 +8,353 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSub,
   DropdownMenuSubTrigger,
+  DropdownMenuPortal,
   DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import {
-  GripVertical,
-  ClipboardCopy,
-  Edit,
+  MoreHorizontal,
   Copy,
   Trash,
-  CircleCheck,
-  List,
-  ListCheck,
-  ListCollapse,
-  ListOrdered,
+  CalendarIcon,
+  NotebookPen,
 } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query"; // Hook for fetching and caching data.
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useAction } from "@/hooks/use-actions";
 import { copyCard } from "@/actions/copy-card";
 import { toast } from "sonner";
 import { deleteCard } from "@/actions/delete-card";
 import { Card } from "@prisma/client";
-import { ElementRef, useState, useRef } from "react";
+import { useEffect, useState } from "react";
+import { useCardModal } from "@/hooks/use-card-modal";
+import { DateTimePicker } from "../(date-time-picker)/date-time-picker";
+import { Calendar } from "@/components/ui/calendar";
+import { TimePicker } from "../(date-time-picker)/time-picker";
+import { updateCard } from "@/actions/update-card";
+import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/eventsContext";
 
 interface CardOptionsProps {
   data: Card;
 }
 
 const CardOptions = ({ data }: CardOptionsProps) => {
-  // gets the board id
   const params = useParams();
+  const queryClient = useQueryClient();
+  const cardModal = useCardModal();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const { dispatch } = useEvents();
+  const [isOpen, setIsOpen] = useState(false);
 
-  // copy card action
-  const { execute: executeCopyCard, isLoading: isLoadingCopy } = useAction(
-    copyCard,
-    {
-      onSuccess: (data) => {
-        toast.success(`Card "${data.title} copied"`);
-      },
-      onError: (error) => {
-        toast.error(error);
-      },
-    }
+  // Add this useEffect to update state when data changes
+  useEffect(() => {
+    setDate(data.dueDate ? new Date(data.dueDate) : null);
+    setStartDate(data.start ? new Date(data.start) : null);
+    setEndDate(data.end ? new Date(data.end) : null);
+  }, [data.dueDate, data.start, data.end]);
+
+  const [date, setDate] = useState<Date | null>(
+    data.dueDate ? new Date(data.dueDate) : null
+  );
+  const [startDate, setStartDate] = useState<Date | null>(
+    data.start ? new Date(data.start) : null
+  );
+  const [endDate, setEndDate] = useState<Date | null>(
+    data.end ? new Date(data.end) : null
   );
 
-  // delete card action
-  const { execute: executeDeleteCard, isLoading: isLoadingDelete } = useAction(
-    deleteCard,
-    {
-      onSuccess: (data) => {
-        toast.success(`Card "${data.title} deleted."`);
-      },
-      onError: (error) => {
-        toast.error(error);
-      },
-    }
-  );
+  const { execute: executeCardUpdate, isLoading } = useAction(updateCard, {
+    onSuccess: (data) => {
+      toast.success(data.dueDate ? "Date updated!" : "Date removed!");
+      dispatch({
+        type: "UPDATE_EVENT",
+        payload: {
+          id: data.id,
+          title: data.title,
+          dueDate: data.dueDate || undefined,
+          start: data.start || undefined,
+          end: data.end || undefined,
+          allDay: data.allDay,
+          backgroundColor: data.color || undefined,
+        },
+      });
+    },
+    onError: (error) => {
+      toast.error("Failed to update date!");
+      console.error("Failed to update date:", error);
+    },
+  });
 
-  // handle copy
+  // Calculate allDay based on presence of times
+  const allDay = !startDate;
+
+  const handleDateChange = (newDate: Date | undefined) => {
+    if (newDate) {
+      // Create pure date (midnight UTC)
+      newDate.setUTCHours(0, 0, 0, 0);
+
+      // Preserve existing times but apply to new date
+      const start = startDate
+        ? new Date(
+            newDate.getUTCFullYear(),
+            newDate.getUTCMonth(),
+            newDate.getUTCDate(),
+            startDate.getUTCHours(),
+            startDate.getUTCMinutes()
+          )
+        : null;
+      console.log("start", start);
+
+      const end = endDate
+        ? new Date(
+            newDate.getUTCFullYear(),
+            newDate.getUTCMonth(),
+            newDate.getUTCDate(),
+            endDate.getUTCHours(),
+            endDate.getUTCMinutes()
+          )
+        : null;
+      console.log("end", end);
+      console.log("updating dates.. ", {
+        id: data.id,
+        boardId: params.boardId as string,
+        title: data.title,
+        dueDate: newDate || null,
+        start: start || null,
+        end: end || null,
+        allDay: data.allDay,
+      });
+
+      executeCardUpdate({
+        id: data.id,
+        boardId: params.boardId as string,
+        title: data.title,
+        dueDate: newDate || null,
+        start: start || null,
+        end: end || null,
+        allDay: data.allDay,
+      });
+    }
+  };
+
+  const handleClear = () => {
+    setIsOpen(false);
+    setDate(null);
+    setStartDate(null);
+    setEndDate(null);
+
+    console.log("attempting to clear fields", {
+      id: data.id,
+      boardId: params.boardId as string,
+      title: data.title,
+      dueDate: null,
+      start: null,
+      end: null,
+      allDay: false,
+    });
+    executeCardUpdate({
+      id: data.id,
+      boardId: params.boardId as string,
+      title: data.title,
+      dueDate: null,
+      start: null,
+      end: null,
+      allDay: false,
+    });
+  };
+
+  // Copy card action
+  const { execute: executeCopyCard } = useAction(copyCard, {
+    onSuccess: (data) => {
+      toast.success(`Card "${data.title}" copied`);
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  // Delete card action
+  const { execute: executeDeleteCard } = useAction(deleteCard, {
+    onSuccess: (data) => {
+      toast.success(`Card "${data.title}" deleted`);
+    },
+    onError: (error) => {
+      toast.error(error);
+    },
+  });
+
+  // Handle copy
   const onCopy = () => {
     const boardId = params.boardId as string;
-    const id = data.id;
-    console.log(`copy id: ${id}`);
-    executeCopyCard({ id, boardId });
+    executeCopyCard({ id: data.id, boardId });
   };
 
-  // handle delete
+  // Handle delete
   const onDelete = () => {
     const boardId = params.boardId as string;
-    const id = data.id;
-    console.log(`delete id: ${id}`);
-    const event = new CustomEvent("deleteCard", {
-      detail: {
-        cardId: id,
-      },
-    });
-
-    // dispatch the event to the window
-    window.dispatchEvent(event);
-
-    executeDeleteCard({ id, boardId });
+    executeDeleteCard({ id: data.id, boardId });
   };
 
-  const getTextColor = () => {
-    if (data?.color && data?.color !== "bg-background")
-      return "text-neutral-700";
-    return "text-foreground";
+  // Handle expand to note
+  const handleExpandToNote = async () => {
+    await queryClient.prefetchQuery(["card", data.id], () =>
+      fetch(`/api/cards/${data.id}`).then((res) => res.json())
+    );
+    cardModal.onOpen(data.id);
+  };
+
+  const handleDatePickerOpen = (open: boolean) => {
+    setDatePickerOpen(open);
   };
 
   return (
-    <DropdownMenu>
-      {/* Trigger for the dropdown menu */}
-      <DropdownMenuTrigger asChild>
-        <Button
-          size="sm"
-          variant="ghost"
-          className={`opacity-0 group-hover:opacity-100 absolute left-0 h-4 w-4 text-neutral-700 hover:bg-transparent ${getTextColor()}`}
-          title="Actions"
-        >
-          <GripVertical className="w-4 h-4" />
-        </Button>
-      </DropdownMenuTrigger>
+    <div className="absolute right-2 top-2">
+      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="sm"
+            variant="ghost"
+            className={`opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0 rounded-full bg-white/80 hover:bg-white`}
+          >
+            <MoreHorizontal className="h-3 w-3" />
+          </Button>
+        </DropdownMenuTrigger>
 
-      {/* Dropdown menu content */}
-      <DropdownMenuContent side="bottom" align="start" className="w-48">
-        {/* Turn Into Submenu */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
+        <DropdownMenuContent side="right" align="start" className="w-48">
+          {/* Note Option */}
+          <DropdownMenuItem onClick={handleExpandToNote}>
             <div className="flex items-center gap-2">
-              <ClipboardCopy className="w-4 h-4" />
-              Turn into
+              <NotebookPen className="w-4 h-4" />
+              Open as Note
             </div>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuItem>
-              <div className="flex items-center gap-2">
-                <CircleCheck className="w-4 h-4" />
-                Task
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex items-center gap-2">
-                <ListCollapse className="w-4 h-4" />
-                Toggle list
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex items-center gap-2">
-                <ListCheck className="w-4 h-4" />
-                Checklist
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex items-center gap-2">
-                <List className="w-4 h-4" />
-                Bullet list
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <div className="flex items-center gap-2">
-                <ListOrdered className="w-4 h-4" />
-                Numbered list
-              </div>
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-        {/* Copy Option */}
-        <DropdownMenuItem onClick={onCopy}>
-          <div className="flex items-center gap-2">
-            <Copy className="w-4 h-4" />
-            Copy
-          </div>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
 
-        {/* Delete Option */}
-        <DropdownMenuItem className="text-red-500" onClick={onDelete}>
-          <div className="flex items-center gap-2">
-            <Trash className="w-4 h-4" />
-            Delete
-          </div>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {/* Calendar Option - Modified to use onClick instead of onSelect */}
+          <DropdownMenuSub
+            open={datePickerOpen}
+            onOpenChange={handleDatePickerOpen}
+          >
+            <DropdownMenuSubTrigger>
+              <CalendarIcon className="h-4 w-4" />
+              {data.dueDate ? "Edit Due Date" : "Set Due Date"}
+            </DropdownMenuSubTrigger>
+
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                alignOffset={-20}
+                className="p-0 overflow-hidden"
+                onInteractOutside={(e) => e.preventDefault()}
+              >
+                <div className="max-h-[350px] overflow-y-auto">
+                  <Calendar
+                    mode="single"
+                    selected={date || undefined}
+                    onSelect={handleDateChange}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                  {date && (
+                    <>
+                      <div className="p-3 border-t border-border">
+                        <TimePicker
+                          date={date}
+                          setDate={setDate}
+                          allDay={allDay}
+                          startDate={startDate}
+                          setStartDate={(newStartDate) => {
+                            console.log("setting start date", newStartDate);
+                            setStartDate(newStartDate);
+                            if (!newStartDate) {
+                              setEndDate(null);
+                            }
+
+                            // Combine the date from dueDate with time from newStartDate
+                            let combinedStart = null;
+                            if (newStartDate && date) {
+                              combinedStart = new Date(date);
+                              combinedStart.setHours(
+                                newStartDate.getHours(),
+                                newStartDate.getMinutes(),
+                                0,
+                                0
+                              );
+                            }
+
+                            executeCardUpdate({
+                              id: data.id,
+                              boardId: params.boardId as string,
+                              dueDate: date,
+                              title: data.title,
+                              start: combinedStart,
+                              end: newStartDate ? endDate : null,
+                              allDay: data.allDay,
+                            });
+                          }}
+                          endDate={endDate}
+                          setEndDate={(newEndDate) => {
+                            setEndDate(newEndDate);
+
+                            // Combine the date from dueDate with time from newStartDate
+                            let combinedEnd = null;
+                            if (newEndDate && date) {
+                              combinedEnd = new Date(date);
+                              combinedEnd.setHours(
+                                newEndDate.getHours(),
+                                newEndDate.getMinutes(),
+                                0,
+                                0
+                              );
+                            }
+
+                            executeCardUpdate({
+                              id: data.id,
+                              boardId: params.boardId as string,
+                              dueDate: date,
+                              title: data.title,
+                              start: startDate,
+                              end: combinedEnd,
+                              allDay: data.allDay,
+                            });
+                          }}
+                        />
+                      </div>
+                      <div className="p-3 border-t border-border">
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="w-full font-medium"
+                          onClick={handleClear}
+                          disabled={isLoading}
+                        >
+                          <Trash className="h-4 w-4 mr-2" />
+                          Clear Selection
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+
+          {/* Copy Option */}
+          <DropdownMenuItem onClick={onCopy}>
+            <div className="flex items-center gap-2">
+              <Copy className="w-4 h-4" />
+              Copy
+            </div>
+          </DropdownMenuItem>
+
+          {/* Delete Option */}
+          <DropdownMenuItem className="text-red-500" onClick={onDelete}>
+            <div className="flex items-center gap-2">
+              <Trash className="w-4 h-4" />
+              Delete
+            </div>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 };
 

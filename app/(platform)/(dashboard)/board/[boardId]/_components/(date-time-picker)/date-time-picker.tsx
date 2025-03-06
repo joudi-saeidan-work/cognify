@@ -182,20 +182,7 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
                 )}
               </span>
             </button>
-          ) : (
-            <Button
-              size="sm"
-              variant="ghost"
-              className={`opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent ${getTextColor()}`}
-              style={{
-                position: "absolute",
-                right: "1rem",
-                transform: "translateY(-50%)",
-              }}
-            >
-              <CalendarIcon className="h-4 w-4" />
-            </Button>
-          )}
+          ) : null}
         </div>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
