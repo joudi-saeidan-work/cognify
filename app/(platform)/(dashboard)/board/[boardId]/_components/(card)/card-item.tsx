@@ -12,9 +12,19 @@ import { toast } from "sonner";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { useTheme } from "next-themes";
 import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/eventsContext";
-import { CalendarIcon, LucideNotebookText, NotebookPen } from "lucide-react";
+import {
+  CalendarIcon,
+  LucideNotebookText,
+  Notebook,
+  NotebookPen,
+  NotebookText,
+  ScrollText,
+} from "lucide-react";
 import { format } from "date-fns";
 import { DateTimePicker } from "../(date-time-picker)/date-time-picker";
+import { Tooltip } from "@/components/ui/tooltip";
+import { Hint } from "@/components/hint";
+import { useCardModal } from "@/hooks/use-card-modal";
 
 interface CardItemProps {
   data: Card;
@@ -28,16 +38,18 @@ export const CardItem = ({ data, index }: CardItemProps) => {
 
   const params = useParams();
   const queryClient = useQueryClient();
-
+  const cardModal = useCardModal();
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const { theme } = useTheme();
 
   const disableEditing = () => setIsEditing(false);
 
   const enableEditing = () => {
-    setIsEditing(true);
+    if (data.description) {
+      cardModal.onOpen(data.id);
+    } else {
+      setIsEditing(true);
+    }
   };
 
   // auto focus when the user is editing
@@ -163,26 +175,30 @@ export const CardItem = ({ data, index }: CardItemProps) => {
               : {}),
           }}
         >
-          <div className="flex flex-col gap-2">
-            <span
-              onClick={enableEditing}
-              className={`whitespace-pre-wrap break-words overflow-hidden text-ellipsis px-2 ${getTextColor()}`}
-            >
-              {data.title}
-            </span>
+          <div className="flex flex-col">
+            <Hint description={data.description ? "Open Card" : "Rename Card"}>
+              <span
+                onClick={enableEditing}
+                className={`whitespace-pre-wrap break-words font-medium overflow-hidden text-ellipsis  ${getTextColor()}`}
+              >
+                {data.title}
+              </span>
+            </Hint>
+          </div>
 
+          <div className={`flex items-center mt-4 gap-1`}>
+            {data.description && (
+              <Hint description="This card has notes">
+                <NotebookPen
+                  className={`h-3 w-3 text-gray-600`}
+                  aria-label="This card has notes"
+                  onClick={() => cardModal.onOpen(data.id)}
+                />
+              </Hint>
+            )}
             <DateTimePicker data={data} />
           </div>
-
-          <div className="flex justify-between items-center mt-2">
-            {data.description && (
-              <LucideNotebookText
-                className="h-4 w-4 text-blue-500"
-                aria-label="Has notes"
-              />
-            )}
-            <CardOptions data={data} />
-          </div>
+          <CardOptions data={data} />
         </div>
       )}
     </Draggable>

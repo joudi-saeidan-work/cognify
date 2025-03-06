@@ -156,13 +156,12 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="relative">
+        <div className="relative ">
           {data.dueDate ? (
             <button
-              className={`inline-flex items-center rounded-full px-1 py-0 bg-background text-gray-600`}
+              className={`inline-flex items-center rounded-full py-0 bg-background text-gray-600`}
               style={{
                 width: "fit-content",
-                marginLeft: "0.75rem",
                 backgroundColor: data.color || undefined,
               }}
             >
