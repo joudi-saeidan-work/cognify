@@ -17,6 +17,7 @@ import {
   Trash,
   CalendarIcon,
   NotebookPen,
+  WandSparkles,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -32,6 +33,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { TimePicker } from "../(date-time-picker)/time-picker";
 import { updateCard } from "@/actions/update-card";
 import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/eventsContext";
+import { Separator } from "@/components/ui/separator";
+import { z } from "zod";
 
 interface CardOptionsProps {
   data: Card;
@@ -207,6 +210,153 @@ const CardOptions = ({ data }: CardOptionsProps) => {
     setDatePickerOpen(open);
   };
 
+  const handleMagicTodo = async () => {
+    const responseText = `Title: ${data.title}\nDescription: ${data.description}\nDue Date: ${data.dueDate}`;
+    const braindumpResponse = await fetch("/api/audio-recorder", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: "user",
+            content: responseText,
+          },
+        ],
+      }),
+    });
+
+    if (!braindumpResponse.ok) {
+      throw new Error("AI processing failed");
+    }
+
+    // Parse the response as JSON to get the object
+    const braindumpData = await braindumpResponse.json();
+    console.log("Raw braindump response:", braindumpData);
+
+    // Extract the content string from the object
+    const contentString = braindumpData.content;
+    console.log("Raw content string:", contentString);
+
+    // Parse the extracted content
+    try {
+      const parsed = parseAIResponse(contentString.trim());
+      console.log("Parsed content: ", parsed);
+      const titleValue = parsed.title;
+      console.log("Title value: ", titleValue);
+      const descriptionContent = [];
+
+      // Summary section with proper validation
+      if (Boolean(parsed.summary?.trim())) {
+        const cleanSummary = parsed.summary.trim();
+        descriptionContent.push(
+          {
+            type: "heading",
+            attrs: { level: 2 },
+            content: [{ type: "text", text: "Summary" }],
+          },
+          {
+            type: "paragraph",
+            content: [{ type: "text", text: cleanSummary }],
+          }
+        );
+      }
+
+      // Todo list section with improved parsing
+      if (Boolean(parsed.todoList?.trim())) {
+        const tasks = parsed.todoList
+          .split(/,\s*(?![^()]*\))/)
+          .map((task) => task.trim())
+          .filter((task) => task.length > 0);
+
+        if (tasks.length > 0) {
+          descriptionContent.push(
+            {
+              type: "heading",
+              attrs: { level: 2 },
+              content: [{ type: "text", text: "To-Do List" }],
+            },
+            {
+              type: "bulletList",
+              content: tasks.map((task) => ({
+                type: "listItem",
+                content: [
+                  {
+                    type: "paragraph",
+                    content: [{ type: "text", text: task }],
+                  },
+                ],
+              })),
+            }
+          );
+        }
+      }
+
+      const descriptionJSON = JSON.stringify({
+        type: "doc",
+        content: descriptionContent,
+      });
+
+      console.log("Creating card with:", {
+        id: data.id,
+        title: titleValue,
+        boardId: params.boardId as string,
+        description: descriptionJSON,
+      });
+
+      executeCardUpdate({
+        id: data.id,
+        title: titleValue,
+        boardId: params.boardId as string,
+        description: descriptionJSON,
+      });
+    } catch (parseError) {
+      console.error("Content parsing error:", parseError);
+      toast.error("Failed to parse AI response content");
+      return;
+    }
+
+    return responseText;
+  };
+
+  const parseAIResponse = (content: string) => {
+    try {
+      console.log("Raw content before parsing:", content);
+      const raw = JSON.parse(content);
+
+      console.log("Raw JSON structure:", raw);
+
+      const OrganizedThoughtsSchema = z.object({
+        title: z.string().min(1).default("Untitled"),
+        category: z
+          .enum(["Note", "Task", "Journal Entry", "Meeting Note", "Other"])
+          .default("Other"),
+        summary: z.string().default(""),
+        todoList: z.array(z.string()).default([]),
+      });
+
+      const parsed = OrganizedThoughtsSchema.parse(raw);
+      console.log("Validated content:", parsed);
+
+      return {
+        title: parsed.title,
+        category: parsed.category,
+        summary: parsed.summary,
+        todoList: parsed.todoList.join(", "),
+      };
+    } catch (error) {
+      console.error("Parsing failed - Content:", content, "Error:", error);
+      toast.error("Failed to process AI response");
+      return {
+        title: "Invalid Response",
+        category: "Other",
+        summary: "Could not parse AI output",
+        todoList: "",
+      };
+    }
+  };
+
   return (
     <div className="absolute right-2 top-2">
       <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
@@ -221,6 +371,13 @@ const CardOptions = ({ data }: CardOptionsProps) => {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent side="right" align="start" className="w-48">
+          {/* Magic Todo*/}
+          <DropdownMenuItem onClick={handleMagicTodo}>
+            <div className="flex items-center gap-2">
+              <WandSparkles className="w-4 h-4" />
+              Magic ToDo
+            </div>
+          </DropdownMenuItem>
           {/* Note Option */}
           <DropdownMenuItem onClick={handleExpandToNote}>
             <div className="flex items-center gap-2">
@@ -336,7 +493,7 @@ const CardOptions = ({ data }: CardOptionsProps) => {
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
-
+          <Separator className="my-2" />
           {/* Copy Option */}
           <DropdownMenuItem onClick={onCopy}>
             <div className="flex items-center gap-2">

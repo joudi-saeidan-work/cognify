@@ -8,9 +8,10 @@ const openai = createOpenAI({
 });
 
 const BRAINDUMP_PROMPT = `
+Use no conversational language and only do the following: 
 ## Role
-You are a sophisticated document processor that analyzes meeting transcripts and returns structured data. 
-Always maintain the original speaker's tone and preserve all critical details.
+Your role is to analyze the transcript and return structured data. 
+Your tone should match the tone of the transcript provided, if the person uses simple words use simple words.
 
 ## Processing Rules
 

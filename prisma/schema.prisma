@@ -17,7 +17,7 @@ datasource db {
 model Board{
   id              String @id @default(uuid())
   orgId           String
-  title           String
+  title           String 
   imageId         String? @db.Text
   imageThumbUrl   String? @db.Text
   imageFullUrl    String? @db.Text 
@@ -52,7 +52,7 @@ model List{
 
 model Card{
   id                String @id @default(uuid())
-  title             String
+  title             String @db.Text
   color             String? 
   order             Int 
   description       String? @db.Text
