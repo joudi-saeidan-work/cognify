@@ -198,7 +198,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
             )}
             <DateTimePicker data={data} />
           </div>
-          <CardOptions data={data} />
+          <CardOptions id={data.id} />
         </div>
       )}
     </Draggable>

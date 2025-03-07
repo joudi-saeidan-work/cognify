@@ -19,7 +19,7 @@ import {
   NotebookPen,
   WandSparkles,
 } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { useAction } from "@/hooks/use-actions";
 import { copyCard } from "@/actions/copy-card";
@@ -36,9 +36,11 @@ import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/e
 import { Separator } from "@/components/ui/separator";
 import { z } from "zod";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { fetcher } from "@/lib/fetcher";
+import { CardWithList } from "@/types";
 
 interface CardOptionsProps {
-  data: Card;
+  id: string;
 }
 
 // Define the type for AI response
@@ -49,10 +51,11 @@ interface AIResponse {
   todoList: string;
 }
 
-const CardOptions = ({ data }: CardOptionsProps) => {
+const CardOptions = ({ id }: CardOptionsProps) => {
   const params = useParams();
   const queryClient = useQueryClient();
   const cardModal = useCardModal();
+  const { onOpen } = cardModal;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { dispatch } = useEvents();
@@ -60,36 +63,49 @@ const CardOptions = ({ data }: CardOptionsProps) => {
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
   const [showAiResponseDialog, setShowAiResponseDialog] = useState(false);
 
-  // Add this useEffect to update state when data changes
-  useEffect(() => {
-    setDate(data.dueDate ? new Date(data.dueDate) : null);
-    setStartDate(data.start ? new Date(data.start) : null);
-    setEndDate(data.end ? new Date(data.end) : null);
-  }, [data.dueDate, data.start, data.end]);
+  const { data: cardData } = useQuery<CardWithList>({
+    queryKey: ["card", id], // Unique key for caching the card data.
+    queryFn: () => fetcher(`/api/cards/${id}`), // Function to fetch the card data from the API.
+    enabled: !!id, //only fetch if `id` is defined
+  });
 
+  useEffect(() => {
+    if (cardData) {
+      setDate(cardData.dueDate ? new Date(cardData.dueDate) : null);
+      setStartDate(cardData.start ? new Date(cardData.start) : null);
+      setEndDate(cardData.end ? new Date(cardData.end) : null);
+    }
+  }, [cardData]);
+
+  const handleExpandToNote = async () => {
+    await queryClient.prefetchQuery(["card", id], () =>
+      fetcher(`/api/cards/${id}`)
+    );
+    onOpen(id);
+  };
   const [date, setDate] = useState<Date | null>(
-    data.dueDate ? new Date(data.dueDate) : null
+    cardData?.dueDate ? new Date(cardData.dueDate) : null
   );
   const [startDate, setStartDate] = useState<Date | null>(
-    data.start ? new Date(data.start) : null
+    cardData?.start ? new Date(cardData.start) : null
   );
   const [endDate, setEndDate] = useState<Date | null>(
-    data.end ? new Date(data.end) : null
+    cardData?.end ? new Date(cardData.end) : null
   );
 
   const { execute: executeCardUpdate, isLoading } = useAction(updateCard, {
     onSuccess: (data) => {
-      toast.success(data.dueDate ? "Date updated!" : "Date removed!");
+      toast.success(cardData?.dueDate ? "Date updated!" : "Date removed!");
       dispatch({
         type: "UPDATE_EVENT",
         payload: {
-          id: data.id,
-          title: data.title,
-          dueDate: data.dueDate || undefined,
-          start: data.start || undefined,
-          end: data.end || undefined,
-          allDay: data.allDay,
-          backgroundColor: data.color || undefined,
+          id: cardData?.id,
+          title: cardData?.title,
+          dueDate: cardData?.dueDate || undefined,
+          start: cardData?.start || undefined,
+          end: cardData?.end || undefined,
+          allDay: cardData?.allDay,
+          backgroundColor: cardData?.color || undefined,
         },
       });
     },
@@ -130,23 +146,23 @@ const CardOptions = ({ data }: CardOptionsProps) => {
         : null;
       console.log("end", end);
       console.log("updating dates.. ", {
-        id: data.id,
+        id: cardData?.id,
         boardId: params.boardId as string,
-        title: data.title,
+        title: cardData?.title,
         dueDate: newDate || null,
         start: start || null,
         end: end || null,
-        allDay: data.allDay,
+        allDay: cardData?.allDay,
       });
 
       executeCardUpdate({
-        id: data.id,
+        id: cardData?.id as string,
         boardId: params.boardId as string,
-        title: data.title,
+        title: cardData?.title,
         dueDate: newDate || null,
         start: start || null,
         end: end || null,
-        allDay: data.allDay,
+        allDay: cardData?.allDay,
       });
     }
   };
@@ -158,18 +174,18 @@ const CardOptions = ({ data }: CardOptionsProps) => {
     setEndDate(null);
 
     console.log("attempting to clear fields", {
-      id: data.id,
+      id: cardData?.id,
       boardId: params.boardId as string,
-      title: data.title,
+      title: cardData?.title,
       dueDate: null,
       start: null,
       end: null,
       allDay: false,
     });
     executeCardUpdate({
-      id: data.id,
+      id: cardData?.id as string,
       boardId: params.boardId as string,
-      title: data.title,
+      title: cardData?.title,
       dueDate: null,
       start: null,
       end: null,
@@ -200,21 +216,13 @@ const CardOptions = ({ data }: CardOptionsProps) => {
   // Handle copy
   const onCopy = () => {
     const boardId = params.boardId as string;
-    executeCopyCard({ id: data.id, boardId });
+    executeCopyCard({ id: cardData?.id as string, boardId });
   };
 
   // Handle delete
   const onDelete = () => {
     const boardId = params.boardId as string;
-    executeDeleteCard({ id: data.id, boardId });
-  };
-
-  // Handle expand to note
-  const handleExpandToNote = async () => {
-    await queryClient.prefetchQuery(["card", data.id], () =>
-      fetch(`/api/cards/${data.id}`).then((res) => res.json())
-    );
-    cardModal.onOpen(data.id);
+    executeDeleteCard({ id: cardData?.id as string, boardId });
   };
 
   const handleDatePickerOpen = (open: boolean) => {
@@ -222,7 +230,7 @@ const CardOptions = ({ data }: CardOptionsProps) => {
   };
 
   const handleMagicTodo = async () => {
-    const responseText = `Title: ${data.title}\nDescription: ${data.description}\nDue Date: ${data.dueDate}`;
+    const responseText = `Title: ${cardData?.title}\nDescription: ${cardData?.description}\nDue Date: ${cardData?.dueDate}`;
     const braindumpResponse = await fetch("/api/audio-recorder", {
       method: "POST",
       headers: {
@@ -259,6 +267,7 @@ const CardOptions = ({ data }: CardOptionsProps) => {
     if (!aiResponse) return;
 
     const titleValue = aiResponse.title;
+    console.log("ai title value", titleValue);
     const descriptionContent = [];
 
     if (Boolean(aiResponse.summary?.trim())) {
@@ -311,7 +320,7 @@ const CardOptions = ({ data }: CardOptionsProps) => {
     });
 
     executeCardUpdate({
-      id: data.id,
+      id: cardData?.id as string,
       title: titleValue,
       boardId: params.boardId as string,
       description: descriptionJSON,
@@ -387,10 +396,9 @@ const CardOptions = ({ data }: CardOptionsProps) => {
           <DropdownMenuItem onClick={handleExpandToNote}>
             <div className="flex items-center gap-2">
               <NotebookPen className="w-4 h-4" />
-              Open as Note
+              {`${cardData?.description ? "Edit" : "Open"} as Note`}
             </div>
           </DropdownMenuItem>
-
           {/* Calendar Option - Modified to use onClick instead of onSelect */}
           <DropdownMenuSub
             open={datePickerOpen}
@@ -398,7 +406,7 @@ const CardOptions = ({ data }: CardOptionsProps) => {
           >
             <DropdownMenuSubTrigger>
               <CalendarIcon className="h-4 w-4" />
-              {data.dueDate ? "Edit Due Date" : "Set Due Date"}
+              {cardData?.dueDate ? "Edit Due Date" : "Set Due Date"}
             </DropdownMenuSubTrigger>
 
             <DropdownMenuPortal>
@@ -443,13 +451,13 @@ const CardOptions = ({ data }: CardOptionsProps) => {
                             }
 
                             executeCardUpdate({
-                              id: data.id,
+                              id: cardData?.id as string,
                               boardId: params.boardId as string,
                               dueDate: date,
-                              title: data.title,
+                              title: cardData?.title,
                               start: combinedStart,
                               end: newStartDate ? endDate : null,
-                              allDay: data.allDay,
+                              allDay: cardData?.allDay,
                             });
                           }}
                           endDate={endDate}
@@ -469,13 +477,13 @@ const CardOptions = ({ data }: CardOptionsProps) => {
                             }
 
                             executeCardUpdate({
-                              id: data.id,
+                              id: cardData?.id as string,
                               boardId: params.boardId as string,
                               dueDate: date,
-                              title: data.title,
+                              title: cardData?.title,
                               start: startDate,
                               end: combinedEnd,
-                              allDay: data.allDay,
+                              allDay: cardData?.allDay,
                             });
                           }}
                         />

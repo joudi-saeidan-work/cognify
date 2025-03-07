@@ -89,7 +89,7 @@ model AuditLog {
   action        ACTION 
   entityId      String
   entityType    ENTITY_TYPE
-  entityTitle   String
+  entityTitle   String @db.Text 
   userId        String
   userImage     String @db.Text 
   userName      String @db.Text 
