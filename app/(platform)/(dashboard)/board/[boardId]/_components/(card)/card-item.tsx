@@ -175,7 +175,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
               : {}),
           }}
         >
-          <div className="flex flex-col mt-6">
+          <div className="flex flex-col mt-3">
             <Hint description={data.description ? "Open Card" : "Rename Card"}>
               <span
                 onClick={enableEditing}

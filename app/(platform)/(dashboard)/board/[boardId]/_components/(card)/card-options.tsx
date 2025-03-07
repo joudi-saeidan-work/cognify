@@ -377,7 +377,7 @@ const CardOptions = ({ id }: CardOptionsProps) => {
           <Button
             size="sm"
             variant="ghost"
-            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 dark:hover:bg-gray-800 -mr-1.5 -mt-1.5"
+            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent dark:hover:bg-transparent -mr-2 -mt-3"
           >
             <MoreHorizontal className="h-3 w-3" />
           </Button>
