@@ -377,8 +377,7 @@ const CardOptions = ({ id }: CardOptionsProps) => {
           <Button
             size="sm"
             variant="ghost"
-            // ToDo fix spacing
-            className={`opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 rounded-full bg-white/80 hover:bg-white absolute right-6`}
+            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-gray-100 dark:hover:bg-gray-800 -mr-1.5 -mt-1.5"
           >
             <MoreHorizontal className="h-3 w-3" />
           </Button>
