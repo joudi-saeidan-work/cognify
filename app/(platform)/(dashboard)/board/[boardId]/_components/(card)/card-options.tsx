@@ -6,10 +6,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
 } from "@/components/ui/dropdown-menu";
 import {
   MoreHorizontal,
@@ -30,8 +26,7 @@ import { Card, Label } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { DateTimePicker } from "../(date-time-picker)/date-time-picker";
-import { Calendar } from "@/components/ui/calendar";
-import { TimePicker } from "../(date-time-picker)/time-picker";
+
 import { updateCard } from "@/actions/update-card";
 import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/eventsContext";
 import { Separator } from "@/components/ui/separator";
@@ -42,7 +37,7 @@ import { CardWithList } from "@/types";
 import { LabelPicker } from "../(label)/label-picker";
 
 interface CardOptionsProps {
-  id: string;
+  data: Card;
   labels: Label[];
 }
 
@@ -54,23 +49,22 @@ interface AIResponse {
   todoList: string;
 }
 
-const CardOptions = ({ id, labels }: CardOptionsProps) => {
+const CardOptions = ({ data, labels }: CardOptionsProps) => {
   const params = useParams();
   const queryClient = useQueryClient();
   const cardModal = useCardModal();
   const { onOpen } = cardModal;
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const { dispatch } = useEvents();
-  const [isOpen, setIsOpen] = useState(false);
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
   const [showAiResponseDialog, setShowAiResponseDialog] = useState(false);
   const [labelPickerOpen, setLabelPickerOpen] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
   const { data: cardData } = useQuery<CardWithList>({
-    queryKey: ["card", id], // Unique key for caching the card data.
-    queryFn: () => fetcher(`/api/cards/${id}`), // Function to fetch the card data from the API.
-    enabled: !!id, //only fetch if `id` is defined
+    queryKey: ["card", data.id], // Unique key for caching the card data.
+    queryFn: () => fetcher(`/api/cards/${data.id}`), // Function to fetch the card data from the API.
+    enabled: !!data.id, //only fetch if `id` is defined
   });
 
   useEffect(() => {
@@ -82,10 +76,10 @@ const CardOptions = ({ id, labels }: CardOptionsProps) => {
   }, [cardData]);
 
   const handleExpandToNote = async () => {
-    await queryClient.prefetchQuery(["card", id], () =>
-      fetcher(`/api/cards/${id}`)
+    await queryClient.prefetchQuery(["card", data.id], () =>
+      fetcher(`/api/cards/${data.id}`)
     );
-    onOpen(id);
+    onOpen(data.id);
   };
   const [date, setDate] = useState<Date | null>(
     cardData?.dueDate ? new Date(cardData.dueDate) : null
@@ -119,84 +113,6 @@ const CardOptions = ({ id, labels }: CardOptionsProps) => {
     },
   });
 
-  // Calculate allDay based on presence of times
-  const allDay = !startDate;
-
-  const handleDateChange = (newDate: Date | undefined) => {
-    if (newDate) {
-      // Create pure date (midnight UTC)
-      newDate.setUTCHours(0, 0, 0, 0);
-
-      // Preserve existing times but apply to new date
-      const start = startDate
-        ? new Date(
-            newDate.getUTCFullYear(),
-            newDate.getUTCMonth(),
-            newDate.getUTCDate(),
-            startDate.getUTCHours(),
-            startDate.getUTCMinutes()
-          )
-        : null;
-      console.log("start", start);
-
-      const end = endDate
-        ? new Date(
-            newDate.getUTCFullYear(),
-            newDate.getUTCMonth(),
-            newDate.getUTCDate(),
-            endDate.getUTCHours(),
-            endDate.getUTCMinutes()
-          )
-        : null;
-      console.log("end", end);
-      console.log("updating dates.. ", {
-        id: cardData?.id,
-        boardId: params.boardId as string,
-        title: cardData?.title,
-        dueDate: newDate || null,
-        start: start || null,
-        end: end || null,
-        allDay: cardData?.allDay,
-      });
-
-      executeCardUpdate({
-        id: cardData?.id as string,
-        boardId: params.boardId as string,
-        title: cardData?.title,
-        dueDate: newDate || null,
-        start: start || null,
-        end: end || null,
-        allDay: cardData?.allDay,
-      });
-    }
-  };
-
-  const handleClear = () => {
-    setIsOpen(false);
-    setDate(null);
-    setStartDate(null);
-    setEndDate(null);
-
-    console.log("attempting to clear fields", {
-      id: cardData?.id,
-      boardId: params.boardId as string,
-      title: cardData?.title,
-      dueDate: null,
-      start: null,
-      end: null,
-      allDay: false,
-    });
-    executeCardUpdate({
-      id: cardData?.id as string,
-      boardId: params.boardId as string,
-      title: cardData?.title,
-      dueDate: null,
-      start: null,
-      end: null,
-      allDay: false,
-    });
-  };
-
   // Copy card action
   const { execute: executeCopyCard } = useAction(copyCard, {
     onSuccess: (data) => {
@@ -227,10 +143,6 @@ const CardOptions = ({ id, labels }: CardOptionsProps) => {
   const onDelete = () => {
     const boardId = params.boardId as string;
     executeDeleteCard({ id: cardData?.id as string, boardId });
-  };
-
-  const handleDatePickerOpen = (open: boolean) => {
-    setDatePickerOpen(open);
   };
 
   const handleMagicTodo = async () => {
@@ -409,113 +321,10 @@ const CardOptions = ({ id, labels }: CardOptionsProps) => {
               {`${cardData?.description ? "Edit" : "Open as"} Note`}
             </div>
           </DropdownMenuItem>
-          {/* Calendar Option - Modified to use onClick instead of onSelect */}
-          <DropdownMenuSub
-            open={datePickerOpen}
-            onOpenChange={handleDatePickerOpen}
-          >
-            <DropdownMenuSubTrigger>
-              <CalendarIcon className="h-4 w-4" />
-              {cardData?.dueDate ? "Edit Due Date" : "Set Due Date"}
-            </DropdownMenuSubTrigger>
-
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                alignOffset={-20}
-                className="p-0 overflow-hidden"
-                onInteractOutside={(e) => e.preventDefault()}
-              >
-                <div className="max-h-[350px] overflow-y-auto">
-                  <Calendar
-                    mode="single"
-                    selected={date || undefined}
-                    onSelect={handleDateChange}
-                    disabled={(date) => date < new Date()}
-                    initialFocus
-                  />
-                  {date && (
-                    <>
-                      <div className="p-3 border-t border-border">
-                        <TimePicker
-                          date={date}
-                          setDate={setDate}
-                          allDay={allDay}
-                          startDate={startDate}
-                          setStartDate={(newStartDate) => {
-                            console.log("setting start date", newStartDate);
-                            setStartDate(newStartDate);
-                            if (!newStartDate) {
-                              setEndDate(null);
-                            }
-
-                            // Combine the date from dueDate with time from newStartDate
-                            let combinedStart = null;
-                            if (newStartDate && date) {
-                              combinedStart = new Date(date);
-                              combinedStart.setHours(
-                                newStartDate.getHours(),
-                                newStartDate.getMinutes(),
-                                0,
-                                0
-                              );
-                            }
-
-                            executeCardUpdate({
-                              id: cardData?.id as string,
-                              boardId: params.boardId as string,
-                              dueDate: date,
-                              title: cardData?.title,
-                              start: combinedStart,
-                              end: newStartDate ? endDate : null,
-                              allDay: cardData?.allDay,
-                            });
-                          }}
-                          endDate={endDate}
-                          setEndDate={(newEndDate) => {
-                            setEndDate(newEndDate);
-
-                            // Combine the date from dueDate with time from newStartDate
-                            let combinedEnd = null;
-                            if (newEndDate && date) {
-                              combinedEnd = new Date(date);
-                              combinedEnd.setHours(
-                                newEndDate.getHours(),
-                                newEndDate.getMinutes(),
-                                0,
-                                0
-                              );
-                            }
-
-                            executeCardUpdate({
-                              id: cardData?.id as string,
-                              boardId: params.boardId as string,
-                              dueDate: date,
-                              title: cardData?.title,
-                              start: startDate,
-                              end: combinedEnd,
-                              allDay: cardData?.allDay,
-                            });
-                          }}
-                        />
-                      </div>
-                      <div className="p-3 border-t border-border">
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="w-full font-medium"
-                          onClick={handleClear}
-                          disabled={isLoading}
-                        >
-                          <Trash className="h-4 w-4 mr-2" />
-                          Clear Selection
-                        </Button>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+          <DropdownMenuItem onClick={() => setDatePickerOpen(true)}>
+            <CalendarIcon className="h-4 w-4" />
+            {cardData?.dueDate ? "Edit Due Date" : "Set Due Date"}
+          </DropdownMenuItem>
           <Separator className="my-2" />
           {/* Copy Option */}
           <DropdownMenuItem onClick={onCopy}>
@@ -582,10 +391,17 @@ const CardOptions = ({ id, labels }: CardOptionsProps) => {
       <LabelPicker
         open={labelPickerOpen}
         onClose={() => setLabelPickerOpen(false)}
-        cardId={id}
+        cardId={data.id}
         boardId={params.boardId as string}
         currentLabel={cardData?.labelId || null}
         labels={labels}
+      />
+
+      {/* Date Picker Dialog */}
+      <DateTimePicker
+        open={datePickerOpen}
+        onClose={() => setDatePickerOpen(false)}
+        data={data}
       />
     </div>
   );

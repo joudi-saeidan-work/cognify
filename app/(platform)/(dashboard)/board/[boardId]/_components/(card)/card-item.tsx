@@ -54,6 +54,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(data.title);
   const [isLabelPickerOpen, setIsLabelPickerOpen] = useState(false);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const params = useParams();
   const queryClient = useQueryClient();
@@ -157,9 +158,9 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   };
 
   const getTextColor = () => {
-    return data.color && data.color !== "bg-background"
-      ? "text-black font-medium"
-      : "text-black font-medium";
+    if (data?.color && data?.color !== "bg-background")
+      return "text-neutral-700";
+    return "text-foreground";
   };
 
   // Find the label object that matches the labelId
@@ -198,7 +199,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
           role="input"
-          className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 pt-2 pb-3 px-4 text-sm rounded-md shadow-sm w-full bg-background"
+          className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 dark:hover:border-white/30 pt-2 pb-3 px-4 text-sm rounded-md shadow-sm w-full"
           style={{
             ...provided.draggableProps.style,
             ...(data.color && data.color !== "bg-background"
@@ -207,7 +208,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           }}
         >
           <div className="absolute -right-1.5 -top-1.5">
-            <CardOptions id={data.id} labels={labels} />
+            <CardOptions data={data} labels={labels} />
           </div>
 
           {/* Display Label if it exists */}
@@ -257,8 +258,44 @@ export const CardItem = ({ data, index }: CardItemProps) => {
                 />
               </Hint>
             )}
-            <DateTimePicker data={data} />
+            {/* <DateTimePicker data={data} /> */}
+            <div className="relative" onClick={() => setIsDatePickerOpen(true)}>
+              {data.dueDate ? (
+                <button
+                  className={`inline-flex items-center rounded-full py-0 bg-background text-gray-600`}
+                  style={{
+                    width: "fit-content",
+                    backgroundColor: data.color || undefined,
+                  }}
+                >
+                  <CalendarIcon className="mr-1 h-3 w-3 -mt-[1px]" />
+                  <span className="text-sm font-medium">
+                    {data.start ? (
+                      <>
+                        {format(
+                          data.dueDate,
+                          data.end ? "MMM d" : "MMM d, yyyy"
+                        )}
+                        <span className="ml-1">
+                          {format(data.start, "h:mm")}
+                          {data.end && `–${format(data.end, "h:mm")}`}
+                          {format(data.start, "a")}
+                        </span>
+                      </>
+                    ) : (
+                      format(data.dueDate, "MMM d, yyyy")
+                    )}
+                  </span>
+                </button>
+              ) : null}
+            </div>
           </div>
+          {/* Label Picker Dialog */}
+          <DateTimePicker
+            data={data}
+            open={isDatePickerOpen}
+            onClose={() => setIsDatePickerOpen(false)}
+          />
         </div>
       )}
     </Draggable>
