@@ -165,7 +165,6 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
               mode="single"
               selected={date || undefined}
               onSelect={handleDateChange}
-              disabled={(date) => date < new Date()}
               initialFocus
             />
             {date && (
@@ -202,14 +201,14 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
                         title: data.title,
                         start: combinedStart,
                         end: newStartDate ? endDate : null,
-                        allDay: data.allDay,
+                        allDay: !newStartDate,
                       });
                     }}
                     endDate={endDate}
                     setEndDate={(newEndDate) => {
                       setEndDate(newEndDate);
 
-                      // Combine the date from dueDate with time from newStartDate
+                      // Combine the date from dueDate with time from newEndDate
                       let combinedEnd = null;
                       if (newEndDate && date) {
                         combinedEnd = new Date(date);
@@ -228,7 +227,7 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
                         title: data.title,
                         start: startDate,
                         end: combinedEnd,
-                        allDay: data.allDay,
+                        allDay: !startDate,
                       });
                     }}
                   />

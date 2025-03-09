@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Period } from "./time-picker-utils";
+import { Period, convert12HourTo24Hour } from "./time-picker-utils";
 import { cn } from "@/lib/utils";
 
 interface TimePeriodSelectProps {
@@ -27,6 +27,31 @@ export const TimePeriodSelect = React.forwardRef<
       if (e.key === "ArrowLeft") onLeftFocus?.();
     };
 
+    const handlePeriodChange = (newPeriod: Period) => {
+      // Don't do anything if the period is not changing
+      if (newPeriod === period) return;
+
+      // Update the period state
+      setPeriod(newPeriod);
+
+      // Only update the date if we have one
+      if (date) {
+        const newDate = new Date(date);
+        const currentHours = newDate.getHours();
+
+        // Convert current hours to 12-hour format
+        let hours12 = currentHours % 12;
+        if (hours12 === 0) hours12 = 12;
+
+        // Convert back to 24-hour format with the new period
+        const newHours = convert12HourTo24Hour(hours12, newPeriod);
+
+        // Update the date with the new hours
+        newDate.setHours(newHours);
+        setDate(newDate);
+      }
+    };
+
     return (
       <div
         ref={ref as React.RefObject<HTMLDivElement>}
@@ -37,7 +62,7 @@ export const TimePeriodSelect = React.forwardRef<
       >
         <button
           type="button"
-          onClick={() => setPeriod("AM")}
+          onClick={() => handlePeriodChange("AM")}
           onKeyDown={handleKeyDown}
           className={cn(
             "w-[48px] text-sm rounded transition-colors duration-200",
@@ -50,7 +75,7 @@ export const TimePeriodSelect = React.forwardRef<
         </button>
         <button
           type="button"
-          onClick={() => setPeriod("PM")}
+          onClick={() => handlePeriodChange("PM")}
           onKeyDown={handleKeyDown}
           className={cn(
             "w-[48px] text-sm rounded transition-colors duration-200",
