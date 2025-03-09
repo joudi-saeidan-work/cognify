@@ -5,22 +5,15 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
 import { Card } from "@prisma/client";
 import { TimePicker } from "./time-picker";
-
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { updateCard } from "@/actions/update-card";
 import { useParams } from "next/navigation";
 import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/eventsContext";
-import { Hint } from "@/components/hint";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import useDebounce from "@/hooks/use-debounce";
 
 interface DateTimePickerProps {
   data: Card;
@@ -30,14 +23,9 @@ interface DateTimePickerProps {
 
 export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
   const { dispatch } = useEvents();
+  const params = useParams();
 
-  // Add this useEffect to update state when data changes
-  React.useEffect(() => {
-    setDate(data.dueDate ? new Date(data.dueDate) : null);
-    setStartDate(data.start ? new Date(data.start) : null);
-    setEndDate(data.end ? new Date(data.end) : null);
-  }, [data.dueDate, data.start, data.end]);
-
+  // Local state for date/time values
   const [date, setDate] = React.useState<Date | null>(
     data.dueDate ? new Date(data.dueDate) : null
   );
@@ -47,9 +35,147 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
   const [endDate, setEndDate] = React.useState<Date | null>(
     data.end ? new Date(data.end) : null
   );
-  // const [open, setOpen] = React.useState(false);
 
-  const params = useParams();
+  // This object will track the complete state of our date/time values
+  const [timeState, setTimeState] = React.useState({
+    dueDate: date,
+    start: startDate,
+    end: endDate,
+    allDay: !startDate,
+  });
+
+  // Debounce the state changes to prevent multiple server actions
+  const debouncedTimeState = useDebounce(timeState, 500);
+
+  // Effect to update the server when the debounced state changes
+  React.useEffect(() => {
+    // Only send updates if something actually changed and we have a date
+    const hasChanges =
+      JSON.stringify(debouncedTimeState) !==
+      JSON.stringify({
+        dueDate: data.dueDate ? new Date(data.dueDate) : null,
+        start: data.start ? new Date(data.start) : null,
+        end: data.end ? new Date(data.end) : null,
+        allDay: !data.start,
+      });
+
+    if (
+      hasChanges &&
+      (debouncedTimeState.dueDate !== null || data.dueDate !== null)
+    ) {
+      executeCardUpdate({
+        id: data.id,
+        boardId: params.boardId as string,
+        title: data.title,
+        dueDate: debouncedTimeState.dueDate,
+        start: debouncedTimeState.start,
+        end: debouncedTimeState.end,
+        allDay: debouncedTimeState.allDay,
+      });
+    }
+  }, [debouncedTimeState]);
+
+  // Update local state and timeState together
+  const handleDateChange = (newDate: Date | undefined) => {
+    if (newDate) {
+      // Create pure date (midnight UTC)
+      newDate.setUTCHours(0, 0, 0, 0);
+      setDate(newDate);
+
+      // Preserve existing times but apply to new date
+      let newStart = null;
+      let newEnd = null;
+
+      if (startDate) {
+        newStart = new Date(newDate);
+        newStart.setHours(startDate.getHours(), startDate.getMinutes(), 0, 0);
+      }
+
+      if (endDate) {
+        newEnd = new Date(newDate);
+        newEnd.setHours(endDate.getHours(), endDate.getMinutes(), 0, 0);
+      }
+
+      setStartDate(newStart);
+      setEndDate(newEnd);
+
+      // Update the timeState (this will eventually trigger the server action after debounce)
+      setTimeState({
+        dueDate: newDate,
+        start: newStart,
+        end: newEnd,
+        allDay: !newStart,
+      });
+    }
+  };
+
+  const handleStartTimeChange = (newStartDate: Date | null) => {
+    setStartDate(newStartDate);
+
+    // If clearing start time, also clear end time
+    if (!newStartDate) {
+      setEndDate(null);
+    }
+
+    // Combine the date with time
+    let combinedStart = null;
+    if (newStartDate && date) {
+      combinedStart = new Date(date);
+      combinedStart.setHours(
+        newStartDate.getHours(),
+        newStartDate.getMinutes(),
+        0,
+        0
+      );
+    }
+
+    // Update the timeState
+    setTimeState((prev) => ({
+      ...prev,
+      start: combinedStart,
+      end: newStartDate ? prev.end : null,
+      allDay: !newStartDate,
+    }));
+  };
+
+  const handleEndTimeChange = (newEndDate: Date | null) => {
+    setEndDate(newEndDate);
+
+    // Combine the date with time
+    let combinedEnd = null;
+    if (newEndDate && date) {
+      combinedEnd = new Date(date);
+      combinedEnd.setHours(
+        newEndDate.getHours(),
+        newEndDate.getMinutes(),
+        0,
+        0
+      );
+    }
+
+    // Update the timeState
+    setTimeState((prev) => ({
+      ...prev,
+      end: combinedEnd,
+    }));
+  };
+
+  const handleClear = () => {
+    // Update state once
+    const clearedState = {
+      dueDate: null,
+      start: null,
+      end: null,
+      allDay: false,
+    };
+
+    setDate(null);
+    setStartDate(null);
+    setEndDate(null);
+    setTimeState(clearedState);
+
+    // Don't call executeCardUpdate here - let the effect handle it
+  };
 
   const { execute: executeCardUpdate, isLoading } = useAction(updateCard, {
     onSuccess: (data) => {
@@ -73,82 +199,19 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
     },
   });
 
-  // Calculate allDay based on presence of times
-  const allDay = !startDate;
+  // Sync with incoming data changes
+  React.useEffect(() => {
+    setDate(data.dueDate ? new Date(data.dueDate) : null);
+    setStartDate(data.start ? new Date(data.start) : null);
+    setEndDate(data.end ? new Date(data.end) : null);
 
-  const handleDateChange = (newDate: Date | undefined) => {
-    if (newDate) {
-      // Create pure date (midnight UTC)
-      newDate.setUTCHours(0, 0, 0, 0);
-
-      // Preserve existing times but apply to new date
-      const start = startDate
-        ? new Date(
-            newDate.getUTCFullYear(),
-            newDate.getUTCMonth(),
-            newDate.getUTCDate(),
-            startDate.getUTCHours(),
-            startDate.getUTCMinutes()
-          )
-        : null;
-      console.log("start", start);
-
-      const end = endDate
-        ? new Date(
-            newDate.getUTCFullYear(),
-            newDate.getUTCMonth(),
-            newDate.getUTCDate(),
-            endDate.getUTCHours(),
-            endDate.getUTCMinutes()
-          )
-        : null;
-      console.log("end", end);
-      console.log("updating dates.. ", {
-        id: data.id,
-        boardId: params.boardId as string,
-        title: data.title,
-        dueDate: newDate || null,
-        start: start || null,
-        end: end || null,
-        allDay: data.allDay,
-      });
-
-      executeCardUpdate({
-        id: data.id,
-        boardId: params.boardId as string,
-        title: data.title,
-        dueDate: newDate || null,
-        start: start || null,
-        end: end || null,
-        allDay: data.allDay,
-      });
-    }
-  };
-
-  const handleClear = () => {
-    setDate(null);
-    setStartDate(null);
-    setEndDate(null);
-
-    console.log("attempting to clear fields", {
-      id: data.id,
-      boardId: params.boardId as string,
-      title: data.title,
-      dueDate: null,
-      start: null,
-      end: null,
-      allDay: false,
+    setTimeState({
+      dueDate: data.dueDate ? new Date(data.dueDate) : null,
+      start: data.start ? new Date(data.start) : null,
+      end: data.end ? new Date(data.end) : null,
+      allDay: !data.start,
     });
-    executeCardUpdate({
-      id: data.id,
-      boardId: params.boardId as string,
-      title: data.title,
-      dueDate: null,
-      start: null,
-      end: null,
-      allDay: false,
-    });
-  };
+  }, [data.dueDate, data.start, data.end]);
 
   const getTextColor = () => {
     if (data?.color && data?.color !== "bg-background")
@@ -173,63 +236,11 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
                   <TimePicker
                     date={date}
                     setDate={setDate}
-                    allDay={allDay}
+                    allDay={!startDate}
                     startDate={startDate}
-                    setStartDate={(newStartDate) => {
-                      console.log("setting start date", newStartDate);
-                      setStartDate(newStartDate);
-                      if (!newStartDate) {
-                        setEndDate(null);
-                      }
-
-                      // Combine the date from dueDate with time from newStartDate
-                      let combinedStart = null;
-                      if (newStartDate && date) {
-                        combinedStart = new Date(date);
-                        combinedStart.setHours(
-                          newStartDate.getHours(),
-                          newStartDate.getMinutes(),
-                          0,
-                          0
-                        );
-                      }
-
-                      executeCardUpdate({
-                        id: data.id,
-                        boardId: params.boardId as string,
-                        dueDate: date,
-                        title: data.title,
-                        start: combinedStart,
-                        end: newStartDate ? endDate : null,
-                        allDay: !newStartDate,
-                      });
-                    }}
+                    setStartDate={handleStartTimeChange}
                     endDate={endDate}
-                    setEndDate={(newEndDate) => {
-                      setEndDate(newEndDate);
-
-                      // Combine the date from dueDate with time from newEndDate
-                      let combinedEnd = null;
-                      if (newEndDate && date) {
-                        combinedEnd = new Date(date);
-                        combinedEnd.setHours(
-                          newEndDate.getHours(),
-                          newEndDate.getMinutes(),
-                          0,
-                          0
-                        );
-                      }
-
-                      executeCardUpdate({
-                        id: data.id,
-                        boardId: params.boardId as string,
-                        dueDate: date,
-                        title: data.title,
-                        start: startDate,
-                        end: combinedEnd,
-                        allDay: !startDate,
-                      });
-                    }}
+                    setEndDate={handleEndTimeChange}
                   />
                 </div>
                 <div className="p-3 border-t border-border">

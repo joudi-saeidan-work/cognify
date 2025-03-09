@@ -86,13 +86,33 @@ const Calendar = ({ boardId }: { boardId: string }) => {
           // Reset dueDate time to midnight
           if (dueDate) dueDate.setUTCHours(0, 0, 0, 0);
 
+          // Find the list that contains this card
+          const list = boards
+            .find((board) => board.id === boardId)
+            ?.lists.find((list) => list.id === card.listId);
+          const listColor = list?.color || undefined;
+
+          // Debug log to see what's happening
+          console.log(
+            "Card:",
+            card.title,
+            "ListId:",
+            card.listId,
+            "List:",
+            list,
+            "Color:",
+            listColor
+          );
+
           return {
             id: card.id,
             title: card.title,
             start: start || dueDate, // Use time-specific start if available
             end: end || dueDate, // Use time-specific end if available
             allDay: !card.start, // All-day if no start time specified
-            backgroundColor: card.color || undefined,
+            backgroundColor: listColor, // Use list color instead of card color
+            textColor: listColor ? "black" : undefined, // Set text to black when background color exists
+            borderColor: listColor || "transparent", // Match border color to background or make it transparent
           };
         });
 
@@ -103,8 +123,11 @@ const Calendar = ({ boardId }: { boardId: string }) => {
       }
     };
 
-    loadEvents();
-  }, [boardId, dispatch]);
+    // Only load events if boards data is available
+    if (boards.length > 0) {
+      loadEvents();
+    }
+  }, [boardId, dispatch, boards]);
 
   useEffect(() => {
     async function fetchBoards() {
