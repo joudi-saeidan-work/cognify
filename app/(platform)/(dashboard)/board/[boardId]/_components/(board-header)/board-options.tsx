@@ -4,7 +4,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  PopoverClose,
 } from "@/components/ui/popover";
 import { MoreHorizontal, Trash, Plus } from "lucide-react";
 import { deleteBoard } from "@/actions/delete-board";
@@ -76,7 +75,6 @@ const BoardOptions = ({
         side="bottom"
         align="start"
       >
-        <PopoverClose asChild />
         <div className="px-5">
           <h3 className="text-start text-neutral-900 pb-3">Board Settings</h3>
 

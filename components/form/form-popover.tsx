@@ -3,7 +3,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  PopoverClose,
 } from "@/components/ui/popover";
 import { ElementRef, useRef } from "react";
 import { FormPicker } from "./form-picker";
@@ -36,7 +35,6 @@ export const FormPopOver = ({
         className="w-80 pt-3 "
       >
         <div className="text-sm font-medium text-neutral-600 pb-4">
-          <PopoverClose ref={closeRef} />
           <FormPicker data={board} />
         </div>
       </PopoverContent>

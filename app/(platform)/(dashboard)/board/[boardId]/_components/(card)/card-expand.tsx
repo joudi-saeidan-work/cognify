@@ -5,7 +5,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  PopoverClose,
 } from "@/components/ui/popover";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -77,7 +76,6 @@ const CardExpand = ({ id }: CardExpandProps) => {
         <div className="flex items-center text-sm font-semibold ">
           Expand to
         </div>
-        <PopoverClose asChild />
         <Button
           variant="ghost"
           onClick={handleExpandToNote}

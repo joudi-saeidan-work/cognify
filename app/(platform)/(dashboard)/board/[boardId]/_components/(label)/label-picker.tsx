@@ -3,7 +3,12 @@
 import { useState, useEffect } from "react";
 import { X, SearchIcon, Plus, Check, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAction } from "@/hooks/use-actions";
 import { updateCard } from "@/actions/update-card";
@@ -185,6 +190,7 @@ export const LabelPicker = ({
                     className="pl-9 text-sm"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
+                    type="text"
                   />
                 </div>
 
@@ -300,6 +306,7 @@ export const LabelPicker = ({
                     value={newLabelText}
                     onChange={(e) => setNewLabelText(e.target.value)}
                     className="mt-1"
+                    type="text"
                   />
                 </div>
 
