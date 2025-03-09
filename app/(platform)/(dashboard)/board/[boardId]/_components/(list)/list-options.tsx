@@ -5,7 +5,6 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-  PopoverClose,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Brush, MoreHorizontal } from "lucide-react";
@@ -195,7 +194,6 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
-          <PopoverClose ref={closeRef} asChild></PopoverClose>
           <Button
             onClick={onAddCard}
             className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm hover:bg-neutral-500/10"

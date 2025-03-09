@@ -26,16 +26,34 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { Hint } from "@/components/hint";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { fetcher } from "@/lib/fetcher";
+import { LabelPicker } from "../(label)/label-picker";
 
 interface CardItemProps {
   data: Card;
   index: number;
 }
 
+// Determine the text color based on the background color
+export const getContrastColor = (hexColor: string): string => {
+  const color = hexColor.startsWith("#") ? hexColor.slice(1) : hexColor;
+
+  // Convert the hex to RGB
+  const r = parseInt(color.substr(0, 2), 16);
+  const g = parseInt(color.substr(2, 2), 16);
+  const b = parseInt(color.substr(4, 2), 16);
+
+  // Calculate luminance - using the relative luminance formula
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+  // Return white for dark backgrounds, black for light backgrounds
+  return luminance > 0.5 ? "black" : "white";
+};
+
 export const CardItem = ({ data, index }: CardItemProps) => {
   const { dispatch } = useEvents();
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(data.title);
+  const [isLabelPickerOpen, setIsLabelPickerOpen] = useState(false);
 
   const params = useParams();
   const queryClient = useQueryClient();
@@ -194,16 +212,29 @@ export const CardItem = ({ data, index }: CardItemProps) => {
 
           {/* Display Label if it exists */}
           {data.labelId && labelObj && (
-            <div
-              className="mb-2 px-2 py-0.5 text-xs font-medium rounded self-start"
-              style={{
-                backgroundColor: labelObj.color || "#61bd4f",
-                color: labelObj.color.startsWith("#4") ? "white" : "black",
-              }}
-            >
-              {labelObj.name || "Label"}
-            </div>
+            <Hint description="Edit label">
+              <div
+                className="font-semibold mb-2 px-2 text-xs rounded self-start -ml-3 cursor-pointer"
+                style={{
+                  backgroundColor: labelObj.color || "#61bd4f",
+                  color: getContrastColor(labelObj.color || "#61bd4f"),
+                }}
+                onClick={() => setIsLabelPickerOpen(true)}
+              >
+                {labelObj.name || "Label"}
+              </div>
+            </Hint>
           )}
+
+          {/* Label Picker Dialog */}
+          <LabelPicker
+            open={isLabelPickerOpen}
+            onClose={() => setIsLabelPickerOpen(false)}
+            cardId={data.id}
+            boardId={boardId}
+            currentLabel={data.labelId}
+            labels={labels}
+          />
 
           <div className="flex flex-col mt-3">
             <Hint description={data.description ? "Open Card" : "Rename Card"}>

@@ -1,14 +1,17 @@
 "use server";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 import { db } from "@/lib/db";
 
 import { InputType, ReturnType } from "./types";
-import { createSafeAction } from "@/lib/create-safe-actions";
 import { CreateLabel } from "./schema";
+import { createSafeAction } from "@/lib/create-safe-actions";
 
-const handler = async (data: InputType): Promise<ReturnType> => {
+const handler = async (
+  data: z.infer<typeof CreateLabel>
+): Promise<ReturnType> => {
   const { userId, orgId } = await auth();
   if (!userId || !orgId) {
     return {
@@ -19,6 +22,23 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   const { name, color, boardId, organizationId } = data;
   const orgIdValue = organizationId ? organizationId : orgId;
 
+  // First, check if a label with the same name and board already exists
+  const existingLabel = await db.label.findFirst({
+    where: {
+      name,
+      boardId,
+    },
+  });
+
+  // If it exists and has the same color, return an error
+  if (existingLabel && existingLabel.color === color) {
+    return {
+      error: "A label with this name and color already exists on this board",
+    };
+  }
+
+  // If it exists with a different color, that's okay
+  // If it doesn't exist, create a new one
   let label;
 
   try {
@@ -33,12 +53,15 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       };
     }
 
-    // Create the label
     label = await db.label.create({
       data: {
-        name: name || null,
+        name,
         color,
-        boardId,
+        board: {
+          connect: {
+            id: boardId,
+          },
+        },
       },
     });
   } catch (error) {

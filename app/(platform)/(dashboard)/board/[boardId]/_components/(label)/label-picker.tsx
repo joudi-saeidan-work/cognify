@@ -3,12 +3,7 @@
 import { useState, useEffect } from "react";
 import { X, SearchIcon, Plus, Check, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useAction } from "@/hooks/use-actions";
 import { updateCard } from "@/actions/update-card";
@@ -18,24 +13,25 @@ import { createLabel } from "@/actions/create-label";
 import { updateLabel } from "@/actions/update-label";
 import { deleteLabel } from "@/actions/delete-label";
 import { Label } from "@prisma/client";
+import { getContrastColor } from "../(card)/card-item";
 
 // color labels
 const LABEL_COLORS = [
-  { bg: "#FFB6C1", text: "black", name: "light pink" },
-  { bg: "#FFDAB9", text: "black", name: "peach" },
-  { bg: "#98FB98", text: "black", name: "pale green" },
-  { bg: "#AFEEEE", text: "black", name: "pale turquoise" },
-  { bg: "#B0E0E6", text: "black", name: "powder blue" },
-  { bg: "#DDA0DD", text: "black", name: "plum" },
-  { bg: "#D3D3D3", text: "black", name: "light gray" },
-  { bg: "#FF7F7F", text: "black", name: "soft red" },
-  { bg: "#FFA07A", text: "black", name: "light salmon" },
-  { bg: "#FFD700", text: "black", name: "gold" },
-  { bg: "#90EE90", text: "black", name: "light green" },
-  { bg: "#87CEEB", text: "black", name: "sky blue" },
-  { bg: "#4682B4", text: "white", name: "steel blue" },
-  { bg: "#9370DB", text: "white", name: "medium purple" },
-  { bg: "#C0C0C0", text: "black", name: "silver" },
+  { bg: "#FFB6C1", name: "light pink" },
+  { bg: "#FFDAB9", name: "peach" },
+  { bg: "#98FB98", name: "pale green" },
+  { bg: "#AFEEEE", name: "pale turquoise" },
+  { bg: "#B0E0E6", name: "powder blue" },
+  { bg: "#DDA0DD", name: "plum" },
+  { bg: "#D3D3D3", name: "light gray" },
+  { bg: "#FF7F7F", name: "soft red" },
+  { bg: "#FFA07A", name: "light salmon" },
+  { bg: "#FFD700", name: "gold" },
+  { bg: "#90EE90", name: "light green" },
+  { bg: "#87CEEB", name: "sky blue" },
+  { bg: "#4682B4", name: "steel blue" },
+  { bg: "#9370DB", name: "medium purple" },
+  { bg: "#C0C0C0", name: "silver" },
 ];
 
 interface LabelPickerProps {
@@ -45,6 +41,12 @@ interface LabelPickerProps {
   boardId: string;
   currentLabel: string | null;
   labels: Label[];
+  cardPosition?: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
 }
 
 export const LabelPicker = ({
@@ -54,6 +56,7 @@ export const LabelPicker = ({
   boardId,
   currentLabel,
   labels,
+  cardPosition,
 }: LabelPickerProps) => {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -61,18 +64,26 @@ export const LabelPicker = ({
   const [newLabelText, setNewLabelText] = useState("");
   const [selectedColor, setSelectedColor] = useState(LABEL_COLORS[0].bg);
   const [editingLabel, setEditingLabel] = useState<Label | null>(null);
+  const [optimisticLabelId, setOptimisticLabelId] = useState<string | null>(
+    currentLabel
+  );
 
   // Update card action
   const { execute: executeUpdateCard } = useAction(updateCard, {
     onSuccess: () => {
       toast.success("Card updated");
       queryClient.invalidateQueries({ queryKey: ["card", cardId] });
-      onClose();
     },
     onError: (error) => {
+      setOptimisticLabelId(currentLabel);
       toast.error(error);
     },
   });
+
+  // Reset optimistic selection when currentLabel changes from props
+  useEffect(() => {
+    setOptimisticLabelId(currentLabel);
+  }, [currentLabel]);
 
   // Create label action
   const { execute: executeCreateLabel } = useAction(createLabel, {
@@ -115,14 +126,20 @@ export const LabelPicker = ({
   );
 
   const handleLabelSelect = (labelId: string) => {
+    // Toggle selection - if already selected, deselect it
+    const newLabelId = optimisticLabelId === labelId ? null : labelId;
+    setOptimisticLabelId(newLabelId);
+
     executeUpdateCard({
       id: cardId,
       boardId,
-      labelId: labelId,
+      labelId: newLabelId,
     });
   };
 
   const handleRemoveLabel = () => {
+    setOptimisticLabelId(null);
+
     executeUpdateCard({
       id: cardId,
       boardId,
@@ -168,11 +185,44 @@ export const LabelPicker = ({
     setCreatingLabel(true);
   };
 
+  // Calculate dialog position based on card position
+  const getDialogPosition = () => {
+    if (!cardPosition) return {};
+
+    // Position to the right of the card by default
+    const position = {
+      position: "fixed" as const,
+      top: `${cardPosition.top}px`,
+      left: `${cardPosition.left + cardPosition.width + 16}px`, // 16px gap
+    };
+
+    // Check if dialog would go off-screen to the right
+    const dialogWidth = 320; // Approximate width of dialog
+    if (
+      cardPosition.left + cardPosition.width + dialogWidth + 16 >
+      window.innerWidth
+    ) {
+      // Position to the left of the card instead
+      position.left = `${cardPosition.left - dialogWidth - 16}px`;
+
+      // If that would go off-screen to the left, position below the card
+      if (cardPosition.left - dialogWidth - 16 < 0) {
+        position.left = `${cardPosition.left}px`;
+        position.top = `${cardPosition.top + cardPosition.height + 16}px`;
+      }
+    }
+
+    return position;
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="bg-white p-0 overflow-hidden max-w-xs">
-          <DialogTitle className="text-center pt-5 px-6 text-sm font-semibold text-gray-600">
+        <DialogContent
+          className="p-0 overflow-hidden max-w-xs dark:bg-slate-800 bg-white"
+          style={getDialogPosition()}
+        >
+          <DialogTitle className="text-center pt-5 px-6 text-sm font-semibold text-gray-600 dark:text-gray-300">
             {creatingLabel
               ? editingLabel
                 ? "Edit Label"
@@ -187,7 +237,7 @@ export const LabelPicker = ({
                   <SearchIcon className="h-4 w-4 absolute top-2.5 left-3 text-muted-foreground" />
                   <Input
                     placeholder="Search labels..."
-                    className="pl-9 text-sm"
+                    className="pl-9 text-sm dark:bg-slate-700 dark:text-white dark:border-slate-600"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     type="text"
@@ -210,12 +260,12 @@ export const LabelPicker = ({
                   {filteredLabels.map((label) => (
                     <div
                       key={label.id}
-                      className="flex items-center gap-2 p-2 rounded hover:bg-gray-100"
+                      className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-slate-700"
                     >
                       <input
                         type="checkbox"
                         className="h-4 w-4"
-                        checked={currentLabel === label.id}
+                        checked={optimisticLabelId === label.id}
                         onChange={() => handleLabelSelect(label.id)}
                         onClick={(e) => e.stopPropagation()}
                       />
@@ -224,10 +274,7 @@ export const LabelPicker = ({
                         style={{
                           backgroundColor: label.color,
                           height: "40px",
-                          color:
-                            LABEL_COLORS.find(
-                              (color) => color.bg === label.color
-                            )?.text || "white",
+                          color: getContrastColor(label.color),
                         }}
                         onClick={() => handleLabelSelect(label.id)}
                       >
@@ -237,7 +284,7 @@ export const LabelPicker = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7"
+                          className="h-7 w-7 dark:hover:bg-slate-600"
                           onClick={() => startEditingLabel(label)}
                         >
                           <Pencil className="h-3 w-3" />
@@ -245,7 +292,7 @@ export const LabelPicker = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30"
                           onClick={() => handleDeleteLabel(label.id)}
                         >
                           <Trash2 className="h-3 w-3" />
@@ -255,10 +302,10 @@ export const LabelPicker = ({
                   ))}
                 </div>
 
-                {currentLabel && (
+                {optimisticLabelId && (
                   <Button
                     variant="outline"
-                    className="w-full text-sm"
+                    className="w-full text-sm dark:bg-slate-700 dark:text-white dark:border-slate-600 dark:hover:bg-slate-600"
                     onClick={handleRemoveLabel}
                   >
                     Remove Label
@@ -267,7 +314,7 @@ export const LabelPicker = ({
 
                 <Button
                   variant="ghost"
-                  className="w-full text-center text-sm font-semibold text-gray-600 hover:bg-gray-100 py-2"
+                  className="w-full text-center text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700 py-2"
                   onClick={() => {
                     setEditingLabel(null);
                     setNewLabelText("");
@@ -286,9 +333,7 @@ export const LabelPicker = ({
                   className="p-3 rounded text-sm font-semibold text-center mx-auto"
                   style={{
                     backgroundColor: selectedColor,
-                    color:
-                      LABEL_COLORS.find((color) => color.bg === selectedColor)
-                        ?.text || "white",
+                    color: getContrastColor(selectedColor),
                     width: "80%",
                     height: "40px",
                     display: "flex",
@@ -305,7 +350,7 @@ export const LabelPicker = ({
                     placeholder="Label name (optional)"
                     value={newLabelText}
                     onChange={(e) => setNewLabelText(e.target.value)}
-                    className="mt-1"
+                    className="mt-1 dark:bg-slate-700 dark:text-white dark:border-slate-600"
                     type="text"
                   />
                 </div>
@@ -318,7 +363,7 @@ export const LabelPicker = ({
                         key={color.bg}
                         className={`h-8 rounded cursor-pointer ${
                           selectedColor === color.bg
-                            ? "ring-2 ring-black ring-offset-2"
+                            ? "ring-2 ring-black dark:ring-white ring-offset-2 dark:ring-offset-slate-800"
                             : ""
                         }`}
                         style={{ backgroundColor: color.bg }}
@@ -331,6 +376,7 @@ export const LabelPicker = ({
                 <div className="flex justify-between">
                   <Button
                     variant="ghost"
+                    className="dark:text-white dark:hover:bg-slate-700"
                     onClick={() => {
                       setCreatingLabel(false);
                       setNewLabelText("");
@@ -340,9 +386,19 @@ export const LabelPicker = ({
                     Cancel
                   </Button>
                   {editingLabel ? (
-                    <Button onClick={handleUpdateLabel}>Update</Button>
+                    <Button
+                      className="dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
+                      onClick={handleUpdateLabel}
+                    >
+                      Update
+                    </Button>
                   ) : (
-                    <Button onClick={handleCreateLabel}>Create</Button>
+                    <Button
+                      className="dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
+                      onClick={handleCreateLabel}
+                    >
+                      Create
+                    </Button>
                   )}
                 </div>
               </div>

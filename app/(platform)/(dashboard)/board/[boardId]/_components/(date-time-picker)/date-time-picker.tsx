@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { updateCard } from "@/actions/update-card";
 import { useParams } from "next/navigation";
 import { useEvents } from "@/app/(platform)/(dashboard)/_components/(calendar)/eventsContext";
+import { Hint } from "@/components/hint";
 
 interface DateTimePickerProps {
   data: Card;
@@ -155,35 +156,37 @@ export function DateTimePicker({ data }: DateTimePickerProps) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <div className="relative ">
-          {data.dueDate ? (
-            <button
-              className={`inline-flex items-center rounded-full py-0 bg-background text-gray-600`}
-              style={{
-                width: "fit-content",
-                backgroundColor: data.color || undefined,
-              }}
-            >
-              <CalendarIcon className="mr-1 h-3 w-3 -mt-[1px]" />
-              <span className="text-sm font-medium">
-                {data.start ? (
-                  <>
-                    {format(data.dueDate, data.end ? "MMM d" : "MMM d, yyyy")}
-                    <span className="ml-1">
-                      {format(data.start, "h:mm")}
-                      {data.end && `–${format(data.end, "h:mm")}`}
-                      {format(data.start, "a")}
-                    </span>
-                  </>
-                ) : (
-                  format(data.dueDate, "MMM d, yyyy")
-                )}
-              </span>
-            </button>
-          ) : null}
-        </div>
-      </PopoverTrigger>
+      <Hint description="Edit due date">
+        <PopoverTrigger asChild>
+          <div className="relative ">
+            {data.dueDate ? (
+              <button
+                className={`inline-flex items-center rounded-full py-0 bg-background text-gray-600`}
+                style={{
+                  width: "fit-content",
+                  backgroundColor: data.color || undefined,
+                }}
+              >
+                <CalendarIcon className="mr-1 h-3 w-3 -mt-[1px]" />
+                <span className="text-sm font-medium">
+                  {data.start ? (
+                    <>
+                      {format(data.dueDate, data.end ? "MMM d" : "MMM d, yyyy")}
+                      <span className="ml-1">
+                        {format(data.start, "h:mm")}
+                        {data.end && `–${format(data.end, "h:mm")}`}
+                        {format(data.start, "a")}
+                      </span>
+                    </>
+                  ) : (
+                    format(data.dueDate, "MMM d, yyyy")
+                  )}
+                </span>
+              </button>
+            ) : null}
+          </div>
+        </PopoverTrigger>
+      </Hint>
       <PopoverContent className="w-auto p-0">
         <div className="max-h-[350px] overflow-y-auto">
           <Calendar

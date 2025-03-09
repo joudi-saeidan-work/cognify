@@ -156,7 +156,6 @@ model Label {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  @@unique([name, boardId])  // Ensures unique label names per board
   @@index([boardId])
 }
 
