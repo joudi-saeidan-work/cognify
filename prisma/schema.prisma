@@ -27,6 +27,7 @@ model Board{
   isFavorite      Boolean @default(false)
 
   lists             List[]
+  labels          Label[]
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -56,6 +57,8 @@ model Card{
   color             String? 
   order             Int 
   description       String? @db.Text
+  labelId           String?
+  label             Label? @relation(fields: [labelId], references: [id], onDelete: SetNull)
 
   listId            String
   list              List @relation(fields:[listId],references: [id],onDelete:Cascade)
@@ -69,6 +72,7 @@ model Card{
   allDay            Boolean   @default(true)
 
   @@index([listId])
+  @@index([labelId])
 }
 
 enum ACTION {
@@ -137,6 +141,23 @@ model Recording {
   updatedAt   DateTime @updatedAt
 
   @@index([orgId])
+}
+
+// Label model
+model Label {
+  id        String @id @default(uuid())
+  name      String?
+  color     String
+  boardId   String
+  board     Board @relation(fields: [boardId], references: [id], onDelete: Cascade) //the boardId field in this model (Label) contains values that correspond to id values in the Board model.
+  
+  cards     Card[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([name, boardId])  // Ensures unique label names per board
+  @@index([boardId])
 }
 
 // npx prisma migrate reset  -> resets your whole data base make sure not to do this in prod

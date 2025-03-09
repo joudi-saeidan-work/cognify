@@ -13,7 +13,6 @@ import { useParams } from "next/navigation";
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { updateCard } from "@/actions/update-card";
-import DOMPurify from "dompurify";
 
 export const defaultHtml = `<p className="absolute top-0 left-0 text-gray-400 pointer-events-none p-4" >write or type " / " for commands</p>`;
 

@@ -18,6 +18,7 @@ import {
   CalendarIcon,
   NotebookPen,
   WandSparkles,
+  Tag,
 } from "lucide-react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -25,7 +26,7 @@ import { useAction } from "@/hooks/use-actions";
 import { copyCard } from "@/actions/copy-card";
 import { toast } from "sonner";
 import { deleteCard } from "@/actions/delete-card";
-import { Card } from "@prisma/client";
+import { Card, Label } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { useCardModal } from "@/hooks/use-card-modal";
 import { DateTimePicker } from "../(date-time-picker)/date-time-picker";
@@ -38,9 +39,11 @@ import { z } from "zod";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { fetcher } from "@/lib/fetcher";
 import { CardWithList } from "@/types";
+import { LabelPicker } from "../(label)/label-picker";
 
 interface CardOptionsProps {
   id: string;
+  labels: Label[];
 }
 
 // Define the type for AI response
@@ -51,7 +54,7 @@ interface AIResponse {
   todoList: string;
 }
 
-const CardOptions = ({ id }: CardOptionsProps) => {
+const CardOptions = ({ id, labels }: CardOptionsProps) => {
   const params = useParams();
   const queryClient = useQueryClient();
   const cardModal = useCardModal();
@@ -62,6 +65,7 @@ const CardOptions = ({ id }: CardOptionsProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
   const [showAiResponseDialog, setShowAiResponseDialog] = useState(false);
+  const [labelPickerOpen, setLabelPickerOpen] = useState(false);
 
   const { data: cardData } = useQuery<CardWithList>({
     queryKey: ["card", id], // Unique key for caching the card data.
@@ -391,11 +395,18 @@ const CardOptions = ({ id }: CardOptionsProps) => {
               Magic ToDo
             </div>
           </DropdownMenuItem>
+          {/* Label Option */}
+          <DropdownMenuItem onClick={() => setLabelPickerOpen(true)}>
+            <div className="flex items-center gap-2">
+              <Tag className="w-4 h-4" />
+              {`${cardData?.labelId ? "Edit" : "Add"} Label`}
+            </div>
+          </DropdownMenuItem>
           {/* Note Option */}
           <DropdownMenuItem onClick={handleExpandToNote}>
             <div className="flex items-center gap-2">
               <NotebookPen className="w-4 h-4" />
-              {`${cardData?.description ? "Edit" : "Open"} as Note`}
+              {`${cardData?.description ? "Edit" : "Open as"} Note`}
             </div>
           </DropdownMenuItem>
           {/* Calendar Option - Modified to use onClick instead of onSelect */}
@@ -566,6 +577,16 @@ const CardOptions = ({ id }: CardOptionsProps) => {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Label Picker Dialog */}
+      <LabelPicker
+        open={labelPickerOpen}
+        onClose={() => setLabelPickerOpen(false)}
+        cardId={id}
+        boardId={params.boardId as string}
+        currentLabel={cardData?.labelId || null}
+        labels={labels}
+      />
     </div>
   );
 };

@@ -1,12 +1,12 @@
 "use client";
 
-import { Card } from "@prisma/client";
+import { Card, Label } from "@prisma/client";
 import { Draggable } from "@hello-pangea/dnd";
 import CardOptions from "./card-options";
 import { ElementRef, useEffect, useRef, useState } from "react";
 import { updateCard } from "@/actions/update-card";
 import { useParams } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { FormTextarea } from "@/components/form/form-textarea";
@@ -25,6 +25,7 @@ import { DateTimePicker } from "../(date-time-picker)/date-time-picker";
 import { Tooltip } from "@/components/ui/tooltip";
 import { Hint } from "@/components/hint";
 import { useCardModal } from "@/hooks/use-card-modal";
+import { fetcher } from "@/lib/fetcher";
 
 interface CardItemProps {
   data: Card;
@@ -41,6 +42,13 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   const cardModal = useCardModal();
   const formRef = useRef<HTMLFormElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Fetch labels from the API
+  const boardId = params.boardId as string;
+  const { data: labels = [], isLoading } = useQuery<Label[]>({
+    queryKey: ["labels", boardId],
+    queryFn: () => fetcher(`/api/boards/${boardId}/labels`),
+  });
 
   const disableEditing = () => setIsEditing(false);
 
@@ -136,6 +144,11 @@ export const CardItem = ({ data, index }: CardItemProps) => {
       : "text-black font-medium";
   };
 
+  // Find the label object that matches the labelId
+  const labelObj = data.labelId
+    ? labels.find((label) => label.id === data.labelId)
+    : null;
+
   if (isEditing) {
     return (
       <div
@@ -167,7 +180,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           {...provided.dragHandleProps}
           ref={provided.innerRef}
           role="input"
-          className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-3 px-4 text-sm rounded-md shadow-sm w-full bg-background"
+          className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 pt-2 pb-3 px-4 text-sm rounded-md shadow-sm w-full bg-background"
           style={{
             ...provided.draggableProps.style,
             ...(data.color && data.color !== "bg-background"
@@ -175,6 +188,23 @@ export const CardItem = ({ data, index }: CardItemProps) => {
               : {}),
           }}
         >
+          <div className="absolute -right-1.5 -top-1.5">
+            <CardOptions id={data.id} labels={labels} />
+          </div>
+
+          {/* Display Label if it exists */}
+          {data.labelId && labelObj && (
+            <div
+              className="mb-2 px-2 py-0.5 text-xs font-medium rounded self-start"
+              style={{
+                backgroundColor: labelObj.color || "#61bd4f",
+                color: labelObj.color.startsWith("#4") ? "white" : "black",
+              }}
+            >
+              {labelObj.name || "Label"}
+            </div>
+          )}
+
           <div className="flex flex-col mt-3">
             <Hint description={data.description ? "Open Card" : "Rename Card"}>
               <span
@@ -198,7 +228,6 @@ export const CardItem = ({ data, index }: CardItemProps) => {
             )}
             <DateTimePicker data={data} />
           </div>
-          <CardOptions id={data.id} />
         </div>
       )}
     </Draggable>
