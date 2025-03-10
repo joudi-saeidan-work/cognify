@@ -7,7 +7,7 @@ const openai = createOpenAI({
   compatibility: "strict",
 });
 
-const BRAINDUMP_PROMPT = `
+const MAGICTODO_PROMPT = `
 ## Role
 You are a sophisticated document processor that analyzes meeting transcripts and returns structured data. 
 Always maintain the original speaker's tone and preserve all critical details.
@@ -69,17 +69,17 @@ export async function POST(req: Request) {
     console.log("Message Body: ", body.messages);
     const stream = streamText({
       model: openai("gpt-3.5-turbo"),
-      system: BRAINDUMP_PROMPT,
+      system: MAGICTODO_PROMPT,
       messages: body.messages,
       temperature: 0.2,
     });
     // test maxTokens and temperature
     return stream.toDataStreamResponse();
   } catch (error) {
-    console.error("Error in /api/braindump", error);
+    console.error("Error in /api/magictodo", error);
     return NextResponse.json(
       {
-        error: "BrainDump Failed",
+        error: "Magic Todo Failed",
         copingStrategies: [
           "Take 5 deep breaths",
           "Write draft response first",

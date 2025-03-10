@@ -1,10 +1,10 @@
-import { Lightbulb, Medal, Scale } from "lucide-react";
+import { Lightbulb, Medal, Scale, WandSparkles } from "lucide-react";
 import NoteWhiz from "@/app/(platform)/(dashboard)/_components/(ai-agents)/note-whiz";
-import BrainDump from "@/app/(platform)/(dashboard)/_components/(ai-agents)/brain-dump";
 import Judge from "@/app/(platform)/(dashboard)/_components/(ai-agents)/judge";
 import RoutineBuilder from "@/app/(platform)/(dashboard)/_components/(ai-agents)/routine-builder";
 
 import { ReactNode } from "react";
+import MagicTodo from "@/app/(platform)/(dashboard)/_components/(ai-agents)/magic-todo";
 
 export interface AIToolConfig {
   id: string;
@@ -31,12 +31,12 @@ export const AI_TOOLS: AIToolConfig[] = [
     initialMessage: "Ask me questions about your notes",
   },
   {
-    id: "braindump",
-    name: "BrainDump",
+    id: "magic-todo",
+    name: "Magic Todo",
     description: "Need help organizing your thoughts?",
-    icon: Lightbulb,
-    component: BrainDump,
-    apiRoute: "/api/braindump",
+    icon: WandSparkles,
+    component: MagicTodo,
+    apiRoute: "/api/magictodo",
     initialMessage: "Start dumping your thoughts here...",
   },
   {

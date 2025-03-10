@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, RefreshCw, Save } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  X,
+  CheckSquare,
+  ListTodo,
+  WandSparkles,
+} from "lucide-react";
 import { useChat } from "ai/react";
 import { Input } from "@/components/ui/input";
 import { AIToolConfig } from "./ai-tools-config";
@@ -29,13 +36,13 @@ const OrganizedThoughtsSchema = z.object({
   todoList: z.array(z.string()).default([]),
 });
 
-interface BrainDumpProps {
+interface MagicTodoProps {
   onClose: () => void;
   open: boolean;
   config: AIToolConfig;
 }
 
-const BrainDump = ({ onClose, open, config }: BrainDumpProps) => {
+const MagicTodo = ({ onClose, open, config }: MagicTodoProps) => {
   const [inputText, setInputText] = useState("");
   const [editableContent, setEditableContent] = useState({
     title: "",
@@ -187,48 +194,54 @@ const BrainDump = ({ onClose, open, config }: BrainDumpProps) => {
   return (
     <div
       className={cn(
-        "fixed bottom-0 right-0 w-full max-w-[500px] p-6 bg-white border border-gray-200 shadow-lg rounded-t-lg",
+        "fixed bottom-6 right-6 z-[9999] w-full max-w-[500px]",
         open ? "block" : "hidden"
       )}
     >
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold text-gray-800">
-          Quick Brain Dump
-        </h2>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-          ✖
-        </button>
-      </div>
+      <div className="flex flex-col rounded-lg bg-card border border-border shadow-md">
+        {/* Header */}
+        <div className="flex items-center justify-between p-3 border-b border-border">
+          <h3 className="text-lg font-medium flex items-center gap-2">
+            <WandSparkles className="h-5 w-5 text-primary" />
+            Magic Todo
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
 
-      <div className="flex flex-col gap-6">
-        <Textarea
-          value={inputText}
-          onChange={(e) => {
-            setInputText(e.target.value);
-            setInput(e.target.value);
-          }}
-          placeholder="Type or speak your thoughts here..."
-          className="resize-none h-32 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          autoFocus
-          disabled={isLoading}
-        />
+        <div className="p-4 flex flex-col gap-4">
+          <Textarea
+            value={inputText}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              setInput(e.target.value);
+            }}
+            placeholder="Enter your tasks and ideas, I'll organize them..."
+            className="resize-none h-32 bg-background border-border focus-visible:ring-1 focus-visible:ring-primary"
+            autoFocus
+            disabled={isLoading}
+          />
 
-        <div className="flex gap-2">
           <Button
             onClick={handleSubmit}
             disabled={!inputText || isLoading}
-            className="bg-blue-500 hover:bg-blue-600 flex-grow text-white"
+            className="w-full bg-primary hover:bg-primary/90"
           >
             {isLoading ? (
-              <Loader2 className="animate-spin h-4 w-4" />
+              <Loader2 className="animate-spin h-4 w-4 mr-2" />
             ) : (
-              "Organize My Thoughts"
+              <CheckSquare className="mr-2 h-4 w-4" />
             )}
+            Create Magic Todo
           </Button>
         </div>
 
         {editableContent.title && (
-          <div className="space-y-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
+          <div className="border-t border-border p-4 space-y-4">
             <Input
               value={editableContent.title}
               onChange={(e) =>
@@ -237,15 +250,16 @@ const BrainDump = ({ onClose, open, config }: BrainDumpProps) => {
                   title: e.target.value,
                 }))
               }
-              className="font-bold text-lg bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="font-medium text-lg bg-background border-border"
+              placeholder="Title"
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <Select
                 value={selectedBoard}
                 onValueChange={(value) => setSelectedBoard(value)}
               >
-                <SelectTrigger className="border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <SelectTrigger className="border-border bg-background">
                   <SelectValue placeholder="Select a Board" />
                 </SelectTrigger>
                 <SelectContent>
@@ -262,7 +276,7 @@ const BrainDump = ({ onClose, open, config }: BrainDumpProps) => {
                 onValueChange={(value) => setSelectedList(value)}
                 disabled={!selectedBoard}
               >
-                <SelectTrigger className="border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <SelectTrigger className="border-border bg-background">
                   <SelectValue placeholder="Select a List" />
                 </SelectTrigger>
                 <SelectContent>
@@ -285,7 +299,8 @@ const BrainDump = ({ onClose, open, config }: BrainDumpProps) => {
                   category: e.target.value,
                 }))
               }
-              className="italic bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="italic bg-background border-border"
+              placeholder="Category"
             />
 
             <Textarea
@@ -296,7 +311,8 @@ const BrainDump = ({ onClose, open, config }: BrainDumpProps) => {
                   summary: e.target.value,
                 }))
               }
-              className="resize-none bg-white min-h-[100px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="resize-none min-h-[100px] bg-background border-border focus-visible:ring-1 focus-visible:ring-primary"
+              placeholder="Summary"
             />
 
             <Textarea
@@ -308,12 +324,12 @@ const BrainDump = ({ onClose, open, config }: BrainDumpProps) => {
                 }))
               }
               placeholder="Enter tasks separated by commas"
-              className="resize-none bg-white min-h-[80px] border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="resize-none min-h-[80px] bg-background border-border focus-visible:ring-1 focus-visible:ring-primary"
             />
 
             <Button
               onClick={handleSave}
-              className="w-full bg-green-700 hover:bg-green-600 text-white"
+              className="w-full bg-primary hover:bg-primary/90"
             >
               <Save className="mr-2 h-4 w-4" />
               Save to Board
@@ -325,4 +341,4 @@ const BrainDump = ({ onClose, open, config }: BrainDumpProps) => {
   );
 };
 
-export default BrainDump;
+export default MagicTodo;
