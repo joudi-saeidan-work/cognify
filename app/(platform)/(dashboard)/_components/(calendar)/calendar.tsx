@@ -16,7 +16,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 import { useEffect, useState, useRef, useMemo } from "react";
@@ -25,7 +24,6 @@ import {
   EventApi,
   EventClickArg,
   formatDate,
-  EventInput,
 } from "@fullcalendar/core/index.js";
 import { Button } from "@/components/ui/button";
 import {
@@ -69,61 +67,61 @@ const Calendar = ({ boardId }: { boardId: string }) => {
   >("calendar");
   const calendarRef = useRef<FullCalendar | null>(null);
 
-  // Load events from local storage or API when component mounts
+  // Define loadEvents at component level instead of inside useEffect
+  const loadEvents = async () => {
+    try {
+      // Fetch events directly from the API
+      const response = await fetch(`/api/boards/${boardId}/cards`);
+      if (!response.ok) throw new Error("Failed to fetch events");
+
+      const cards = await response.json();
+      const events = cards.map((card: Card) => {
+        const dueDate = card.dueDate ? new Date(card.dueDate) : undefined;
+        const start = card.start ? new Date(card.start) : undefined;
+        const end = card.end ? new Date(card.end) : undefined;
+
+        // Reset dueDate time to midnight
+        if (dueDate) dueDate.setUTCHours(0, 0, 0, 0);
+
+        // Find the list that contains this card
+        const list = boards
+          .find((board) => board.id === boardId)
+          ?.lists.find((list) => list.id === card.listId);
+        const listColor = list?.color || undefined;
+
+        // Debug log to see what's happening
+        console.log(
+          "Card:",
+          card.title,
+          "ListId:",
+          card.listId,
+          "List:",
+          list,
+          "Color:",
+          listColor
+        );
+
+        return {
+          id: card.id,
+          title: card.title,
+          start: start || dueDate, // Use time-specific start if available
+          end: end || dueDate, // Use time-specific end if available
+          allDay: !card.start, // All-day if no start time specified
+          backgroundColor: listColor, // Use list color instead of card color
+          textColor: listColor ? "black" : undefined, // Set text to black when background color exists
+          borderColor: listColor || "transparent", // Match border color to background or make it transparent
+        };
+      });
+
+      // Update state with events
+      dispatch({ type: "SET_EVENTS", payload: events });
+    } catch (error) {
+      console.error("Failed to load events:", error);
+    }
+  };
+
+  // Call loadEvents from useEffect
   useEffect(() => {
-    const loadEvents = async () => {
-      try {
-        // Fetch events directly from the API
-        const response = await fetch(`/api/boards/${boardId}/cards`);
-        if (!response.ok) throw new Error("Failed to fetch events");
-
-        const cards = await response.json();
-        const events = cards.map((card: Card) => {
-          const dueDate = card.dueDate ? new Date(card.dueDate) : undefined;
-          const start = card.start ? new Date(card.start) : undefined;
-          const end = card.end ? new Date(card.end) : undefined;
-
-          // Reset dueDate time to midnight
-          if (dueDate) dueDate.setUTCHours(0, 0, 0, 0);
-
-          // Find the list that contains this card
-          const list = boards
-            .find((board) => board.id === boardId)
-            ?.lists.find((list) => list.id === card.listId);
-          const listColor = list?.color || undefined;
-
-          // Debug log to see what's happening
-          console.log(
-            "Card:",
-            card.title,
-            "ListId:",
-            card.listId,
-            "List:",
-            list,
-            "Color:",
-            listColor
-          );
-
-          return {
-            id: card.id,
-            title: card.title,
-            start: start || dueDate, // Use time-specific start if available
-            end: end || dueDate, // Use time-specific end if available
-            allDay: !card.start, // All-day if no start time specified
-            backgroundColor: listColor, // Use list color instead of card color
-            textColor: listColor ? "black" : undefined, // Set text to black when background color exists
-            borderColor: listColor || "transparent", // Match border color to background or make it transparent
-          };
-        });
-
-        // Update state with events
-        dispatch({ type: "SET_EVENTS", payload: events });
-      } catch (error) {
-        console.error("Failed to load events:", error);
-      }
-    };
-
-    // Only load events if boards data is available
     if (boards.length > 0) {
       loadEvents();
     }
@@ -421,7 +419,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                     height="100%"
                     plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                     headerToolbar={{
-                      left: "prevButton,todayButton,nextButton",
+                      left: "prevButton,todayButton,nextButton,refreshButton",
                       center: "title",
                       right: "dayGridMonth,timeGridWeek,timeGridDay",
                     }}
@@ -534,6 +532,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                           const calendarApi = calendarRef.current?.getApi();
                           calendarApi?.prev();
                         },
+                        hint: "Previous",
                       },
                       nextButton: {
                         text: ">",
@@ -541,6 +540,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                           const calendarApi = calendarRef.current?.getApi();
                           calendarApi?.next();
                         },
+                        hint: "Next",
                       },
                       todayButton: {
                         text: "Today",
@@ -548,6 +548,12 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                           const calendarApi = calendarRef.current?.getApi();
                           calendarApi?.today();
                         },
+                        hint: "Today",
+                      },
+                      refreshButton: {
+                        text: "↻",
+                        click: loadEvents,
+                        hint: "Refresh Calendar",
                       },
                     }}
                     slotLabelInterval="01:00"
