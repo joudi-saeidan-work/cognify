@@ -451,3 +451,95 @@ pre {
     @apply bg-background text-foreground;
   }
 }
+
+/* Dark mode calendar styles */
+.dark .fc-button {
+  background-color: #2d3748 !important;
+  color: #e2e8f0 !important;
+  border-color: #4a5568 !important;
+}
+
+.dark .fc-button:hover {
+  background-color: #4a5568 !important;
+}
+
+.dark .fc-button-active {
+  background-color: #6366f1 !important;
+  color: white !important;
+  border-color: #6366f1 !important;
+}
+
+.dark .fc-toolbar-title {
+  color: #e2e8f0;
+}
+
+.dark .fc-day-today {
+  background-color: rgba(99, 102, 241, 0.2) !important;
+}
+
+.dark .fc-col-header-cell {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+.dark .fc-daygrid-day-number {
+  color: #e2e8f0;
+}
+
+.dark .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  background-color: #6366f1;
+}
+
+.dark .fc-timegrid-slot-label {
+  color: #e2e8f0;
+}
+
+.dark .fc-list-day-cushion {
+  background-color: #2d3748;
+}
+
+.dark .fc-list-event:hover td {
+  background-color: #4a5568;
+}
+
+.dark .fc-theme-standard .fc-list-day-cushion {
+  background-color: #2d3748;
+}
+
+.dark .fc-theme-standard td,
+.dark .fc-theme-standard th {
+  border-color: #4a5568;
+}
+
+.dark .fc-theme-standard .fc-scrollgrid {
+  border-color: #4a5568;
+}
+
+/* Tooltip for refresh button - dark mode compatible */
+.fc .fc-button.fc-refreshButton-button::after {
+  content: "Refresh Calendar";
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+}
+
+.fc .fc-button.fc-refreshButton-button:hover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Dark mode tooltip styling */
+.dark .fc .fc-button::after {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: black;
+}

@@ -67,10 +67,29 @@ const Calendar = ({ boardId }: { boardId: string }) => {
   >("calendar");
   const calendarRef = useRef<FullCalendar | null>(null);
 
-  // Define loadEvents at component level instead of inside useEffect
-  const loadEvents = async () => {
+  // Add a function to fetch boards that can be called from multiple places
+  const fetchBoards = async () => {
     try {
-      // Fetch events directly from the API
+      const response = await fetch("/api/get-boards");
+      if (!response.ok) throw new Error("Failed to fetch boards");
+      const data = await response.json();
+      setBoards(data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching boards:", error);
+      return null;
+    }
+  };
+
+  // Enhance loadEvents to have a parameter that prevents re-fetching boards
+  const loadEvents = async (skipBoardFetch = false) => {
+    try {
+      // Only fetch boards if not skipped
+      if (!skipBoardFetch) {
+        await fetchBoards();
+      }
+
+      // Then fetch events as normal
       const response = await fetch(`/api/boards/${boardId}/cards`);
       if (!response.ok) throw new Error("Failed to fetch events");
 
@@ -120,24 +139,25 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     }
   };
 
-  // Call loadEvents from useEffect
+  // In the boards effect, pass true to skip board fetching
   useEffect(() => {
     if (boards.length > 0) {
-      loadEvents();
+      loadEvents(true); // Skip fetching boards since we already have them
     }
   }, [boardId, dispatch, boards]);
 
+  // In interval, use normal loadEvents (will fetch boards)
   useEffect(() => {
-    async function fetchBoards() {
-      try {
-        const response = await fetch("/api/get-boards");
-        const data = await response.json();
-        setBoards(data);
-      } catch (error) {
-        console.error("Error fetching boards:", error);
-      }
-    }
+    // Initial fetch
     fetchBoards();
+
+    // Set up interval for auto-refresh (30 seconds)
+    const intervalId = setInterval(() => {
+      console.log("Auto-refreshing boards and lists");
+      loadEvents(); // This will fetch boards and then events
+    }, 30000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -349,6 +369,10 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     }
   };
 
+  const handleRefreshClick = (ev: MouseEvent, element: HTMLElement) => {
+    loadEvents(); // Call loadEvents with default parameter (false)
+  };
+
   return (
     <div>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -552,7 +576,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                       },
                       refreshButton: {
                         text: "↻",
-                        click: loadEvents,
+                        click: handleRefreshClick,
                         hint: "Refresh Calendar",
                       },
                     }}

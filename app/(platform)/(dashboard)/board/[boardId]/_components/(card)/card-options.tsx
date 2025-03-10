@@ -146,7 +146,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
   };
 
   const handleMagicTodo = async () => {
-    const responseText = `Title: ${cardData?.title}\nDescription: ${cardData?.description}\nDue Date: ${cardData?.dueDate}`;
+    const responseText = `Here's my transcript + \n\n + ${cardData?.title} +  \n\n + ${cardData?.description} +  \n\n + Date: ${cardData?.dueDate}`;
     const braindumpResponse = await fetch("/api/audio-recorder", {
       method: "POST",
       headers: {
