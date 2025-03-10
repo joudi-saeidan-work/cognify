@@ -76,88 +76,50 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
   }, [debouncedTimeState]);
 
   // Update local state and timeState together
-  const handleDateChange = (newDate: Date | undefined) => {
-    if (newDate) {
-      // Create pure date (midnight UTC)
-      newDate.setUTCHours(0, 0, 0, 0);
+  const handleTimeChange = (
+    newDate: Date | null,
+    type: "start" | "end" | "dueDate"
+  ) => {
+    // If updating start time, ensure it's not after end time
+    if (type === "start" && newDate && endDate) {
+      if (newDate > endDate) {
+        // If new start time is after current end time, adjust end time
+        const adjustedEnd = new Date(newDate);
+        adjustedEnd.setMinutes(adjustedEnd.getMinutes() + 30); // Add 30 minutes as buffer
+        setEndDate(adjustedEnd);
+
+        // Update timeState with both the new start and adjusted end
+        setTimeState({
+          ...timeState,
+          start: newDate,
+          end: adjustedEnd,
+        });
+        return;
+      }
+    }
+
+    // If updating end time, ensure it's not before start time
+    if (type === "end" && newDate && startDate) {
+      if (newDate < startDate) {
+        toast.error("End time cannot be before start time");
+        return; // Don't update state with invalid end time
+      }
+    }
+
+    // Normal flow for valid time updates
+    if (type === "start") {
+      setStartDate(newDate);
+    } else if (type === "end") {
+      setEndDate(newDate);
+    } else {
       setDate(newDate);
-
-      // Preserve existing times but apply to new date
-      let newStart = null;
-      let newEnd = null;
-
-      if (startDate) {
-        newStart = new Date(newDate);
-        newStart.setHours(startDate.getHours(), startDate.getMinutes(), 0, 0);
-      }
-
-      if (endDate) {
-        newEnd = new Date(newDate);
-        newEnd.setHours(endDate.getHours(), endDate.getMinutes(), 0, 0);
-      }
-
-      setStartDate(newStart);
-      setEndDate(newEnd);
-
-      // Update the timeState (this will eventually trigger the server action after debounce)
-      setTimeState({
-        dueDate: newDate,
-        start: newStart,
-        end: newEnd,
-        allDay: !newStart,
-      });
-    }
-  };
-
-  const handleStartTimeChange = (newStartDate: Date | null) => {
-    setStartDate(newStartDate);
-
-    // If clearing start time, also clear end time
-    if (!newStartDate) {
-      setEndDate(null);
     }
 
-    // Combine the date with time
-    let combinedStart = null;
-    if (newStartDate && date) {
-      combinedStart = new Date(date);
-      combinedStart.setHours(
-        newStartDate.getHours(),
-        newStartDate.getMinutes(),
-        0,
-        0
-      );
-    }
-
-    // Update the timeState
-    setTimeState((prev) => ({
-      ...prev,
-      start: combinedStart,
-      end: newStartDate ? prev.end : null,
-      allDay: !newStartDate,
-    }));
-  };
-
-  const handleEndTimeChange = (newEndDate: Date | null) => {
-    setEndDate(newEndDate);
-
-    // Combine the date with time
-    let combinedEnd = null;
-    if (newEndDate && date) {
-      combinedEnd = new Date(date);
-      combinedEnd.setHours(
-        newEndDate.getHours(),
-        newEndDate.getMinutes(),
-        0,
-        0
-      );
-    }
-
-    // Update the timeState
-    setTimeState((prev) => ({
-      ...prev,
-      end: combinedEnd,
-    }));
+    // Update timeState with the new values
+    setTimeState({
+      ...timeState,
+      [type]: newDate,
+    });
   };
 
   const handleClear = () => {
@@ -173,8 +135,6 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
     setStartDate(null);
     setEndDate(null);
     setTimeState(clearedState);
-
-    // Don't call executeCardUpdate here - let the effect handle it
   };
 
   const { execute: executeCardUpdate, isLoading } = useAction(updateCard, {
@@ -199,7 +159,6 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
     },
   });
 
-  // Sync with incoming data changes
   React.useEffect(() => {
     setDate(data.dueDate ? new Date(data.dueDate) : null);
     setStartDate(data.start ? new Date(data.start) : null);
@@ -213,10 +172,16 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
     });
   }, [data.dueDate, data.start, data.end]);
 
-  const getTextColor = () => {
-    if (data?.color && data?.color !== "bg-background")
-      return "text-neutral-700";
-    return "text-foreground";
+  const handleDateSelect = (newDate: Date | undefined) => {
+    handleTimeChange(newDate || null, "dueDate");
+  };
+
+  const handleStartChange = (date: Date | null) => {
+    handleTimeChange(date, "start");
+  };
+
+  const handleEndChange = (date: Date | null) => {
+    handleTimeChange(date, "end");
   };
 
   return (
@@ -227,7 +192,7 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
             <Calendar
               mode="single"
               selected={date || undefined}
-              onSelect={handleDateChange}
+              onSelect={handleDateSelect}
               initialFocus
             />
             {date && (
@@ -238,9 +203,9 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
                     setDate={setDate}
                     allDay={!startDate}
                     startDate={startDate}
-                    setStartDate={handleStartTimeChange}
+                    setStartDate={handleStartChange}
                     endDate={endDate}
-                    setEndDate={handleEndTimeChange}
+                    setEndDate={handleEndChange}
                   />
                 </div>
                 <div className="p-3 border-t border-border">
