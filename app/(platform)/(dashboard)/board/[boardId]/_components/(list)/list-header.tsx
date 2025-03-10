@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useEventListener } from "usehooks-ts";
 import { ListOptions } from "./list-options";
 import { useTheme } from "next-themes";
+import { Loader2 } from "lucide-react";
 
 interface ListHeaderProps {
   data: List;
@@ -30,7 +31,7 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
     });
   };
 
-  const { execute, fieldErrors } = useAction(updateList, {
+  const { execute, fieldErrors, isLoading } = useAction(updateList, {
     onSuccess: (data) => {
       toast.success(`Renamed to "${data.title}"`);
       setTitle(data.title);
@@ -70,9 +71,13 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
   };
 
   return (
-    <div className="pt-2 pb-2 px-2 text-sm font-semibold flex  justify-between items-start gap-x-2">
+    <div className="pt-2 pb-2 px-2 text-sm font-semibold flex justify-between items-start gap-x-2">
       {isEditing ? (
-        <form ref={formRef} action={handleSubmit} className="flex-1 px-[2px]">
+        <form
+          ref={formRef}
+          action={handleSubmit}
+          className="flex-1 px-[2px] relative"
+        >
           <input hidden id="id" name="id" value={data.id} />
           <input hidden id="boardId" name="boardId" value={data.boardId} />
           <FormInput
@@ -82,8 +87,14 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
             id="title"
             placeholder="Enter list title.."
             defaultValue={title}
+            disabled={isLoading}
             className={`text-sm px-[7px] py-1 h-7 font-semibold border-transparent hover:border-input focus:border-input transition truncate bg-transparent ${getTextColor()}`}
           />
+          {isLoading && (
+            <div className="absolute right-1 top-1">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+            </div>
+          )}
           <button type="submit" hidden />
         </form>
       ) : (

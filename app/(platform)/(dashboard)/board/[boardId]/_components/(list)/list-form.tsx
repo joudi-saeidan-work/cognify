@@ -1,7 +1,7 @@
 "use client";
 
 import { toast } from "sonner";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Loader2 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useRef, ElementRef } from "react";
 import { useEventListener, useOnClickOutside } from "usehooks-ts";
@@ -33,7 +33,7 @@ export const ListForm = () => {
     setIsEditing(false);
   };
 
-  const { execute, fieldErrors } = useAction(createList, {
+  const { execute, fieldErrors, isLoading } = useAction(createList, {
     onSuccess: (data) => {
       toast.success(`List "${data.title}" created`);
       disableEditing();
@@ -73,11 +73,26 @@ export const ListForm = () => {
             id="title"
             className="text-sm px-2 py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition bg-background/60"
             placeholder="Enter list title..."
+            disabled={isLoading}
           />
           <input hidden value={params.boardId} name="boardId" />
           <div className="flex items-center gap-x-1">
-            <FormSubmit>Add a list</FormSubmit>
-            <Button onClick={disableEditing} size="sm" variant="ghost">
+            <FormSubmit disabled={isLoading}>
+              {isLoading ? (
+                <div className="flex items-center gap-x-1">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Creating...</span>
+                </div>
+              ) : (
+                "Add a list"
+              )}
+            </FormSubmit>
+            <Button
+              onClick={disableEditing}
+              size="sm"
+              variant="ghost"
+              disabled={isLoading}
+            >
               <X className="h-5 w-5" />
             </Button>
           </div>

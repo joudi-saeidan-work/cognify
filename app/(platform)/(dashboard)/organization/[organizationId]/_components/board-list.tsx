@@ -14,10 +14,16 @@ interface BoardListProps {
 const BoardList: React.FC<BoardListProps> = ({ boards }) => {
   // const [favoriteBoards, setFavoriteBoards] = useState<string[]>([]);
   const [showFavorites, setShowFavorites] = useState(false); // track if we want to show fav boards
+  const [loadingBoardId, setLoadingBoardId] = useState<string | null>(null);
 
   const displayedBoards = showFavorites
     ? boards.filter((board) => board.isFavorite === true)
     : boards;
+
+  // Function to handle board selection and loading state
+  const handleBoardClick = (boardId: string) => {
+    setLoadingBoardId(boardId);
+  };
 
   return (
     <div className="space-y-4">
@@ -58,7 +64,12 @@ const BoardList: React.FC<BoardListProps> = ({ boards }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {displayedBoards.length > 0 ? (
           displayedBoards.map((board) => (
-            <BoardItem key={board.id} board={board} />
+            <BoardItem
+              key={board.id}
+              board={board}
+              isLoading={loadingBoardId === board.id}
+              onBoardClick={handleBoardClick}
+            />
           ))
         ) : (
           <p className="text-gray-500 text-center col-span-full">

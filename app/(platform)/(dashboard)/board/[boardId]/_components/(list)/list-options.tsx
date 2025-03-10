@@ -7,7 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Brush, MoreHorizontal } from "lucide-react";
+import { Brush, MoreHorizontal, Loader2 } from "lucide-react";
 import { FormSubmit } from "@/components/form/form-submit";
 import { useAction } from "@/hooks/use-actions";
 import { deleteList } from "@/actions/delete-list";
@@ -18,6 +18,7 @@ import { Copy, Trash, Plus } from "lucide-react";
 import { updateList } from "@/actions/update-list";
 import { useParams } from "next/navigation";
 import { updateCards } from "@/actions/update-cards";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 interface ListOptionsProps {
   data: List;
@@ -58,17 +59,20 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
     onUpdateList(color.list);
   };
 
-  const { execute: executeDelete } = useAction(deleteList, {
-    onSuccess: (data) => {
-      toast.success(`List "${data.title}" deleted.`);
-      closeRef.current?.click();
-    },
-    onError: (error) => {
-      toast.error(error);
-    },
-  });
+  const { execute: executeDelete, isLoading: isDeleting } = useAction(
+    deleteList,
+    {
+      onSuccess: (data) => {
+        toast.success(`List "${data.title}" deleted.`);
+        closeRef.current?.click();
+      },
+      onError: (error) => {
+        toast.error(error);
+      },
+    }
+  );
 
-  const { execute: executeCopy } = useAction(copyList, {
+  const { execute: executeCopy, isLoading: isCopying } = useAction(copyList, {
     onSuccess: (data) => {
       toast.success(`List "${data.title}" copied. `);
       closeRef.current?.click();
@@ -78,25 +82,33 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
     },
   });
 
-  const { execute: executeUpdateList } = useAction(updateList, {
-    onSuccess: (data) => {
-      toast.success(`List color "${data.title}" updated. `);
-      closeRef.current?.click();
-    },
-    onError: (error) => {
-      toast.error(error);
-    },
-  });
+  const { execute: executeUpdateList, isLoading: isUpdatingList } = useAction(
+    updateList,
+    {
+      onSuccess: (data) => {
+        toast.success(`List color "${data.title}" updated. `);
+        closeRef.current?.click();
+      },
+      onError: (error) => {
+        toast.error(error);
+      },
+    }
+  );
 
-  const { execute: executeUpdateCards } = useAction(updateCards, {
-    onSuccess: () => {
-      toast.success(`Card Color updated! `);
-      closeRef.current?.click();
-    },
-    onError: (error) => {
-      toast.error(error);
-    },
-  });
+  const { execute: executeUpdateCards, isLoading: isUpdatingCards } = useAction(
+    updateCards,
+    {
+      onSuccess: () => {
+        toast.success(`Card Color updated! `);
+        closeRef.current?.click();
+      },
+      onError: (error) => {
+        toast.error(error);
+      },
+    }
+  );
+
+  const isUpdatingColor = isUpdatingList || isUpdatingCards;
 
   const onCopy = (formData: FormData) => {
     const id = formData.get("id") as string;
@@ -111,7 +123,6 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
   };
 
   const onUpdateList = (listColor: string) => {
-    // How do we get the board id and the card id if we don't have form data
     const boardId = params.boardId as string;
 
     executeUpdateList({
@@ -123,7 +134,6 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
   };
 
   const onUpdateCard = (cardColor: string) => {
-    // How do we get the board id and the card id if we don't have form data
     const boardId = params.boardId as string;
 
     executeUpdateCards({
@@ -138,6 +148,7 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
       return "text-neutral-700";
     return "text-foreground";
   };
+
   return (
     <>
       {/* color  */}
@@ -146,8 +157,13 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
           <Button
             className={`h-auto w-auto p-2 hover:bg-transparent ${getTextColor()}`}
             variant="ghost"
+            disabled={isUpdatingColor}
           >
-            <Brush className="w-4 h-4" />
+            {isUpdatingColor ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Brush className="w-4 h-4" />
+            )}
           </Button>
         </PopoverTrigger>
         <PopoverContent
@@ -160,7 +176,9 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
             {colors.map(({ card, list }, index) => (
               <div
                 key={index}
-                className="w-8 h-8 relative cursor-pointer"
+                className={`w-8 h-8 relative cursor-pointer ${
+                  isUpdatingColor ? "opacity-50 pointer-events-none" : ""
+                }`}
                 onClick={() => handleColorSelect({ card, list })}
               >
                 {/* ListColorBlock */}
@@ -181,8 +199,15 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
               </div>
             ))}
           </div>
+          {isUpdatingColor && (
+            <div className="flex justify-center mt-2">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-xs ml-1">Updating colors...</span>
+            </div>
+          )}
         </PopoverContent>
       </Popover>
+
       {/* options */}
       <Popover>
         <PopoverTrigger asChild>
@@ -206,23 +231,45 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
             <input hidden name="id" id="id" value={data.id} />
             <input hidden name="boardId" id="boardId" value={data.boardId} />
             <FormSubmit
-              className="flex items-center gap-2 rounded-sm w-full h-full  px-2 py-1.5  justify-start font-normal text-sm"
+              className="flex items-center gap-2 rounded-sm w-full h-full px-2 py-1.5 justify-start font-normal text-sm"
               variant="ghost"
+              disabled={isCopying}
             >
-              <Copy />
-              Copy List
+              {isCopying ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Copying...
+                </>
+              ) : (
+                <>
+                  <Copy />
+                  Copy List
+                </>
+              )}
             </FormSubmit>
           </form>
           <form action={onDelete}>
             <input hidden name="id" id="id" value={data.id} />
             <input hidden name="boardId" id="boardId" value={data.boardId} />
             <FormSubmit
-              className="flex items-center gap-2 text-red-500 rounded-sm w-full h-full  px-2 py-1.5 justify-start font-normal text-sm"
+              className="flex items-center gap-2 text-red-500 rounded-sm w-full h-full px-2 py-1.5 justify-start font-normal text-sm"
               variant="ghost"
+              disabled={isDeleting}
             >
-              <Trash /> Delete List
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash />
+                  Delete List
+                </>
+              )}
             </FormSubmit>
           </form>
+          <PopoverClose ref={closeRef} className="hidden" />
         </PopoverContent>
       </Popover>
     </>
