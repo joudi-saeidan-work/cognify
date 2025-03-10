@@ -160,7 +160,21 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   const getTextColor = () => {
     if (data?.color && data?.color !== "bg-background")
       return "text-neutral-700";
-    return "text-foreground";
+    // Use Tailwind classes for theme compatibility
+    return "text-foreground dark:text-gray-200";
+  };
+
+  // Get a default card background color that's different from the list
+  const getCardBackground = () => {
+    // If card has a specific color, use that
+    if (data.color && data.color !== "bg-background") {
+      return { backgroundColor: data.color };
+    }
+
+    // Use a CSS variable approach for theme-aware backgrounds
+    return {
+      backgroundColor: "var(--card-bg-color)",
+    };
   };
 
   // Find the label object that matches the labelId
@@ -171,8 +185,8 @@ export const CardItem = ({ data, index }: CardItemProps) => {
   if (isEditing) {
     return (
       <div
-        className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 py-2 px-3 text-sm rounded-md shadow-md w-full"
-        style={data.color ? { backgroundColor: data.color } : undefined}
+        className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 dark:hover:border-white/30 py-2 px-3 text-sm rounded-md shadow-md w-full"
+        style={getCardBackground()}
       >
         <form ref={formRef} action={onSubmit} className="w-full">
           <FormTextarea
@@ -202,9 +216,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 dark:hover:border-white/30 pt-2 pb-3 px-4 text-sm rounded-md shadow-sm w-full"
           style={{
             ...provided.draggableProps.style,
-            ...(data.color && data.color !== "bg-background"
-              ? { backgroundColor: data.color }
-              : {}),
+            ...getCardBackground(),
           }}
         >
           <div className="absolute -right-1.5 -top-1.5">

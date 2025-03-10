@@ -15,6 +15,7 @@ import {
   NotebookPen,
   WandSparkles,
   Tag,
+  CalendarPlus,
 } from "lucide-react";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -322,7 +323,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
             </div>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setDatePickerOpen(true)}>
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarPlus className="h-4 w-4" />
             {cardData?.dueDate ? "Edit Due Date" : "Set Due Date"}
           </DropdownMenuItem>
           <Separator className="my-2" />

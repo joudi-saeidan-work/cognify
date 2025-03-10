@@ -117,10 +117,38 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
     }, [isRecording]);
 
     const getTextColor = () => {
-      if (color && color != "bg-background") {
+      // Special case for when recording is active
+      if (isRecording) {
+        return "text-neutral-900 dark:text-white";
+      }
+
+      // For colored cards, keep current behavior
+      if (color && color !== "bg-background") {
         return "text-neutral-700";
       }
-      return "text-foreground";
+
+      // For non-colored cards, use Tailwind's dark mode
+      return "text-neutral-800 dark:text-gray-200";
+    };
+
+    // Get recording background color using Tailwind's dark mode
+    const getRecordingBackground = () => {
+      return "bg-red-50 dark:bg-red-900/20";
+    };
+
+    // Get the textarea background color
+    const getTextareaBackground = () => {
+      // If color was provided, use that
+      if (color && color !== "bg-background") {
+        return { backgroundColor: color };
+      }
+
+      // if editing with no color, use the list background color
+      if (isEditing) {
+        return {
+          backgroundColor: "var(--list-bg-color)",
+        };
+      }
     };
 
     const handleTranscriptionUpdate = (text: string) => {
@@ -161,7 +189,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
                 isRecording ? "Listening..." : "Write anything or speak..."
               }
               className={`resize-none relative flex flex-col justify-between border-none hover:border-black/20 py-2 px-3 pb-10 text-sm rounded-md shadow-none w-full ${getTextColor()} ${
-                isRecording ? "bg-red-50" : ""
+                isRecording ? getRecordingBackground() : ""
               }`}
               readOnly={isRecording}
             />
@@ -182,7 +210,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
       <div className="pt-2 px-2 ">
         <Button
           className={`whitespace-pre-wrap h-auto px-2 py-1.5 w-full justify-start text-sm ${getTextColor()}`}
-          style={{ backgroundColor: color || undefined }}
+          style={getTextareaBackground()}
           size="sm"
           variant="ghost"
           onClick={enableEditing}
