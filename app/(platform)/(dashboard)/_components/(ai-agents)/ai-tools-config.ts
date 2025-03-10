@@ -1,10 +1,21 @@
-import { Lightbulb, Medal, Scale, WandSparkles } from "lucide-react";
+import {
+  Feather,
+  Lightbulb,
+  Medal,
+  Scale,
+  WandSparkles,
+  BookOpen,
+  Briefcase,
+} from "lucide-react";
 import NoteWhiz from "@/app/(platform)/(dashboard)/_components/(ai-agents)/note-whiz";
-import Judge from "@/app/(platform)/(dashboard)/_components/(ai-agents)/judge";
 import RoutineBuilder from "@/app/(platform)/(dashboard)/_components/(ai-agents)/routine-builder";
 
 import { ReactNode } from "react";
 import MagicTodo from "@/app/(platform)/(dashboard)/_components/(ai-agents)/magic-todo";
+import Formalizer from "./formalizer";
+import Professor from "@/app/(platform)/(dashboard)/_components/(ai-agents)/professor";
+import Consultant from "@/app/(platform)/(dashboard)/_components/(ai-agents)/consultant";
+import Judge from "./judge";
 
 export interface AIToolConfig {
   id: string;
@@ -40,16 +51,34 @@ export const AI_TOOLS: AIToolConfig[] = [
     initialMessage: "Start dumping your thoughts here...",
   },
   {
-    id: "judge",
-    name: "Judge",
-    description: "Am I misreading the tone of this?",
-    icon: Scale,
-    component: Judge,
-    apiRoute: "/api/judge",
-    initialMessage: "Start dumping your thoughts here...",
+    id: "formalizer",
+    name: "Text Formalizer",
+    description: "Need to polish your writing?",
+    icon: Feather,
+    component: Formalizer,
+    apiRoute: "/api/formalizer",
+    initialMessage: "Enter text to reformulate...",
   },
   {
-    id: "routine builder",
+    id: "professor",
+    name: "The Professor",
+    description: "Want to learn something new?",
+    icon: BookOpen,
+    component: Professor,
+    apiRoute: "/api/professor",
+    initialMessage: "What do you want to learn about?",
+  },
+  {
+    id: "consultant",
+    name: "The Consultant",
+    description: "Need help with a decision?",
+    icon: Briefcase,
+    component: Consultant,
+    apiRoute: "/api/consultant",
+    initialMessage: "Describe your situation...",
+  },
+  {
+    id: "routine-builder",
     name: "RoutineBuilder",
     description: "Want to stay productive?",
     icon: Medal,
