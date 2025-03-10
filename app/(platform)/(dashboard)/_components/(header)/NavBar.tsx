@@ -8,7 +8,6 @@ import { dark } from "@clerk/themes";
 import { UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "../../../../../components/ThemeModeToggle";
-import AssistanceButton from "../(ai-agents)/assitance-button";
 import { Separator } from "@/components/ui/separator";
 // Main NavBar component definition
 const NavBar = () => {
@@ -31,7 +30,6 @@ const NavBar = () => {
         </div>
       </div>
       <div className="ml-auto flex items-center gap-x-2">
-        <AssistanceButton />
         <Separator orientation="vertical" className="h-6 dark:bg-muted" />
         <ThemeToggle
           colorBlindMode={colorBlindMode}
