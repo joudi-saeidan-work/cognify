@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bot } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -17,14 +17,54 @@ const AssistanceButton = () => {
   const [open, setIsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // Handle dropdown item click
+  const handleToolClick = (toolId: string) => {
+    if (activeTool === toolId && open) {
+      // If clicking the same tool that's already open, close it
+      setIsOpen(false);
+      setActiveTool(null);
+    } else {
+      // Otherwise, open the clicked tool
+      setIsOpen(true);
+      setActiveTool(toolId);
+    }
+    setMenuOpen(false);
+  };
+
+  // Handle main button click when there's an active tool
+  const handleMainButtonClick = () => {
+    if (activeTool && open) {
+      // If there's an active tool, close it first before opening menu
+      setIsOpen(false);
+      setActiveTool(null);
+      // Small delay before opening menu to avoid UI flicker
+      setTimeout(() => setMenuOpen(true), 100);
+    } else {
+      // Normal behavior - toggle dropdown menu
+      setMenuOpen(!menuOpen);
+    }
+  };
+
   return (
     <>
       {/* Floating button in bottom-right corner */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+      <div className="fixed bottom-6 right-6 z-[9998]">
+        <DropdownMenu
+          open={menuOpen}
+          onOpenChange={(isOpen) => {
+            // Only allow the dropdown menu state to be controlled by our handlers
+            if (!isOpen) setMenuOpen(false);
+          }}
+        >
           <DropdownMenuTrigger asChild>
             <motion.button
-              className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-md hover:shadow-lg transition-all"
+              onClick={handleMainButtonClick}
+              className={cn(
+                "flex items-center justify-center w-12 h-12 rounded-full shadow-md hover:shadow-lg transition-all",
+                activeTool
+                  ? "bg-primary/90 text-primary-foreground"
+                  : "bg-primary text-primary-foreground"
+              )}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -36,12 +76,11 @@ const AssistanceButton = () => {
             {AI_TOOLS.map((tool) => (
               <DropdownMenuItem
                 key={tool.id}
-                onClick={() => {
-                  setIsOpen(true);
-                  setActiveTool(tool.id);
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2"
+                onClick={() => handleToolClick(tool.id)}
+                className={cn(
+                  "flex items-center gap-2",
+                  activeTool === tool.id && "bg-muted"
+                )}
               >
                 <tool.icon size={16} />
                 {tool.description}
@@ -56,22 +95,15 @@ const AssistanceButton = () => {
         {AI_TOOLS.map(
           (tool) =>
             activeTool === tool.id && (
-              <motion.div
+              <tool.component
                 key={tool.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.2 }}
-              >
-                <tool.component
-                  open={open}
-                  onClose={() => {
-                    setIsOpen(false);
-                    setActiveTool(null);
-                  }}
-                  config={tool}
-                />
-              </motion.div>
+                open={open}
+                onClose={() => {
+                  setIsOpen(false);
+                  setActiveTool(null);
+                }}
+                config={tool}
+              />
             )
         )}
       </AnimatePresence>
