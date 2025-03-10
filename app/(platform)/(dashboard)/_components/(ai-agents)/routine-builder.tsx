@@ -114,14 +114,6 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
     },
   });
 
-  const handleDayToggle = (day: string) => {
-    if (daysAvailable.includes(day)) {
-      setDaysAvailable(daysAvailable.filter((d) => d !== day));
-    } else {
-      setDaysAvailable([...daysAvailable, day]);
-    }
-  };
-
   const handleChallengeToggle = (challenge: string) => {
     if (challenges.includes(challenge)) {
       setChallenges(challenges.filter((c) => c !== challenge));
@@ -196,35 +188,6 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
                     value={goal}
                     onChange={(e) => setGoal(e.target.value)}
                   />
-                </div>
-
-                {/* Days Available */}
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-medium block">
-                    Which days can you commit to this goal?
-                  </Label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {DAYS.map((day, index) => (
-                      <button
-                        key={day}
-                        type="button"
-                        onClick={() => handleDayToggle(day)}
-                        className={cn(
-                          "py-1 px-2 rounded-md text-xs font-medium transition-colors",
-                          daysAvailable.includes(day)
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                        )}
-                      >
-                        {SHORT_DAYS[index]}
-                      </button>
-                    ))}
-                  </div>
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    {daysAvailable.length === 0
-                      ? "If none selected, all days will be considered."
-                      : `Selected: ${daysAvailable.length} days`}
-                  </p>
                 </div>
 
                 {/* Challenges */}
