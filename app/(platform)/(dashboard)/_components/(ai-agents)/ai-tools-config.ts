@@ -78,7 +78,7 @@ export const AI_TOOLS: AIToolConfig[] = [
     initialMessage: "Describe your situation...",
   },
   {
-    id: "routine-builder",
+    id: "routinebuilder",
     name: "RoutineBuilder",
     description: "Want to stay productive?",
     icon: Medal,

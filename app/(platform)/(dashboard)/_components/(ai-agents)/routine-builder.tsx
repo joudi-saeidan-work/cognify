@@ -1,42 +1,29 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
-import { useChat } from "ai/react";
-import { toast } from "sonner";
-import { z } from "zod";
-import { cn } from "@/lib/utils";
-import { AIToolConfig } from "./ai-tools-config";
-import { Select } from "@radix-ui/react-select";
 import {
+  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarPlus } from "lucide-react";
-
-// Updated schema to match AI response structure
-const RoutineResultSchema = z.object({
-  totalDuration: z.string(),
-  milestones: z.array(
-    z.object({
-      phase: z.string(),
-      goal: z.string(),
-    })
-  ),
-  weeklyRoutine: z.record(
-    z.array(
-      z.object({
-        task: z.string(),
-        duration: z.string(),
-      })
-    )
-  ),
-  estimatedCompletionTime: z.string(),
-  tips: z.array(z.string()),
-});
-
-type RoutineResult = z.infer<typeof RoutineResultSchema>;
+import {
+  CalendarPlus,
+  Medal,
+  Loader2,
+  X,
+  Calendar,
+  Clock,
+  LightbulbIcon,
+  CheckCircle2,
+} from "lucide-react";
+import { useChat } from "ai/react";
+import { AIToolConfig } from "./ai-tools-config";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface RoutineBuilderProps {
   onClose: () => void;
@@ -44,26 +31,36 @@ interface RoutineBuilderProps {
   config: AIToolConfig;
 }
 
+interface RoutineMilestone {
+  phase: string;
+  goal: string;
+}
+
+interface RoutineTask {
+  task: string;
+  duration: string;
+}
+
+interface RoutineResult {
+  estimatedCompletionTime: string;
+  milestones: RoutineMilestone[];
+  weeklyRoutine: { [key: string]: RoutineTask[] };
+  tips: string[];
+}
+
 const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
   // -- Form Input States --
   const [goal, setGoal] = useState("");
-  const [timeAvailable, setTimeAvailable] = useState("");
-  const [timeframeNumber, setTimeframeNumber] = useState("");
-  const [timeframeUnit, setTimeframeUnit] = useState("");
   const [daysAvailable, setDaysAvailable] = useState<string[]>([]);
-  const [dailyCommitment, setDailyCommitment] = useState(false);
-  const [highEnergyDays, setHighEnergyDays] = useState<string[]>([]);
-  const [lowEnergyDays, setLowEnergyDays] = useState<string[]>([]);
-  const [preferredWorkTime, setPreferredWorkTime] = useState("");
   const [challenges, setChallenges] = useState<string[]>([]);
-  const [motivationPreferences, setMotivationPreferences] = useState<string[]>(
-    []
-  );
 
   // -- Result State --
   const [routineResult, setRoutineResult] = useState<RoutineResult | null>(
     null
   );
+
+  // Add this with your other state variables
+  const [loading, setLoading] = useState(false);
 
   const DAYS = [
     "Monday",
@@ -74,453 +71,306 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
     "Saturday",
     "Sunday",
   ];
+  const SHORT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  const WORK_TIME_OPTIONS = [
-    "Morning (6am-12pm)",
-    "Afternoon (12pm-5pm)",
-    "Evening (5pm-9pm)",
-    "Night (9pm-12am)",
-    "Flexible",
-  ];
-
-  const MOTIVATION_OPTIONS = [
-    "Gamification",
-    "Small Rewards",
-    "Accountability Partner",
-    "Progress Tracking",
-    "Positive Reinforcement",
-    "Deadline-driven",
-    "Social Motivation",
-  ];
-
-  const TIME_AVAILABLE_OPTIONS = [
-    "30 minutes per day",
-    "1 hour per day",
-    "2 hours per day",
-    "3 hours per day",
-    "4+ hours per day",
-    "Flexible schedule",
-  ];
-
-  const CHALLENGES_OPTIONS = [
+  const CHALLENGE_OPTIONS = [
     "Procrastination",
+    "Lack of motivation",
+    "Time management",
+    "Consistency",
     "Distractions",
-    "Time Management",
-    "Lack of Motivation",
-    "Overcommitment",
-    "Stress/Fatigue",
-    "Inconsistent Schedule",
+    "Energy levels",
+    "Work-life balance",
   ];
 
-  // Calendar export function (updated for new schema)
-  const exportToCalendar = () => {
-    if (!routineResult) return;
-
-    const icsContent = [
-      "BEGIN:VCALENDAR",
-      "VERSION:2.0",
-      "PRODID:-//Routine Builder//EN",
-      ...Object.entries(routineResult.weeklyRoutine).flatMap(([day, tasks]) =>
-        tasks.map(
-          (task, index) =>
-            `BEGIN:VEVENT
-UID:${day}-${index}@routinebuilder
-DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "")}
-DTSTART:${day.toUpperCase()}_0000AM
-DURATION:PT${task.duration.replace(" minutes", "M").replace(" hours", "H")}
-SUMMARY:${task.task}
-DESCRIPTION:${task.task} - ${task.duration}
-END:VEVENT`
-        )
-      ),
-      "END:VCALENDAR",
-    ].join("\n");
-
-    const blob = new Blob([icsContent], { type: "text/calendar" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "routine-schedule.ics";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  // Update the chat’s input message whenever any field changes.
-  const updateChatInput = () => {
-    const payload = {
-      goal,
-      timeAvailable,
-      timeframe:
-        timeframeNumber && timeframeUnit
-          ? `${timeframeNumber} ${timeframeUnit}`
-          : "",
-      daysAvailable,
-      preferredWorkTimes: { preferredWorkTime },
-      challenges,
-      motivationPreferences,
-    };
-    setInput(JSON.stringify(payload));
-  };
-
-  const parseAIResponse = (response: string) => {
-    try {
-      // Clean response first
-      const cleaned = response
-        .replace(/[\u200B-\u200D\uFEFF]/g, "") // Remove zero-width spaces
-        .replace(/\\\"/g, '"'); // Fix escaped quotes
-
-      const raw = JSON.parse(cleaned);
-      const parsed = RoutineResultSchema.parse(raw);
-      return parsed;
-    } catch (error) {
-      console.error("Parsing Failed:", error);
-      toast.error("Failed to process AI response");
-      return null;
-    }
-  };
-
+  // Updated parsing logic to handle markdown-formatted JSON
   const { handleSubmit, isLoading, setInput } = useChat({
     api: config.apiRoute,
     onFinish: (response) => {
-      const parsed = parseAIResponse(response.content);
-      setRoutineResult(parsed);
+      console.log("API response received:", response);
+      try {
+        // Clean the response content by removing markdown formatting
+        let cleanContent = response.content;
+
+        // Remove markdown code block indicators if present
+        if (cleanContent.includes("```json") || cleanContent.includes("```")) {
+          cleanContent = cleanContent
+            .replace(/```json/g, "")
+            .replace(/```/g, "")
+            .trim();
+        }
+
+        console.log("Cleaned content:", cleanContent);
+        const parsedContent = JSON.parse(cleanContent);
+        setRoutineResult(parsedContent);
+      } catch (e) {
+        toast.error("Failed to generate routine");
+        console.error("Failed to parse response:", e, response.content);
+      }
     },
     onError: (error) => {
-      toast.error(`AI processing failed: ${error.message}`);
+      console.error("API error:", error);
+      toast.error(`Error: ${error.message}`);
     },
   });
 
-  // Helper for toggling checkboxes
-  const toggleDay = (
-    day: string,
-    selectedDays: string[],
-    setSelectedDays: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    if (selectedDays.includes(day)) {
-      setSelectedDays(selectedDays.filter((d) => d !== day));
+  const handleDayToggle = (day: string) => {
+    if (daysAvailable.includes(day)) {
+      setDaysAvailable(daysAvailable.filter((d) => d !== day));
     } else {
-      setSelectedDays([...selectedDays, day]);
+      setDaysAvailable([...daysAvailable, day]);
     }
-    updateChatInput();
   };
 
-  // Update the toggle function for multi-select preferences
-  const togglePreference = (preference: string) => {
-    setMotivationPreferences((prev) =>
-      prev.includes(preference)
-        ? prev.filter((p) => p !== preference)
-        : [...prev, preference]
-    );
-    updateChatInput();
-  };
-
-  // Toggle function for challenges
-  const toggleChallenge = (challenge: string) => {
-    setChallenges((prev) =>
-      prev.includes(challenge)
-        ? prev.filter((c) => c !== challenge)
-        : [...prev, challenge]
-    );
-    updateChatInput();
+  const handleChallengeToggle = (challenge: string) => {
+    if (challenges.includes(challenge)) {
+      setChallenges(challenges.filter((c) => c !== challenge));
+    } else {
+      setChallenges([...challenges, challenge]);
+    }
   };
 
   return (
-    <div
-      className={cn(
-        "h-[600px] overflow-y-auto fixed bottom-0 right-0 w-full max-w-[600px] p-6 bg-white border border-gray-200 shadow-lg rounded-lg",
-        open ? "block" : "hidden"
-      )}
-    >
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">
-          🗓️ Routine Builder
-        </h2>
-        <button
-          onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
-          aria-label="Close"
-        >
-          ✖
-        </button>
-      </div>
-
-      {/* Form Section */}
-      <div className="space-y-6">
-        {/* Goal */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            🎯 Goal
-          </label>
-          <input
-            type="text"
-            placeholder="e.g., Run a marathon"
-            value={goal}
-            onChange={(e) => {
-              setGoal(e.target.value);
-              updateChatInput();
-            }}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-        {/* Time Available */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ⏳ Time Available
-          </label>
-          <Select
-            value={timeAvailable}
-            onValueChange={(value) => {
-              setTimeAvailable(value);
-              updateChatInput();
-            }}
+    <div className="fixed inset-0 z-50 flex items-end justify-end sm:p-5">
+      <div className="bg-black/50 absolute inset-0" onClick={onClose} />
+      <div
+        className={cn(
+          "z-50 flex h-full w-full flex-col rounded-t-lg sm:h-auto sm:max-h-[85vh] sm:w-full sm:max-w-[550px] sm:rounded-lg bg-card border border-border shadow-xl overflow-hidden",
+          "animate-in slide-in-from-bottom-10 fade-in-0 duration-300 ease-in-out"
+        )}
+      >
+        {/* Header */}
+        <div className="flex items-center px-4 py-2.5 border-b border-border">
+          <div className="flex items-center gap-2">
+            <Medal className="h-5 w-5 text-primary" />
+            <h2 className="text-base font-medium">{config.name}</h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="ml-auto rounded-full h-6 w-6 inline-flex items-center justify-center transition-colors hover:bg-muted"
           >
-            <SelectTrigger className="border-gray-200 rounded-xl hover:border-gray-300">
-              <SelectValue placeholder="Select time availability" />
-            </SelectTrigger>
-            <SelectContent>
-              {TIME_AVAILABLE_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <X className="h-4 w-4" />
+          </button>
         </div>
-        {/* Timeframe */}
-        <label className="block text-sm font-medium text-gray-700">
-          ⏳ Time Frame
-        </label>
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="number"
-            min="1"
-            placeholder="Number"
-            value={timeframeNumber}
-            onChange={(e) => {
-              const value = Math.max(1, parseInt(e.target.value) || 1);
-              setTimeframeNumber(value.toString());
-              updateChatInput();
-            }}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <Select
-            value={timeframeUnit}
-            onValueChange={(value) => {
-              setTimeframeUnit(value);
-              updateChatInput();
-            }}
-          >
-            <SelectTrigger className="border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-              <SelectValue placeholder="Select unit" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="days">Days</SelectItem>
-              <SelectItem value="weeks">Weeks</SelectItem>
-              <SelectItem value="months">Months</SelectItem>
-              <SelectItem value="years">Years</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        {/* Days Available */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            📅 Days Available
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {DAYS.map((day) => (
-              <button
-                key={`available-${day}`}
-                onClick={() => toggleDay(day, daysAvailable, setDaysAvailable)}
-                className={cn(
-                  "px-4 py-2 rounded-full text-sm",
-                  daysAvailable.includes(day)
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                )}
-              >
-                {day}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* Preferred Work Times */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Preferred Work Time
-            </label>
-            <Select
-              value={preferredWorkTime}
-              onValueChange={(value) => {
-                setPreferredWorkTime(value);
-                updateChatInput();
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select time" />
-              </SelectTrigger>
-              <SelectContent>
-                {WORK_TIME_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-        {/* Challenges */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Challenges
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {CHALLENGES_OPTIONS.map((option) => (
-              <button
-                key={option}
-                onClick={() => toggleChallenge(option)}
-                className={cn(
-                  "px-4 py-2 rounded-full text-sm",
-                  challenges.includes(option)
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                )}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-        {/* Motivation Preferences */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Motivation Preferences
-          </label>
-          <div className="flex flex-wrap gap-2">
-            {MOTIVATION_OPTIONS.map((option) => (
-              <button
-                key={option}
-                onClick={() => togglePreference(option)}
-                className={cn(
-                  "px-4 py-2 rounded-full text-sm",
-                  motivationPreferences.includes(option)
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                )}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {/* Results Section */}
-      {routineResult && (
-        <div className="mt-8 p-6 bg-white border border-gray-100 rounded-xl shadow-sm">
-          <div className="flex justify-between items-start mb-6">
-            <h3 className="text-xl font-bold text-gray-900">
-              📋 Your Routine Plan
-            </h3>
-            <Button
-              onClick={exportToCalendar}
-              variant="outline"
-              className="gap-2"
-            >
-              <CalendarPlus className="w-4 h-4" />
-              Export to Calendar
-            </Button>
-          </div>
-
-          {/* Summary Cards */}
-          <div className="grid grid-cols-2 gap-4 mb-8">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-600">Total Time Commitment</p>
-              <p className="text-xl font-semibold text-blue-800">
-                {routineResult.totalDuration}
-              </p>
-            </div>
-            <div className="p-4 bg-green-50 rounded-lg">
-              <p className="text-sm text-green-600">Estimated Completion</p>
-              <p className="text-xl font-semibold text-green-800">
-                {routineResult.estimatedCompletionTime}
-              </p>
-            </div>
-          </div>
-
-          {/* Milestones Section */}
-          <div className="mb-8">
-            <h4 className="text-lg font-semibold mb-4">Milestones</h4>
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-4 h-full">
+          {!routineResult ? (
+            /* Input Form */
             <div className="space-y-4">
-              {routineResult.milestones.map((milestone, index) => (
-                <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                  <h5 className="font-medium text-gray-700">
-                    Phase: {milestone.phase}
-                  </h5>
-                  <p className="text-sm text-gray-500">
-                    Goal: {milestone.goal}
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!goal) {
+                    toast.error("Please enter a goal first");
+                    return;
+                  }
+
+                  // Create user preferences object
+                  const userPreferences = {
+                    goal,
+                    daysAvailable:
+                      daysAvailable.length > 0 ? daysAvailable : DAYS,
+                    challenges: challenges.length > 0 ? challenges : [],
+                  };
+
+                  // First set the input so the API has the correct content to process
+                  setInput(JSON.stringify(userPreferences));
+
+                  // Then submit the form
+                  handleSubmit(e, {
+                    data: { userPreferences: JSON.stringify(userPreferences) },
+                  });
+                }}
+                className="space-y-3"
+              >
+                {/* Goal Input */}
+                <div className="space-y-1.5">
+                  <Label htmlFor="goal" className="text-xs font-medium">
+                    What's your goal?
+                  </Label>
+                  <Textarea
+                    id="goal"
+                    placeholder="E.g., Learn piano, Run a marathon, Launch a podcast..."
+                    className="resize-none h-20 text-sm"
+                    value={goal}
+                    onChange={(e) => setGoal(e.target.value)}
+                  />
+                </div>
+
+                {/* Days Available */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium block">
+                    Which days can you commit to this goal?
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DAYS.map((day, index) => (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => handleDayToggle(day)}
+                        className={cn(
+                          "py-1 px-2 rounded-md text-xs font-medium transition-colors",
+                          daysAvailable.includes(day)
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                        )}
+                      >
+                        {SHORT_DAYS[index]}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {daysAvailable.length === 0
+                      ? "If none selected, all days will be considered."
+                      : `Selected: ${daysAvailable.length} days`}
                   </p>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Weekly Schedule */}
-          <div className="mb-8">
-            <h4 className="text-lg font-semibold mb-4">Weekly Schedule</h4>
-            <div className="space-y-4">
-              {Object.entries(routineResult.weeklyRoutine).map(
-                ([day, tasks]) => (
-                  <div key={day} className="p-4 bg-gray-50 rounded-lg">
-                    <h5 className="font-medium text-gray-700 mb-2">{day}</h5>
-                    <div className="space-y-2">
-                      {tasks.map((task, index) => (
-                        <div
-                          key={index}
-                          className="flex justify-between items-center p-3 bg-white rounded-md border border-gray-100"
+                {/* Challenges */}
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium block">
+                    What challenges might you face?
+                  </Label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {CHALLENGE_OPTIONS.map((challenge) => (
+                      <div
+                        key={challenge}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={challenge}
+                          checked={challenges.includes(challenge)}
+                          onCheckedChange={() =>
+                            handleChallengeToggle(challenge)
+                          }
+                          className="h-3.5 w-3.5"
+                        />
+                        <label
+                          htmlFor={challenge}
+                          className="text-xs cursor-pointer"
                         >
-                          <div>
-                            <p className="font-medium text-gray-800">
-                              {task.task}
-                            </p>
-                            <p className="text-sm text-gray-500">
+                          {challenge}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  disabled={!goal || isLoading || loading}
+                  className="w-full"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Medal className="mr-2 h-4 w-4" />
+                      Generate Smart Routine
+                    </>
+                  )}
+                </Button>
+              </form>
+            </div>
+          ) : (
+            /* Results Section */
+            <div className="space-y-4">
+              {/* Header with export button */}
+              <div className="flex justify-between items-center">
+                <h4 className="text-sm font-medium">Your Routine Plan</h4>
+              </div>
+
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 rounded-md bg-muted/50 border border-border/50 w-full">
+                  <p className="text-[10px] text-muted-foreground mb-1">
+                    <Clock className="h-3 w-3 inline mr-1" />
+                    Estimated Completion
+                  </p>
+                  <p className="text-sm font-medium">
+                    {routineResult.estimatedCompletionTime}
+                  </p>
+                </div>
+              </div>
+
+              {/* Milestones */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium">Milestones</p>
+                <div className="space-y-2">
+                  {routineResult.milestones.map((milestone, index) => (
+                    <div
+                      key={index}
+                      className="p-2.5 rounded-md bg-background border border-border/50"
+                    >
+                      <p className="text-xs font-medium">{milestone.phase}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {milestone.goal}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Weekly Schedule */}
+              <div className="space-y-1.5">
+                <p className="text-xs font-medium">Weekly Schedule</p>
+                <div className="space-y-3">
+                  {Object.entries(routineResult.weeklyRoutine).map(
+                    ([day, tasks]) => (
+                      <div key={day} className="space-y-1.5">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          {day}
+                        </p>
+                        {tasks.map((task, index) => (
+                          <div
+                            key={index}
+                            className="p-2 rounded-md bg-background border border-border/50 flex justify-between items-center"
+                          >
+                            <p className="text-xs">{task.task}</p>
+                            <p className="text-xs text-muted-foreground ml-2 shrink-0">
                               {task.duration}
                             </p>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )
-              )}
+                        ))}
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
+
+              {/* Tips */}
+              <div className="p-3 rounded-md bg-primary/10 border border-primary/20">
+                <p className="text-xs font-medium mb-1.5 flex items-center gap-1">
+                  <LightbulbIcon className="h-3.5 w-3.5 text-primary" />
+                  Pro Tips
+                </p>
+                <ul className="space-y-1.5 text-xs">
+                  {routineResult.tips.map((tip, index) => (
+                    <li key={index} className="flex items-start gap-1.5">
+                      <span className="text-primary">•</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Back Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-2 w-full"
+                onClick={() => setRoutineResult(null)}
+              >
+                Create Another Routine
+              </Button>
             </div>
-          </div>
-
-          {/* Tips Section */}
-          <div className="p-4 bg-yellow-50 rounded-lg">
-            <h4 className="text-lg font-semibold mb-3">🌟 Pro Tips</h4>
-            <ul className="space-y-2">
-              {routineResult.tips.map((tip, index) => (
-                <li key={index} className="flex items-start text-gray-700">
-                  <span className="mr-2">•</span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </div>
+          )}
         </div>
-      )}
-
-      {/* Generate Button */}
-      <div className="mt-6">
-        <Button
-          className="w-full h-12 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg transition-all"
-          onClick={handleSubmit}
-          disabled={isLoading}
-        >
-          {isLoading ? "✨ Crafting Your Routine..." : "Generate Smart Routine"}
-        </Button>
       </div>
     </div>
   );
