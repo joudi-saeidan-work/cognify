@@ -48,13 +48,6 @@ const BoardNavbar = ({
     showThemes: true,
   });
 
-  const handleToggle = (setting: string, value: boolean) => {
-    setVisibilitySettings((prev) => ({
-      ...prev,
-      [setting]: value,
-    }));
-  };
-
   const handleOnClick = () => {
     if (userId && orgId) {
       const path = `/organization/${orgId}`;
@@ -84,7 +77,9 @@ const BoardNavbar = ({
         backdrop-blur-sm border-b 
        "
     >
-      {user ? <WelcomeModal username={user.firstName || "User"} /> : null}
+      {user ? (
+        <WelcomeModal username={user.firstName || "User"} boardId={data.id} />
+      ) : null}
       {/* Left section */}
       <div className="flex items-center gap-x-4">
         <button

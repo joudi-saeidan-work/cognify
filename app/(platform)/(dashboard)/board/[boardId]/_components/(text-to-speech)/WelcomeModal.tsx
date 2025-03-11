@@ -5,9 +5,24 @@ import { useVoice } from "./VoiceContext";
 import SpeechModal from "./SpeechModal";
 import { motion } from "framer-motion";
 import { Sparkles, Flame } from "lucide-react";
+import { Board as PrismaBoard } from "@prisma/client";
 
 interface WelcomeModalProps {
   username: string;
+  boardId: string;
+}
+
+// Extended interface for boards with lists and cards
+interface ExtendedBoard extends PrismaBoard {
+  lists: {
+    title: string;
+    cards: {
+      title: string;
+      label?: string;
+      description?: string;
+      dueDate?: string;
+    }[];
+  }[];
 }
 
 const motivationalQuotes = [
@@ -58,7 +73,7 @@ const motivationalQuotes = [
   },
 ];
 
-const WelcomeModal = ({ username }: WelcomeModalProps) => {
+const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
   const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -66,6 +81,57 @@ const WelcomeModal = ({ username }: WelcomeModalProps) => {
   const [audioUrl, setAudioUrl] = useState("");
   const { selectedVoice } = useVoice();
   const [quote, setQuote] = useState(motivationalQuotes[0]);
+  const [taskText, setTaskText] = useState("");
+  const [assistantMessage, setAssistantMessage] = useState("");
+
+  function formatCurrentBoard(board: ExtendedBoard) {
+    if (!board.lists || board.lists.length === 0) {
+      return "No tasks found on this board.";
+    }
+
+    const lists = board.lists
+      .map((list) => {
+        const cards = list.cards
+          .map((card) => {
+            const label = card.label ? `Label: ${card.label}` : "No label";
+            const description = card.description
+              ? `Description: ${card.description}`
+              : "No description";
+            const dueDate = card.dueDate
+              ? `Due Date: ${new Date(card.dueDate).toLocaleDateString()}`
+              : "No due date";
+            return `- ${card.title}\n  ${label}\n  ${description}\n  ${dueDate}`;
+          })
+          .join("\n");
+        return `List: ${list.title}\n${cards}`;
+      })
+      .join("\n\n");
+    return lists;
+  }
+
+  useEffect(() => {
+    async function fetchBoardContent() {
+      try {
+        const response = await fetch(`/api/boards/${boardId}/content`);
+        const board = await response.json();
+
+        const formattedTasks = formatCurrentBoard(board);
+        setTaskText(
+          `Here are my tasks on ${board.title}:\n\n${formattedTasks}`
+        );
+        console.log("Task text:", taskText);
+      } catch (error) {
+        console.error("Error fetching board content:", error);
+        setTaskText(
+          `Hello ${username}, I'm ready to read your tasks when you create some.`
+        );
+      }
+    }
+
+    if (boardId) {
+      fetchBoardContent();
+    }
+  }, [boardId, username]);
 
   useEffect(() => {
     // Pick a random motivational quote when component mounts
@@ -85,14 +151,73 @@ const WelcomeModal = ({ username }: WelcomeModalProps) => {
       setLoading(true);
       setMessage("");
 
-      const taskText = `Hello ${username}, your tasks for today are: Complete the project dashboard, review pull requests, and prepare for tomorrow's meeting.`;
+      // Ensure taskText is ready before calling the AI assistant
+      if (!taskText) {
+        console.error("Task text is not ready");
+        setMessage("Task text is not ready. Please try again later.");
+        return;
+      }
 
+      const maxRetries = 5;
+      const delay = 1000; // 1 second delay
+      let attempts = 0;
+      let content = "";
+
+      while (attempts < maxRetries) {
+        // Fetch motivational and prioritized response from the AI assistant
+        const assistantResponse = await fetch("/api/voice-assistant", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: [
+              {
+                role: "user",
+                content: taskText, // Use the formatted board content
+              },
+            ],
+          }),
+        });
+
+        if (!assistantResponse.ok) {
+          throw new Error("Failed to fetch assistant response");
+        }
+
+        const assistantData = await assistantResponse.json();
+        console.log("Assistant response:", assistantData);
+
+        // Assuming the response has a 'content' field that is a string
+        content = assistantData.messages[0].content[0].text || ""; // Ensure it's a string
+
+        // Check if the assistant message is non-empty
+        if (content.trim()) {
+          break; // Exit the loop if we have a valid response
+        }
+
+        attempts += 1;
+        console.log(
+          `Attempt ${attempts}: AI assistant response is empty. Retrying...`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay)); // Wait before retrying
+      }
+
+      if (!content.trim()) {
+        setMessage(
+          "AI assistant did not return a valid response. Please try again."
+        );
+        return;
+      }
+
+      setAssistantMessage(content);
+
+      // Now send the AI assistant's response to the voice assistant
       console.log(
         "Starting speech request with voice:",
         selectedVoice.voice_id
       );
+      console.log("Reading taskText:", taskText);
 
-      // Create a simplified voice object to send to API
       const voiceForAPI = {
         id: selectedVoice.id,
         voice_id: selectedVoice.voice_id,
@@ -110,13 +235,13 @@ const WelcomeModal = ({ username }: WelcomeModalProps) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text: taskText,
+          text: content, // Use the AI assistant's response
           voice: voiceForAPI,
         }),
       });
 
-      // Get response as text first to inspect it
       const responseText = await response.text();
+      console.log("Raw response text:", responseText); // Log the raw response
 
       if (!response.ok) {
         console.error(
@@ -155,7 +280,6 @@ const WelcomeModal = ({ username }: WelcomeModalProps) => {
           responseText.substring(0, 200)
         );
 
-        // Use fallback for development
         const fallbackUrl =
           "https://s3.us-east-1.amazonaws.com/invideo-uploads-us-east-1/speechfr-FR-Neural2-A17416860464130.mp3";
         console.log("Using fallback audio URL");
@@ -170,8 +294,6 @@ const WelcomeModal = ({ username }: WelcomeModalProps) => {
           error instanceof Error ? error.message : "Unknown error"
         }`
       );
-
-      // You could also add a fallback here if you want to always show something
     } finally {
       setLoading(false);
     }
@@ -208,7 +330,7 @@ const WelcomeModal = ({ username }: WelcomeModalProps) => {
 
               <div className="py-3 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                 <p className="text-sm text-gray-700 dark:text-gray-200">
-                  Would you like me to read out your tasks for today?
+                  {"Would you like me to read out your tasks for today?"}
                 </p>
 
                 {selectedVoice && (
