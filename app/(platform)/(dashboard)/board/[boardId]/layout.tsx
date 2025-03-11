@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { Metadata } from "next";
 import { CoverImage } from "./_components/(board-header)/cover-image";
 import BoardNavbarContainer from "./_components/(board-header)/board-navbar-container";
+import { VoiceProvider } from "./_components/(text-to-speech)/VoiceContext";
+
 export async function generateMetadata({
   params,
 }: {
@@ -54,13 +56,15 @@ const BoardIdLayout = async ({
   console.log("has cover image", hasCoverImage);
 
   return (
-    <div className="max-w-9xl mx-auto dark:bg-[#27272a] bg-muted/90 h-full relative rounded-xl overflow-y-auto">
-      {hasCoverImage && <CoverImage board={board} />}
-      <div className="sticky top-0 z-10 bg-muted shadow-md">
-        <BoardNavbarContainer data={board} />
+    <VoiceProvider>
+      <div className="max-w-9xl mx-auto dark:bg-[#27272a] bg-muted/90 h-full relative rounded-xl overflow-y-auto">
+        {hasCoverImage && <CoverImage board={board} />}
+        <div className="sticky top-0 z-10 bg-muted shadow-md">
+          <BoardNavbarContainer data={board} />
+        </div>
+        <div className="h-full pt-[60px]">{children}</div>
       </div>
-      <div className="h-full pt-[60px]">{children}</div>
-    </div>
+    </VoiceProvider>
   );
 };
 

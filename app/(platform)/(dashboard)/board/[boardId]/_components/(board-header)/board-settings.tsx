@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState, useRef } from "react";
+import { Dispatch, SetStateAction, useState, useRef, useEffect } from "react";
 import {
   Settings,
   ZoomIn,
@@ -29,6 +29,8 @@ import { useRouter } from "next/navigation";
 import { useAction } from "@/hooks/use-actions";
 import { deleteBoard } from "@/actions/delete-board";
 import { createBoard } from "@/actions/create-board";
+import voiceData from "../(text-to-speech)/model.json";
+import { useVoice, Voice } from "../(text-to-speech)/VoiceContext";
 
 interface BoardSettingsProps {
   zoomLevel: number;
@@ -36,7 +38,14 @@ interface BoardSettingsProps {
   colorBlindMode: boolean;
   setColorBlindMode: Dispatch<SetStateAction<boolean>>;
   boardId: string;
+  onModelChange: (model: Voice) => void;
 }
+
+const uniqueValues = (field: keyof Voice) => {
+  return [
+    ...new Set(voiceData.voices_list.map((voice) => voice[field] as string)),
+  ];
+};
 
 const BoardSettings = ({
   zoomLevel,
@@ -44,12 +53,51 @@ const BoardSettings = ({
   colorBlindMode,
   setColorBlindMode,
   boardId,
+  onModelChange,
 }: BoardSettingsProps) => {
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const closeRef = useRef<HTMLButtonElement>(null);
   const [displayOpen, setDisplayOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
+
+  const [filteredModels, setFilteredModels] = useState<Voice[]>([]);
+  const [message, setMessage] = useState("");
+  const [showModel, setShowModel] = useState(false);
+  const [url, setUrl] = useState("");
+
+  const [voices, setVoices] = useState<Voice[]>([]);
+  const [selectedGender, setSelectedGender] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedModel, setSelectedModel] = useState("");
+
+  const { setSelectedVoice, voices: voiceContextVoices } = useVoice();
+
+  useEffect(() => {
+    setVoices(voiceData.voices_list);
+  }, []);
+
+  useEffect(() => {
+    const filtered = voices.filter(
+      (voice) =>
+        (selectedGender ? voice.gender === selectedGender : true) &&
+        (selectedCountry ? voice.country === selectedCountry : true) &&
+        (selectedLanguage ? voice.language === selectedLanguage : true)
+    );
+    setFilteredModels(filtered);
+  }, [selectedGender, selectedCountry, selectedLanguage]);
+
+  useEffect(() => {
+    const modelArray = filteredModels.filter(
+      (model) => model.voice_id === selectedModel
+    );
+
+    // Only call onModelChange if we found a matching model
+    if (modelArray.length > 0) {
+      onModelChange(modelArray[0]);
+    }
+  }, [selectedModel, filteredModels, onModelChange]);
 
   const { execute: executeDeleteBoard, isLoading: isLoadingDelete } = useAction(
     deleteBoard,
@@ -100,6 +148,17 @@ const BoardSettings = ({
 
   const handleSliderChange = (value: number[]) => {
     setZoomLevel(value[0]);
+  };
+
+  const handleModelSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const voiceId = e.target.value;
+    setSelectedModel(voiceId);
+
+    const voice =
+      voiceContextVoices.find((v) => v.voice_id === voiceId) || null;
+    if (voice) {
+      setSelectedVoice(voice);
+    }
   };
 
   return (
@@ -267,6 +326,112 @@ const BoardSettings = ({
                   </div>
                 </div>
               </DropdownMenuItem>
+
+              <DropdownMenuSeparator className="my-2" />
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={resetSettings}
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <RotateCcw className="h-4 w-4" />
+                Reset Settings
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <DropdownMenuSeparator className="my-3" />
+
+        {/* Voice Assistant Settings */}
+        <div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setActionsOpen(!actionsOpen)}
+            className="w-full flex justify-between items-center font-bold"
+          >
+            <span className="text-xs">Voice Assistant Settings</span>
+            {actionsOpen ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </Button>
+          {actionsOpen && (
+            <div className="py-3 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">Gender</span>
+                <select
+                  value={selectedGender}
+                  onChange={(e) => setSelectedGender(e.target.value)}
+                  className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded"
+                >
+                  <option value="">Select Gender</option>
+                  {/* this will go through our dataset and find all possible genders and display them in the dropdown */}
+                  {uniqueValues("gender")
+                    .sort()
+                    .map((gender: string, index: number) => (
+                      <option key={index} value={gender}>
+                        {gender}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">Language</span>
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded"
+                >
+                  <option value="">Select Language</option>
+                  {/* this will go through our dataset and find all possible genders and display them in the dropdown */}
+                  {uniqueValues("language")
+                    .sort()
+                    .map((language: string, index: number) => (
+                      <option key={index} value={language}>
+                        {language}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">Country</span>
+                <select
+                  value={selectedCountry}
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded"
+                >
+                  <option value="">Select Country</option>
+                  {/* this will go through our dataset and find all possible genders and display them in the dropdown */}
+                  {uniqueValues("country")
+                    .sort()
+                    .map((country: string, index: number) => (
+                      <option key={index} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium">Model</span>
+                <select
+                  value={selectedModel}
+                  onChange={handleModelSelect}
+                  className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded"
+                >
+                  <option value="">Select Model</option>
+                  {/* this will go through our dataset and find all possible genders and display them in the dropdown */}
+                  {filteredModels.map((voice: Voice, index: number) => (
+                    <option key={index} value={voice.voice_id}>
+                      {voice.name} ({voice.voice_id})
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           )}
         </div>

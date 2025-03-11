@@ -5,12 +5,18 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
-  // Remove this once done testing
+  // Make both versions of the API route public
   "/api/getSpeech",
+  "/api/getSpeech/(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
   const { userId, orgId } = await auth();
+
+  // Check if it's the speech API and always let it through
+  if (request.nextUrl.pathname.startsWith("/api/getSpeech")) {
+    return NextResponse.next();
+  }
 
   if (!isPublicRoute(request)) {
     await auth.protect();

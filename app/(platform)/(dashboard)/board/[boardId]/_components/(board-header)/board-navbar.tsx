@@ -3,7 +3,7 @@ import { Board, Bookmark, BookmarkFolder } from "@prisma/client";
 import BoardOptions from "./board-options";
 import { ThemeToggle } from "@/components/ThemeModeToggle";
 import { Separator } from "@/components/ui/separator";
-import { UserButton, useAuth } from "@clerk/nextjs";
+import { UserButton, useAuth, useUser } from "@clerk/nextjs";
 
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -18,6 +18,8 @@ import ZoomControls from "@/app/(platform)/(dashboard)/_components/(header)/Zoom
 import Calendar from "@/app/(platform)/(dashboard)/_components/(calendar)/calendar";
 import DisplaySettings from "./display-settings";
 import BoardSettings from "./board-settings";
+import WelcomeModal from "../(text-to-speech)/WelcomeModal";
+import { Voice } from "../(text-to-speech)/VoiceContext";
 
 interface BoardNavBarProps {
   data: Board;
@@ -33,8 +35,10 @@ const BoardNavbar = ({
   const { theme } = useTheme();
   const router = useRouter();
   const { userId, orgId } = useAuth();
+  const { user } = useUser();
   const [zoomLevel, setZoomLevel] = useState(130);
   const [colorBlindMode, setColorBlindMode] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<Voice | null>(null);
 
   const [visibilitySettings, setVisibilitySettings] = useState({
     showAssistant: true,
@@ -60,16 +64,27 @@ const BoardNavbar = ({
       console.log("Missing userId or orgId:", { userId, orgId });
     }
   };
+
+  const handleModelChange = (model: Voice) => {
+    setSelectedModel(model);
+  };
+
   useEffect(() => {
     // Apply the font-size for zoom effect
     document.documentElement.style.fontSize = `${zoomLevel}%`;
   }, [zoomLevel]);
+
+  useEffect(() => {
+    // Logic to show the modal when the board is opened
+  }, []);
+
   return (
     <div
       className="w-full flex items-center px-4 gap-x-4 
         backdrop-blur-sm border-b 
        "
     >
+      {user ? <WelcomeModal username={user.firstName || "User"} /> : null}
       {/* Left section */}
       <div className="flex items-center gap-x-4">
         <button
@@ -86,7 +101,6 @@ const BoardNavbar = ({
           <BordTitleForm data={data} />
         </div>
       </div>
-
       {/* Right section */}
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
@@ -110,6 +124,7 @@ const BoardNavbar = ({
           setZoomLevel={setZoomLevel}
           colorBlindMode={colorBlindMode}
           setColorBlindMode={setColorBlindMode}
+          onModelChange={handleModelChange}
         />
         {visibilitySettings.showAvatar && (
           <UserButton
