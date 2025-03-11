@@ -16,6 +16,7 @@ import AssistanceButton from "@/app/(platform)/(dashboard)/_components/(ai-agent
 import ResetControls from "@/app/(platform)/(dashboard)/_components/(header)/ResetControls";
 import ZoomControls from "@/app/(platform)/(dashboard)/_components/(header)/ZoomControls";
 import Calendar from "@/app/(platform)/(dashboard)/_components/(calendar)/calendar";
+import DisplaySettings from "./display-settings";
 
 interface BoardNavBarProps {
   data: Board;
@@ -31,7 +32,7 @@ const BoardNavbar = ({
   const { theme } = useTheme();
   const router = useRouter();
   const { userId, orgId } = useAuth();
-  const [zoomLevel, setZoomLevel] = useState(110);
+  const [zoomLevel, setZoomLevel] = useState(130);
   const [colorBlindMode, setColorBlindMode] = useState(false);
 
   const [visibilitySettings, setVisibilitySettings] = useState({
@@ -94,46 +95,26 @@ const BoardNavbar = ({
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
           <Calendar boardId={data.id} />
-          {visibilitySettings.showBookmarks ? (
+          {visibilitySettings.showBookmarks && (
             <>
               <BookmarkBar
                 folders={folders}
                 bookmarks={bookmarksWithoutFolders}
               />
-
               <Separator
                 orientation="vertical"
                 className="h-6 bg-muted-foreground"
               />
             </>
-          ) : (
-            ""
           )}
         </div>
-        {visibilitySettings.showThemes ? (
-          <ThemeToggle
-            colorBlindMode={colorBlindMode}
-            setColorBlindMode={setColorBlindMode}
-          />
-        ) : (
-          ""
-        )}
-        {visibilitySettings.showZoomControls ? (
-          <div className="hidden md:flex items-center gap-x-4">
-            <ResetControls
-              setZoomLevel={setZoomLevel}
-              setColorBlindMode={setColorBlindMode}
-            />
-            <ZoomControls zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
-            <Separator
-              orientation="vertical"
-              className="h-6 bg-muted-foreground"
-            />
-          </div>
-        ) : (
-          ""
-        )}
-        {visibilitySettings.showAvatar ? (
+        <DisplaySettings
+          zoomLevel={zoomLevel}
+          setZoomLevel={setZoomLevel}
+          colorBlindMode={colorBlindMode}
+          setColorBlindMode={setColorBlindMode}
+        />
+        {visibilitySettings.showAvatar && (
           <UserButton
             afterSignOutUrl="/"
             appearance={{
@@ -146,8 +127,6 @@ const BoardNavbar = ({
               },
             }}
           />
-        ) : (
-          ""
         )}
       </div>
     </div>
