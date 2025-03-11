@@ -9,17 +9,16 @@ import { UserButton } from "@clerk/nextjs";
 import { useTheme } from "next-themes";
 import { ThemeToggle } from "../../../../../components/ThemeModeToggle";
 import { Separator } from "@/components/ui/separator";
+import DisplaySettings from "../../board/[boardId]/_components/(board-header)/display-settings";
 // Main NavBar component definition
 const NavBar = () => {
-  const [zoomLevel, setZoomLevel] = useState(110); // Default font size percentage
+  const [zoomLevel, setZoomLevel] = useState(130);
   const [colorBlindMode, setColorBlindMode] = useState(false);
   const { theme } = useTheme();
-
   useEffect(() => {
     // Apply the font-size for zoom effect
     document.documentElement.style.fontSize = `${zoomLevel}%`;
   }, [zoomLevel]);
-
   return (
     // Navbar container with fixed positioning at the top of the page, shadows, and padding for structure
     <nav className="z-[50] fixed top-0 px-4 w-full h-14 border border-b shadow-sm bg-background text-foreground flex items-center transition-colors duration-300">
@@ -30,17 +29,12 @@ const NavBar = () => {
         </div>
       </div>
       <div className="ml-auto flex items-center gap-x-2">
-        <Separator orientation="vertical" className="h-6 dark:bg-muted" />
-        <ThemeToggle
+        <DisplaySettings
+          zoomLevel={zoomLevel}
+          setZoomLevel={setZoomLevel}
           colorBlindMode={colorBlindMode}
           setColorBlindMode={setColorBlindMode}
         />
-        <ResetControls
-          setZoomLevel={setZoomLevel}
-          setColorBlindMode={setColorBlindMode}
-        />
-        <ZoomControls zoomLevel={zoomLevel} setZoomLevel={setZoomLevel} />
-
         <Separator orientation="vertical" className="h-6 dark:bg-muted" />
         <UserButton
           afterSignOutUrl="/"
@@ -48,8 +42,8 @@ const NavBar = () => {
             baseTheme: theme === "dark" ? dark : undefined,
             elements: {
               avatarBox: {
-                height: 30,
-                width: 30,
+                height: 35,
+                width: 35,
               },
             },
           }}

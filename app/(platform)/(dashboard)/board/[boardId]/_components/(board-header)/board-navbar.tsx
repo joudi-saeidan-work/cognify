@@ -17,6 +17,7 @@ import ResetControls from "@/app/(platform)/(dashboard)/_components/(header)/Res
 import ZoomControls from "@/app/(platform)/(dashboard)/_components/(header)/ZoomControls";
 import Calendar from "@/app/(platform)/(dashboard)/_components/(calendar)/calendar";
 import DisplaySettings from "./display-settings";
+import BoardSettings from "./board-settings";
 
 interface BoardNavBarProps {
   data: Board;
@@ -83,11 +84,6 @@ const BoardNavbar = ({
         <div className="flex items-center gap-x-2">
           {/* Board icon/color */}
           <BordTitleForm data={data} />
-          <BoardOptions
-            id={data.id}
-            visibilitySettings={visibilitySettings}
-            onSettingsChange={handleToggle}
-          />
         </div>
       </div>
 
@@ -108,7 +104,8 @@ const BoardNavbar = ({
             </>
           )}
         </div>
-        <DisplaySettings
+        <BoardSettings
+          boardId={data.id}
           zoomLevel={zoomLevel}
           setZoomLevel={setZoomLevel}
           colorBlindMode={colorBlindMode}
@@ -121,8 +118,8 @@ const BoardNavbar = ({
               baseTheme: theme === "dark" ? dark : undefined,
               elements: {
                 avatarBox: {
-                  height: 32,
-                  width: 32,
+                  height: 35,
+                  width: 35,
                 },
               },
             }}
