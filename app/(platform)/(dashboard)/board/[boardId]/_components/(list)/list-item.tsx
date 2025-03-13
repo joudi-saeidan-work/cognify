@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { CardItem } from "../(card)/card-item";
 import { Draggable, Droppable } from "@hello-pangea/dnd";
 import { useTheme } from "next-themes";
+import { useAuth } from "@clerk/nextjs";
 
 interface ListItemProps {
   data: ListWithCards;
@@ -15,6 +16,7 @@ interface ListItemProps {
 
 export const ListItem = ({ data, index }: ListItemProps) => {
   const { theme } = useTheme();
+  const { userId } = useAuth();
   const textareaRef = useRef<ElementRef<"textarea">>(null);
 
   const [isEditing, setIsEditing] = useState(false);

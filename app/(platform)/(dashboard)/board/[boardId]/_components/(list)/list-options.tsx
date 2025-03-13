@@ -19,6 +19,7 @@ import { updateList } from "@/actions/update-list";
 import { useParams } from "next/navigation";
 import { updateCards } from "@/actions/update-cards";
 import { PopoverClose } from "@radix-ui/react-popover";
+import { Hint } from "@/components/hint";
 
 interface ListOptionsProps {
   data: List;
@@ -155,14 +156,18 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            className={`h-auto w-auto p-2 hover:bg-transparent ${getTextColor()}`}
+            className={`h-auto w-auto p-2 hover:${getTextColor()} ${getTextColor()} hover:bg-transparent`}
             variant="ghost"
             disabled={isUpdatingColor}
           >
             {isUpdatingColor ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Brush className="w-4 h-4" />
+              <Hint description="Change list color">
+                <p>
+                  <Brush className="w-4 h-4" />
+                </p>
+              </Hint>
             )}
           </Button>
         </PopoverTrigger>
@@ -212,10 +217,14 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            className={`h-auto w-auto p-2 hover:bg-neutral-500/10 ${getTextColor()}`}
+            className={`h-auto w-auto p-2 hover:${getTextColor()} ${getTextColor()} hover:bg-transparent`}
             variant="ghost"
           >
-            <MoreHorizontal className="h-4 w-4 " />
+            <Hint description="More options">
+              <p>
+                <MoreHorizontal className="h-4 w-4 " />
+              </p>
+            </Hint>
           </Button>
         </PopoverTrigger>
         <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">

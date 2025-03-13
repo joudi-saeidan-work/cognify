@@ -90,7 +90,7 @@ const BoardNavbar = ({
         className="hover:bg-slate-100 dark:hover:bg-black p-2 rounded-md disabled:opacity-50 disabled:pointer-events-none"
         disabled={isLoading}
       >
-        <Home className="h-4 w-4 text-muted-foreground" />
+        <Home className="h-4 w-4 text-foreground" />
       </button>
 
       <Separator orientation="vertical" className="h-6 bg-muted-foreground" />

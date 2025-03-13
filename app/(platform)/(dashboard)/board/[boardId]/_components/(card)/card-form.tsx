@@ -17,6 +17,7 @@ import { useParams } from "next/navigation";
 import { useOnClickOutside, useEventListener } from "usehooks-ts";
 import { toast } from "sonner";
 import { LiveRecorder } from "@/app/audio-recorder/_components/live-recorder";
+import { Hint } from "@/components/hint";
 
 interface CardFormProps {
   listId: string;
@@ -209,7 +210,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
     return (
       <div className="pt-2 px-2 ">
         <Button
-          className={`whitespace-pre-wrap h-auto px-2 py-1.5 w-full justify-start text-sm ${getTextColor()}`}
+          className={`whitespace-pre-wrap h-auto px-2 py-1.5 w-full justify-start text-sm ${getTextColor()} hover:${getTextColor()} hover:bg-transparent`}
           style={getTextareaBackground()}
           size="sm"
           variant="ghost"

@@ -6,6 +6,7 @@ import {
 } from "@/components/ui/popover";
 import { ElementRef, useRef } from "react";
 import { FormPicker } from "./form-picker";
+import { PopoverClose } from "@radix-ui/react-popover";
 
 // used to create a board
 interface PopOverProps {
@@ -32,7 +33,7 @@ export const FormPopOver = ({
         side={side}
         align={align}
         sideOffset={sideOffset}
-        className="w-80 pt-3 "
+        className="w-80 h-full pt-3 "
       >
         <div className="text-sm font-medium text-neutral-600 pb-4">
           <FormPicker data={board} />

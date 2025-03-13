@@ -59,6 +59,7 @@ const BoardSettings = ({
   const router = useRouter();
   const closeRef = useRef<HTMLButtonElement>(null);
   const [displayOpen, setDisplayOpen] = useState(false);
+  const [voiceSettingsOpen, setVoiceSettingsOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
 
   const [filteredModels, setFilteredModels] = useState<Voice[]>([]);
@@ -349,17 +350,17 @@ const BoardSettings = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setActionsOpen(!actionsOpen)}
+            onClick={() => setVoiceSettingsOpen(!voiceSettingsOpen)}
             className="w-full flex justify-between items-center font-bold"
           >
             <span className="text-xs">Voice Assistant Settings</span>
-            {actionsOpen ? (
+            {voiceSettingsOpen ? (
               <ChevronUp className="h-4 w-4" />
             ) : (
               <ChevronDown className="h-4 w-4" />
             )}
           </Button>
-          {actionsOpen && (
+          {voiceSettingsOpen && (
             <div className="py-3 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium">Gender</span>
