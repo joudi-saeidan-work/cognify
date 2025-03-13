@@ -21,6 +21,7 @@ import BoardSettings from "./board-settings";
 import WelcomeModal from "../(text-to-speech)/WelcomeModal";
 import { Voice } from "../(text-to-speech)/VoiceContext";
 import ReadTasksButton from "../(text-to-speech)/ReadTasksButton";
+import { Hint } from "@/components/hint";
 
 interface BoardNavBarProps {
   data: Board;
@@ -85,14 +86,16 @@ const BoardNavbar = ({
         <WelcomeModal username={user.firstName || "User"} boardId={data.id} />
       ) : null}
       {/* Left section */}
-      <button
-        onClick={handleOnClick}
-        className="hover:bg-slate-100 dark:hover:bg-black p-2 rounded-md disabled:opacity-50 disabled:pointer-events-none"
-        disabled={isLoading}
-      >
-        <Home className="h-4 w-4 text-foreground" />
-      </button>
 
+      <Hint description="Go to Home">
+        <button
+          onClick={handleOnClick}
+          className="hover:bg-slate-100 dark:hover:bg-black p-2 rounded-md disabled:opacity-50 disabled:pointer-events-none"
+          disabled={isLoading}
+        >
+          <Home className="h-4 w-4 text-foreground" />
+        </button>
+      </Hint>
       <Separator orientation="vertical" className="h-6 bg-muted-foreground" />
       <div className="group relative flex items-center">
         <BordTitleForm data={data} />

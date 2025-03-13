@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { createBookmarkFolder } from "@/actions/create-bookmark-folder/index";
 import { createBookmark } from "@/actions/create-bookmark";
 import type { BookmarkFolder, Bookmark as BookmarkType } from "@prisma/client";
+import { Hint } from "../hint";
 
 interface BookmarkBarProps {
   folders: (BookmarkFolder & { bookmarks: BookmarkType[] })[];
@@ -77,10 +78,12 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
     <div className="flex items-center gap-2 p-2">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="sm">
-            <Folder className="h-4 w-4 mr-2 " />
-            Bookmarks
-          </Button>
+          <Hint description="Open Bookmarks">
+            <Button variant="ghost" size="sm">
+              <Folder className="h-4 w-4 mr-2 " />
+              Bookmarks
+            </Button>
+          </Hint>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-72">
           {/* Navigation header */}

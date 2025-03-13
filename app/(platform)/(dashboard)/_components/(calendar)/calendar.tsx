@@ -47,6 +47,7 @@ import { createCard } from "@/actions/create-card";
 import { toast } from "sonner";
 import { deleteCard } from "@/actions/delete-card";
 import { updateCard } from "@/actions/update-card";
+import { Hint } from "@/components/hint";
 const Calendar = ({ boardId }: { boardId: string }) => {
   const { state: currentEvents, dispatch } = useEvents();
   const [boards, setBoards] = useState<(Board & { lists: List[] })[]>([]);
@@ -377,10 +378,12 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     <div>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <CalendarIcon className="h-4 w-4 " />
-            View Calendar
-          </Button>
+          <Hint description="Open Calendar">
+            <Button variant="outline" className="gap-2">
+              <CalendarIcon className="h-4 w-4 " />
+              View Calendar
+            </Button>
+          </Hint>
         </SheetTrigger>
         <SheetContent
           side="right"

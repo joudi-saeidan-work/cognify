@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { FormTextarea } from "@/components/form/form-textarea";
 import { FormPopOver } from "@/components/form/form-popover";
 import { ImageIcon } from "lucide-react";
+import { Hint } from "@/components/hint";
 
 interface BoardTitleFormProps {
   data: Board;
@@ -82,13 +83,15 @@ export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
         </form>
       ) : (
         <div className="flex items-center gap-x-2">
-          <Button
-            className="font-bold text-lg h-auto w-auto p-1 px-2 text-foreground"
-            variant="ghost"
-            onClick={enableEditing}
-          >
-            {title}
-          </Button>
+          <Hint description={`Rename ${title}`}>
+            <Button
+              className="font-bold text-lg h-auto w-auto p-1 px-2 text-foreground"
+              variant="ghost"
+              onClick={enableEditing}
+            >
+              {title}
+            </Button>
+          </Hint>
 
           {/* Add Cover Button - Only shows on hover */}
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
