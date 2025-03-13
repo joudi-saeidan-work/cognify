@@ -97,6 +97,7 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
             className="flex items-center justify-center"
+            data-reduced-motion-disable="true"
           >
             <div className="w-24 h-24 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-indigo-600 dark:from-blue-600 dark:to-indigo-800">
               <Volume2 className="h-12 w-12 text-white" />
@@ -126,6 +127,13 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
                 value={progress}
                 onChange={handleProgressChange}
                 className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500 dark:accent-blue-400"
+                aria-label="Audio progress"
+                aria-valuemin={0}
+                aria-valuemax={duration || 100}
+                aria-valuenow={progress}
+                aria-valuetext={`${formatTime(progress)} of ${formatTime(
+                  duration
+                )}`}
               />
               <div
                 className="absolute top-0 left-0 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full pointer-events-none"
@@ -138,22 +146,32 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
                 data-testid="volume-button"
                 onClick={toggleMute}
                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+                aria-pressed={isMuted}
               >
                 {isMuted ? (
-                  <VolumeX className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                  <VolumeX
+                    className="h-5 w-5 text-gray-600 dark:text-gray-300"
+                    aria-hidden="true"
+                  />
                 ) : (
-                  <Volume2 className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                  <Volume2
+                    className="h-5 w-5 text-gray-600 dark:text-gray-300"
+                    aria-hidden="true"
+                  />
                 )}
               </button>
               <button
                 data-testid="play-pause-button"
                 onClick={togglePlayPause}
                 className="p-3 rounded-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white transition-colors"
+                aria-label={isPlaying ? "Pause audio" : "Play audio"}
+                aria-pressed={isPlaying}
               >
                 {isPlaying ? (
-                  <Pause className="h-6 w-6" />
+                  <Pause className="h-6 w-6" aria-hidden="true" />
                 ) : (
-                  <Play className="h-6 w-6" />
+                  <Play className="h-6 w-6" aria-hidden="true" />
                 )}
               </button>
               <div className="w-9"></div> {/* Placeholder for balance */}

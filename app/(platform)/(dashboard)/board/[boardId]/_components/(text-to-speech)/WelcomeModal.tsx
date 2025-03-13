@@ -362,6 +362,7 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 className="py-4 px-5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border-l-4 border-blue-500 dark:border-blue-400"
+                data-reduced-motion-disable="true"
               >
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-100 leading-relaxed">
                   "{quote.quote}"
@@ -373,12 +374,17 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
 
               <div className="py-3 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                 {fetchingTasks ? (
-                  <div className="flex items-center justify-center space-x-2 py-2">
+                  <div
+                    className="flex items-center justify-center space-x-2 py-2"
+                    role="status"
+                    aria-live="polite"
+                  >
                     <svg
                       className="animate-spin h-4 w-4 text-blue-500"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
+                      aria-hidden="true"
                     >
                       <circle
                         className="opacity-25"

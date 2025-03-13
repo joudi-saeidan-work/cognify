@@ -134,13 +134,19 @@ const ReadListButton = ({ username, listData }: ReadListButtonProps) => {
 
   return (
     <>
-      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        data-reduced-motion-disable="true"
+      >
         <Button
           onClick={onReadList}
           variant="ghost"
           size="icon"
-          className={`h-7 w-7 rounded-full  transition-colors bg-transparent hover:bg-transparent hover:${getTextColor()} ${getTextColor()}`}
+          className={`h-7 w-7 rounded-full transition-colors bg-transparent hover:bg-transparent hover:${getTextColor()} ${getTextColor()}`}
           disabled={loading}
+          aria-label={`Read ${listData.title} tasks aloud`}
+          aria-busy={loading}
         >
           {loading ? (
             <svg
