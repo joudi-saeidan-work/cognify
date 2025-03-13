@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Volume2, VolumeX, Pause, Play } from "lucide-react";
@@ -86,8 +86,12 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="p-0 overflow-hidden bg-white dark:bg-gray-900 border-0 rounded-xl shadow-xl max-w-sm w-full">
-        <div className="relative p-6 space-y-5">
+      <DialogContent
+        className="p-0 overflow-hidden bg-white dark:bg-gray-900 border-0 rounded-xl shadow-xl max-w-sm w-full"
+        aria-describedby="speech-modal-description"
+      >
+        <DialogTitle className="sr-only">Playing Tasks</DialogTitle>
+        <div className="relative p-6 space-y-5" id="speech-modal-description">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -141,6 +145,7 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
                 )}
               </button>
               <button
+                data-testid="play-pause-button"
                 onClick={togglePlayPause}
                 className="p-3 rounded-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white transition-colors"
               >
@@ -157,6 +162,7 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
 
         <div className="border-t border-gray-100 dark:border-gray-800 p-4 bg-gray-50 dark:bg-gray-800/30">
           <Button
+            data-testid="close-button"
             onClick={handleClose}
             variant="outline"
             className="w-full border-gray-200 text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 hover:bg-gray-100 transition-colors"
