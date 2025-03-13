@@ -78,7 +78,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <Button variant="ghost" size="sm">
-            <Folder className="h-4 w-4 mr-2" />
+            <Folder className="h-4 w-4 mr-2 " />
             Bookmarks
           </Button>
         </PopoverTrigger>

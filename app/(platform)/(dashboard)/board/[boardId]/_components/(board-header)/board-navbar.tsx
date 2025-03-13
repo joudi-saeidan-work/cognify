@@ -20,6 +20,7 @@ import DisplaySettings from "./display-settings";
 import BoardSettings from "./board-settings";
 import WelcomeModal from "../(text-to-speech)/WelcomeModal";
 import { Voice } from "../(text-to-speech)/VoiceContext";
+import ReadTasksButton from "../(text-to-speech)/ReadTasksButton";
 
 interface BoardNavBarProps {
   data: Board;
@@ -39,6 +40,7 @@ const BoardNavbar = ({
   const [zoomLevel, setZoomLevel] = useState(130);
   const [colorBlindMode, setColorBlindMode] = useState(false);
   const [selectedModel, setSelectedModel] = useState<Voice | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [visibilitySettings, setVisibilitySettings] = useState({
     showAssistant: true,
@@ -50,8 +52,10 @@ const BoardNavbar = ({
 
   const handleOnClick = () => {
     if (userId && orgId) {
+      setIsLoading(true);
       const path = `/organization/${orgId}`;
       console.log("Navigating to:", path);
+
       router.push(path);
     } else {
       console.log("Missing userId or orgId:", { userId, orgId });
@@ -81,21 +85,33 @@ const BoardNavbar = ({
         <WelcomeModal username={user.firstName || "User"} boardId={data.id} />
       ) : null}
       {/* Left section */}
-      <div className="flex items-center gap-x-4">
-        <button
-          onClick={handleOnClick}
-          className="hover:bg-slate-100 dark:hover:bg-slate-800 p-2 rounded-md"
-        >
-          <Home className="h-4 w-4 text-muted-foreground" />
-        </button>
+      <button
+        onClick={handleOnClick}
+        className="hover:bg-slate-100 dark:hover:bg-black p-2 rounded-md disabled:opacity-50 disabled:pointer-events-none"
+        disabled={isLoading}
+      >
+        <Home className="h-4 w-4 text-muted-foreground" />
+      </button>
 
-        <Separator orientation="vertical" className="h-6 bg-muted-foreground" />
-
-        <div className="flex items-center gap-x-2">
-          {/* Board icon/color */}
-          <BordTitleForm data={data} />
-        </div>
+      <Separator orientation="vertical" className="h-6 bg-muted-foreground" />
+      <div className="group relative flex items-center">
+        <BordTitleForm data={data} />
+        {user && (
+          <div
+            className="        transition-transform
+        duration-300
+        transform
+        translate-x-0
+        group-hover:translate-x-[150px] absolute left-[calc(100%-140px)] top-1/2 -translate-y-1/2"
+          >
+            <ReadTasksButton
+              username={user.firstName || "User"}
+              boardId={data.id}
+            />
+          </div>
+        )}
       </div>
+
       {/* Right section */}
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
@@ -105,10 +121,6 @@ const BoardNavbar = ({
               <BookmarkBar
                 folders={folders}
                 bookmarks={bookmarksWithoutFolders}
-              />
-              <Separator
-                orientation="vertical"
-                className="h-6 bg-muted-foreground"
               />
             </>
           )}
@@ -121,6 +133,7 @@ const BoardNavbar = ({
           setColorBlindMode={setColorBlindMode}
           onModelChange={handleModelChange}
         />
+        <Separator orientation="vertical" className="h-6 bg-muted-foreground" />
         {visibilitySettings.showAvatar && (
           <UserButton
             afterSignOutUrl="/"

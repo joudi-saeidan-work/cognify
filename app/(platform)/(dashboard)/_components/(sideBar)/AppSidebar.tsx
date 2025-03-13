@@ -39,11 +39,6 @@ export function AppSidebar({ collapsable = "icon" }: SideBarProps) {
           icon: Activity,
         },
         {
-          title: "Billing",
-          url: `/organization/${activeOrganization.id}/billing`,
-          icon: CreditCard,
-        },
-        {
           title: "Settings",
           url: `/organization/${activeOrganization.id}/settings`,
           icon: Settings,

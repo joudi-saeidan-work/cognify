@@ -76,6 +76,7 @@ const motivationalQuotes = [
 const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
   const [open, setOpen] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [fetchingTasks, setFetchingTasks] = useState(true);
   const [message, setMessage] = useState("");
   const [showSpeechModal, setShowSpeechModal] = useState(false);
   const [audioUrl, setAudioUrl] = useState("");
@@ -83,6 +84,45 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
   const [quote, setQuote] = useState(motivationalQuotes[0]);
   const [taskText, setTaskText] = useState("");
   const [assistantMessage, setAssistantMessage] = useState("");
+  const [lastRefresh, setLastRefresh] = useState(Date.now());
+
+  // Function to trigger a refresh of the board content
+  const refreshBoardContent = () => {
+    setLastRefresh(Date.now());
+  };
+
+  // Subscribe to board updates
+  useEffect(() => {
+    // Event listener for card updates
+    const handleCardUpdate = () => {
+      console.log("Card updated, refreshing board content...");
+      refreshBoardContent();
+    };
+
+    // Event listener for list updates
+    const handleListUpdate = () => {
+      console.log("List updated, refreshing board content...");
+      refreshBoardContent();
+    };
+
+    // Add event listeners
+    window.addEventListener("card:update", handleCardUpdate);
+    window.addEventListener("list:update", handleListUpdate);
+    window.addEventListener("card:create", handleCardUpdate);
+    window.addEventListener("card:delete", handleCardUpdate);
+    window.addEventListener("list:create", handleListUpdate);
+    window.addEventListener("list:delete", handleListUpdate);
+
+    // Clean up event listeners on unmount
+    return () => {
+      window.removeEventListener("card:update", handleCardUpdate);
+      window.removeEventListener("list:update", handleListUpdate);
+      window.removeEventListener("card:create", handleCardUpdate);
+      window.removeEventListener("card:delete", handleCardUpdate);
+      window.removeEventListener("list:create", handleListUpdate);
+      window.removeEventListener("list:delete", handleListUpdate);
+    };
+  }, []);
 
   function formatCurrentBoard(board: ExtendedBoard) {
     if (!board.lists || board.lists.length === 0) {
@@ -111,13 +151,14 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
 
   useEffect(() => {
     async function fetchBoardContent() {
+      setFetchingTasks(true);
       try {
         const response = await fetch(`/api/boards/${boardId}/content`);
         const board = await response.json();
 
         const formattedTasks = formatCurrentBoard(board);
         setTaskText(
-          `Here are my tasks on ${board.title}:\n\n${formattedTasks}`
+          `Hello ${username}, here are your tasks on ${board.title}:\n\n${formattedTasks}`
         );
         console.log("Task text:", taskText);
       } catch (error) {
@@ -125,13 +166,15 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
         setTaskText(
           `Hello ${username}, I'm ready to read your tasks when you create some.`
         );
+      } finally {
+        setFetchingTasks(false);
       }
     }
 
     if (boardId) {
       fetchBoardContent();
     }
-  }, [boardId, username]);
+  }, [boardId, username, lastRefresh]);
 
   useEffect(() => {
     // Pick a random motivational quote when component mounts
@@ -302,11 +345,11 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="p-0 overflow-hidden bg-white dark:bg-gray-900 border-0 rounded-xl shadow-xl max-w-md w-full">
-          <div className="p-6 space-y-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-full">
-                <Flame className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+        <DialogContent className="p-0 overflow-hidden bg-white dark:bg-gray-900 border-0 rounded-xl shadow-xl max-w-sm w-full">
+          <div className="p-6 space-y-6">
+            <div className="flex flex-col items-center text-center space-y-2">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
+                <Sparkles className="h-5 w-5 text-blue-700 dark:text-blue-400" />
               </div>
               <DialogTitle className="text-xl font-medium m-0">
                 Ready to crush it, {username}!
@@ -329,9 +372,37 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
               </motion.div>
 
               <div className="py-3 px-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                <p className="text-sm text-gray-700 dark:text-gray-200">
-                  {"Would you like me to read out your tasks for today?"}
-                </p>
+                {fetchingTasks ? (
+                  <div className="flex items-center justify-center space-x-2 py-2">
+                    <svg
+                      className="animate-spin h-4 w-4 text-blue-500"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <p className="text-sm text-gray-700 dark:text-gray-200">
+                      Loading your tasks...
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-700 dark:text-gray-200">
+                    {"Would you like me to read out your tasks for today?"}
+                  </p>
+                )}
 
                 {selectedVoice && (
                   <div className="flex items-center mt-2">
@@ -369,7 +440,7 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
               <Button
                 onClick={onReadTask}
                 className="bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                disabled={loading}
+                disabled={loading || fetchingTasks}
               >
                 {loading ? (
                   <span className="flex items-center">

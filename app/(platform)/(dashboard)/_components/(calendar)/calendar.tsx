@@ -378,7 +378,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
           <Button variant="outline" className="gap-2">
-            <CalendarIcon className="h-4 w-4" />
+            <CalendarIcon className="h-4 w-4 " />
             View Calendar
           </Button>
         </SheetTrigger>
