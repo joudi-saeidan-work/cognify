@@ -84,22 +84,24 @@ export const FormPicker = ({ data }: FormPickerProps) => {
   return (
     <div className="relative">
       {selectedOption && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="absolute -top-7 -right-2 font-semibold text-xs text-muted-foreground"
-          onClick={() => {
-            setSelectedOption(null);
-            executeUpdateBoard({
-              id,
-              image: "|||||",
-              color: undefined,
-            });
-          }}
-        >
-          <X className="w-4 h-4 text-muted-foreground" />
-          Remove Cover
-        </Button>
+        <div className="flex justify-end mb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs font-semibold flex items-center gap-1"
+            onClick={() => {
+              setSelectedOption(null);
+              executeUpdateBoard({
+                id,
+                image: "|||||",
+                color: undefined,
+              });
+            }}
+          >
+            <X className="w-3.5 h-3.5" />
+            Remove Cover
+          </Button>
+        </div>
       )}
       <div className="flex flex-col gap-2">
         <div>
