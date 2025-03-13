@@ -10,6 +10,7 @@ import ReadListButton from "@/app/(platform)/(dashboard)/board/[boardId]/_compon
 import { VoiceProvider } from "@/app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext";
 import { toast } from "sonner";
 import React, { ReactNode } from "react";
+import { useVoice } from "../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext";
 
 // Mock dependencies
 jest.mock("sonner", () => ({
@@ -23,22 +24,7 @@ jest.mock("sonner", () => ({
 jest.mock(
   "@/app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext",
   () => {
-    // Create a mockImplementation that can be changed between tests
-    const useVoiceMock = jest.fn().mockImplementation(() => ({
-      selectedVoice: {
-        id: 1,
-        voice_id: "en-AU-Neural2-C",
-        name: "Test Voice",
-        gender: "Female",
-        language_code: "en-US",
-        language: "English",
-        country: "US",
-        type: "neural",
-      },
-      setSelectedVoice: jest.fn(),
-      voices: [],
-    }));
-
+    const useVoiceMock = jest.fn();
     return {
       useVoice: useVoiceMock,
       VoiceProvider: ({ children }: { children: ReactNode }) => <>{children}</>,

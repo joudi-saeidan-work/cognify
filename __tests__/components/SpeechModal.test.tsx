@@ -81,4 +81,66 @@ describe("SpeechModal", () => {
     // Restore real timers
     jest.useRealTimers();
   });
+
+  it("toggles mute when mute button is clicked", () => {
+    // Create a mutable mock property for muted state
+    let mutedState = false;
+
+    // Override the muted property temporarily for this test
+    Object.defineProperty(HTMLMediaElement.prototype, "muted", {
+      get() {
+        return mutedState;
+      },
+      set(v) {
+        mutedState = v;
+      },
+    });
+
+    render(<SpeechModal setShowModel={setShowModelMock} url={testUrl} />);
+
+    // Find the button that contains the volume icon
+    const muteButton = screen.getAllByRole("button")[0]; // First button in the controls
+
+    // Click to mute
+    fireEvent.click(muteButton);
+
+    // Check if muted state was changed
+    expect(mutedState).toBe(true);
+  });
+
+  it("updates progress when time updates", () => {
+    render(<SpeechModal setShowModel={setShowModelMock} url={testUrl} />);
+
+    const audioElement = document.querySelector("audio");
+
+    // Simulate timeupdate event
+    fireEvent.timeUpdate(audioElement as HTMLMediaElement);
+
+    // Should update progress display
+    expect(screen.getByText("0:30")).toBeInTheDocument();
+  });
+
+  it("handles progress bar interaction", () => {
+    // Mock currentTime setter
+    let currentTime = 30;
+    Object.defineProperty(HTMLMediaElement.prototype, "currentTime", {
+      get() {
+        return currentTime;
+      },
+      set(v) {
+        currentTime = v;
+      },
+    });
+
+    render(<SpeechModal setShowModel={setShowModelMock} url={testUrl} />);
+
+    // Find the progress input
+    const progressBar = screen.getByRole("slider");
+
+    // Change the value
+    fireEvent.change(progressBar, { target: { value: "50" } });
+
+    // Verify the time was updated
+    expect(currentTime).toBe(50);
+  });
 });
