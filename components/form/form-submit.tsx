@@ -14,15 +14,14 @@ interface FormSubmitProps {
     | "outline"
     | "secondary"
     | "ghost"
-    | "link"
-    | "primary";
+    | "link";
 }
 
 export const FormSubmit = ({
   children,
   disabled,
   className,
-  variant = "primary",
+  variant = "outline",
 }: FormSubmitProps) => {
   const { pending } = useFormStatus();
   return (

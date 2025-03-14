@@ -138,8 +138,8 @@ describe("NavBar", () => {
   it("applies zoom level to document root", () => {
     render(<NavBar />);
 
-    // Check initial zoom level (default is 130%)
-    expect(document.documentElement.style.fontSize).toBe("130%");
+    // Check initial zoom level (default is 110%)
+    expect(document.documentElement.style.fontSize).toBe("110%");
 
     document.documentElement.style.fontSize = "110%";
 

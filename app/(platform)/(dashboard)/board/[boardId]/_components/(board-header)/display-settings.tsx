@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import {
   Settings,
   ZoomIn,
@@ -41,7 +41,7 @@ const DisplaySettings = ({
   const handleZoomOut = () => setZoomLevel((prev) => Math.max(prev - 10, 50));
 
   const resetSettings = () => {
-    setZoomLevel(130);
+    setZoomLevel(110);
     setTheme("light");
     setColorBlindMode(false);
     document.body.classList.remove("accessible");

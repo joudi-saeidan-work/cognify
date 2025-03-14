@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import DisplaySettings from "../../board/[boardId]/_components/(board-header)/display-settings";
 // Main NavBar component definition
 const NavBar = () => {
-  const [zoomLevel, setZoomLevel] = useState(130);
+  const [zoomLevel, setZoomLevel] = useState(110);
   const [colorBlindMode, setColorBlindMode] = useState(false);
   const { theme } = useTheme();
   useEffect(() => {

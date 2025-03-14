@@ -7,11 +7,11 @@ import {
   StickySidebarTrigger,
 } from "@/components/ui/sidebar";
 import NavBar from "./_components/(header)/NavBar";
-import { AppSidebar } from "./_components/(sideBar)/AppSidebar";
 import { Hint } from "@/components/hint";
 import { usePathname } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import AssistanceButton from "./_components/(ai-agents)/assitance-button";
+import { AppSidebar } from "@/components/ui/(sideBar)/AppSidebar";
 
 const DashBoardLayout = ({ children }: { children: React.ReactNode }) => {
   const path = usePathname();
@@ -24,7 +24,7 @@ const DashBoardLayout = ({ children }: { children: React.ReactNode }) => {
       <NavBar />
 
       <div className="pt-14 flex-1 flex z-[0]">
-        <SidebarProvider defaultOpen={true}>
+        <SidebarProvider defaultOpen={false}>
           {/* removed z score for testing */}
           {/* <div className="flex flex-1 z-[50]">  */}
           <div className="flex flex-1">

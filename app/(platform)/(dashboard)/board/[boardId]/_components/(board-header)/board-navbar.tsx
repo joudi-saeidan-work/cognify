@@ -38,7 +38,7 @@ const BoardNavbar = ({
   const router = useRouter();
   const { userId, orgId } = useAuth();
   const { user } = useUser();
-  const [zoomLevel, setZoomLevel] = useState(130);
+  const [zoomLevel, setZoomLevel] = useState(110);
   const [colorBlindMode, setColorBlindMode] = useState(false);
   const [selectedModel, setSelectedModel] = useState<Voice | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,13 +68,8 @@ const BoardNavbar = ({
   };
 
   useEffect(() => {
-    // Apply the font-size for zoom effect
     document.documentElement.style.fontSize = `${zoomLevel}%`;
   }, [zoomLevel]);
-
-  useEffect(() => {
-    // Logic to show the modal when the board is opened
-  }, []);
 
   return (
     <div
