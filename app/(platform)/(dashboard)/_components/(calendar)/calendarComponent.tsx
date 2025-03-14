@@ -374,12 +374,14 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     <div>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
-          <Hint description="Open Calendar">
-            <Button variant="outline" className="gap-2">
-              <CalendarIcon className="h-4 w-4 " />
-              View Calendar
-            </Button>
-          </Hint>
+          <Button variant="outline" className="gap-2">
+            <Hint description="Open Calendar">
+              <span className="flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                View Calendar
+              </span>
+            </Hint>
+          </Button>
         </SheetTrigger>
         <SheetContent
           side="right"

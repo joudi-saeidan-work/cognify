@@ -78,12 +78,14 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
     <div className="flex items-center gap-2 p-2">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Hint description="Open Bookmarks">
-            <Button variant="ghost" size="sm">
-              <Folder className="h-4 w-4 mr-2 " />
-              Bookmarks
-            </Button>
-          </Hint>
+          <Button variant="ghost" size="sm">
+            <Hint description="Open Bookmarks">
+              <span className="flex items-center gap-2">
+                <Folder className="h-4 w-4 mr-2" />
+                Bookmarks
+              </span>
+            </Hint>
+          </Button>
         </PopoverTrigger>
         <PopoverContent align="start" className="w-72">
           {/* Navigation header */}
