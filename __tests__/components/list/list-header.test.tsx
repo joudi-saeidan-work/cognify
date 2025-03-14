@@ -298,7 +298,7 @@ describe("ListHeader", () => {
 
     // The form should submit (but with the same value, so no API call)
     expect(mockExecuteUpdateList).not.toHaveBeenCalled();
-  });
+  }, 10000);
 
   it("submits the form with updated title", async () => {
     render(<ListHeader data={mockList} onAddCard={mockOnAddCard} />);

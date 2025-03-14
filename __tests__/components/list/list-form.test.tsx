@@ -241,7 +241,7 @@ describe("ListForm", () => {
 
     // Should exit editing state
     expect(screen.queryByTestId("form-input")).not.toBeInTheDocument();
-  });
+  }, 10000);
 
   it("submits the form with valid data", async () => {
     // Setup

@@ -2,110 +2,69 @@
  * @jest-environment jsdom
  */
 
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-
-// Mock the component directly
-jest.mock(
-  "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(board-header)/board-options",
-  () => ({
-    __esModule: true,
-    default: jest
-      .fn()
-      .mockImplementation(({ id, visibilitySettings, onSettingsChange }) => {
-        // Create a simplified mock implementation for testing
-        const onDelete = jest.fn();
-        const onCreate = jest.fn();
-
-        return (
-          <div data-testid="board-options">
-            <button data-testid="options-button">Options</button>
-            <div data-testid="settings-panel">
-              <div data-testid="zoom-controls">
-                <span>Zoom Controls</span>
-                <button
-                  data-testid="zoom-toggle"
-                  onClick={() =>
-                    onSettingsChange(
-                      "showZoomControls",
-                      !visibilitySettings.showZoomControls
-                    )
-                  }
-                >
-                  {visibilitySettings.showZoomControls ? "On" : "Off"}
-                </button>
-              </div>
-
-              <div data-testid="theme-controls">
-                <span>Theme</span>
-                <button
-                  data-testid="theme-toggle"
-                  onClick={() =>
-                    onSettingsChange(
-                      "showThemes",
-                      !visibilitySettings.showThemes
-                    )
-                  }
-                >
-                  {visibilitySettings.showThemes ? "On" : "Off"}
-                </button>
-              </div>
-
-              <div data-testid="bookmark-controls">
-                <span>Bookmark</span>
-                <button
-                  data-testid="bookmark-toggle"
-                  onClick={() =>
-                    onSettingsChange(
-                      "showBookmarks",
-                      !visibilitySettings.showBookmarks
-                    )
-                  }
-                >
-                  {visibilitySettings.showBookmarks ? "On" : "Off"}
-                </button>
-              </div>
-
-              <div data-testid="assistant-controls">
-                <span>Assistance</span>
-                <button
-                  data-testid="assistant-toggle"
-                  onClick={() =>
-                    onSettingsChange(
-                      "showAssistant",
-                      !visibilitySettings.showAssistant
-                    )
-                  }
-                >
-                  {visibilitySettings.showAssistant ? "On" : "Off"}
-                </button>
-              </div>
-
-              <button data-testid="delete-board-button" onClick={onDelete}>
-                Delete Board
-              </button>
-
-              <button data-testid="create-board-button" onClick={onCreate}>
-                Create Board
-              </button>
-            </div>
-          </div>
-        );
-      }),
-  })
-);
-
-// Import after mocks
 import BoardOptions from "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(board-header)/board-options";
+import { useRouter } from "next/navigation";
+
+// Mock router
+jest.mock("next/navigation", () => ({
+  useRouter: jest.fn().mockReturnValue({
+    push: jest.fn(),
+  }),
+}));
+
+// Mock actions
+jest.mock("../../../hooks/use-actions", () => ({
+  useAction: jest.fn().mockImplementation(() => ({
+    execute: jest.fn(),
+    isLoading: false,
+  })),
+}));
+
+// Mock delete-board and create-board
+jest.mock("../../../actions/delete-board", () => ({
+  deleteBoard: { name: "deleteBoard" },
+}));
+
+jest.mock("../../../actions/create-board", () => ({
+  createBoard: { name: "createBoard" },
+}));
+
+// Mock toast
+jest.mock("sonner", () => ({
+  toast: {
+    error: jest.fn(),
+    success: jest.fn(),
+  },
+}));
+
+import { useAction } from "../../../hooks/use-actions";
+import { deleteBoard } from "../../../actions/delete-board";
+import { createBoard } from "../../../actions/create-board";
 
 describe("BoardOptions Component", () => {
-  // Reset the mock implementation before each test
+  const mockExecuteDeleteBoard = jest.fn();
+  const mockExecuteCreateBoard = jest.fn();
+  const mockRouter = { push: jest.fn() };
+
   beforeEach(() => {
     jest.clearAllMocks();
+    (useRouter as jest.Mock).mockReturnValue(mockRouter);
+
+    // Mock the first call to useAction (for deleteBoard)
+    (useAction as jest.Mock).mockImplementationOnce(() => ({
+      execute: mockExecuteDeleteBoard,
+      isLoading: false,
+    }));
+
+    // Mock the second call to useAction (for createBoard)
+    (useAction as jest.Mock).mockImplementationOnce(() => ({
+      execute: mockExecuteCreateBoard,
+      isLoading: false,
+    }));
   });
 
-  const boardId = "board-123";
   const defaultVisibilitySettings = {
     showAssistant: true,
     showAvatar: true,
@@ -114,72 +73,56 @@ describe("BoardOptions Component", () => {
     showThemes: true,
   };
 
-  const mockOnSettingsChange = jest.fn();
-
-  it("renders the component without crashing", () => {
+  it("renders without crashing", () => {
     render(
       <BoardOptions
-        id={boardId}
+        id="test-board-123"
         visibilitySettings={defaultVisibilitySettings}
-        onSettingsChange={mockOnSettingsChange}
+        onSettingsChange={() => {}}
       />
     );
 
-    expect(screen.getByTestId("board-options")).toBeInTheDocument();
-    expect(screen.getByTestId("options-button")).toBeInTheDocument();
-    expect(screen.getByTestId("settings-panel")).toBeInTheDocument();
+    // Should render a button with MoreHorizontal icon
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
-  it("displays correct toggle states based on visibility settings", () => {
+  it("displays settings content when clicked", () => {
     render(
       <BoardOptions
-        id={boardId}
+        id="test-board-123"
         visibilitySettings={defaultVisibilitySettings}
-        onSettingsChange={mockOnSettingsChange}
+        onSettingsChange={() => {}}
       />
     );
 
-    // All settings should be "On" with default settings
-    expect(screen.getByTestId("zoom-toggle")).toHaveTextContent("On");
-    expect(screen.getByTestId("theme-toggle")).toHaveTextContent("On");
-    expect(screen.getByTestId("bookmark-toggle")).toHaveTextContent("On");
-    expect(screen.getByTestId("assistant-toggle")).toHaveTextContent("On");
-  });
+    // Click the options button to open the popover
+    fireEvent.click(screen.getByRole("button"));
 
-  it("displays correct toggle states when settings are off", () => {
-    const offSettings = {
-      showAssistant: false,
-      showAvatar: false,
-      showZoomControls: false,
-      showBookmarks: false,
-      showThemes: false,
-    };
-
-    render(
-      <BoardOptions
-        id={boardId}
-        visibilitySettings={offSettings}
-        onSettingsChange={mockOnSettingsChange}
-      />
-    );
-
-    // All settings should be "Off"
-    expect(screen.getByTestId("zoom-toggle")).toHaveTextContent("Off");
-    expect(screen.getByTestId("theme-toggle")).toHaveTextContent("Off");
-    expect(screen.getByTestId("bookmark-toggle")).toHaveTextContent("Off");
-    expect(screen.getByTestId("assistant-toggle")).toHaveTextContent("Off");
+    // Content should be visible
+    expect(screen.getByText("Board Settings")).toBeInTheDocument();
+    expect(screen.getByText("Zoom Controls")).toBeInTheDocument();
+    expect(screen.getByText("Theme")).toBeInTheDocument();
+    expect(screen.getByText("Bookmark")).toBeInTheDocument();
+    expect(screen.getByText("Assistance")).toBeInTheDocument();
   });
 
   it("calls onSettingsChange when zoom toggle is clicked", () => {
+    const mockOnSettingsChange = jest.fn();
     render(
       <BoardOptions
-        id={boardId}
+        id="test-board-123"
         visibilitySettings={defaultVisibilitySettings}
         onSettingsChange={mockOnSettingsChange}
       />
     );
 
-    fireEvent.click(screen.getByTestId("zoom-toggle"));
+    // Open the popover
+    fireEvent.click(screen.getByRole("button"));
+
+    // Find all checkboxes and click the first one (Zoom Controls)
+    const checkboxes = screen.getAllByRole("checkbox");
+    fireEvent.click(checkboxes[0]);
+
     expect(mockOnSettingsChange).toHaveBeenCalledWith(
       "showZoomControls",
       false
@@ -187,71 +130,116 @@ describe("BoardOptions Component", () => {
   });
 
   it("calls onSettingsChange when theme toggle is clicked", () => {
+    const mockOnSettingsChange = jest.fn();
     render(
       <BoardOptions
-        id={boardId}
+        id="test-board-123"
         visibilitySettings={defaultVisibilitySettings}
         onSettingsChange={mockOnSettingsChange}
       />
     );
 
-    fireEvent.click(screen.getByTestId("theme-toggle"));
+    // Open the popover
+    fireEvent.click(screen.getByRole("button"));
+
+    // Find all checkboxes and click the second one (Theme)
+    const checkboxes = screen.getAllByRole("checkbox");
+    fireEvent.click(checkboxes[1]);
+
     expect(mockOnSettingsChange).toHaveBeenCalledWith("showThemes", false);
   });
 
   it("calls onSettingsChange when bookmark toggle is clicked", () => {
+    const mockOnSettingsChange = jest.fn();
     render(
       <BoardOptions
-        id={boardId}
+        id="test-board-123"
         visibilitySettings={defaultVisibilitySettings}
         onSettingsChange={mockOnSettingsChange}
       />
     );
 
-    fireEvent.click(screen.getByTestId("bookmark-toggle"));
+    // Open the popover
+    fireEvent.click(screen.getByRole("button"));
+
+    // Find all checkboxes and click the third one (Bookmark)
+    const checkboxes = screen.getAllByRole("checkbox");
+    fireEvent.click(checkboxes[2]);
+
     expect(mockOnSettingsChange).toHaveBeenCalledWith("showBookmarks", false);
   });
 
   it("calls onSettingsChange when assistant toggle is clicked", () => {
+    const mockOnSettingsChange = jest.fn();
     render(
       <BoardOptions
-        id={boardId}
+        id="test-board-123"
         visibilitySettings={defaultVisibilitySettings}
         onSettingsChange={mockOnSettingsChange}
       />
     );
 
-    fireEvent.click(screen.getByTestId("assistant-toggle"));
+    // Open the popover
+    fireEvent.click(screen.getByRole("button"));
+
+    // Find all checkboxes and click the fourth one (Assistant)
+    const checkboxes = screen.getAllByRole("checkbox");
+    fireEvent.click(checkboxes[3]);
+
     expect(mockOnSettingsChange).toHaveBeenCalledWith("showAssistant", false);
   });
 
-  it("shows delete board button", () => {
+  it("renders delete and create board buttons", () => {
     render(
       <BoardOptions
-        id={boardId}
+        id="test-board-123"
         visibilitySettings={defaultVisibilitySettings}
-        onSettingsChange={mockOnSettingsChange}
+        onSettingsChange={() => {}}
       />
     );
 
-    expect(screen.getByTestId("delete-board-button")).toBeInTheDocument();
-    expect(screen.getByTestId("delete-board-button")).toHaveTextContent(
-      "Delete Board"
-    );
+    // Open the popover
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(screen.getByText("Delete Board")).toBeInTheDocument();
+    expect(screen.getByText("Create Board")).toBeInTheDocument();
   });
 
-  it("shows create board button", () => {
+  it("calls executeDeleteBoard when delete button is clicked", () => {
     render(
       <BoardOptions
-        id={boardId}
+        id="test-board-123"
         visibilitySettings={defaultVisibilitySettings}
-        onSettingsChange={mockOnSettingsChange}
+        onSettingsChange={() => {}}
       />
     );
 
-    expect(screen.getByTestId("create-board-button")).toBeInTheDocument();
-    expect(screen.getByTestId("create-board-button")).toHaveTextContent(
-      "Create Board"
+    // Open the popover
+    fireEvent.click(screen.getByRole("button"));
+
+    // Click the delete button
+    fireEvent.click(screen.getByText("Delete Board"));
+
+    expect(mockExecuteDeleteBoard).toHaveBeenCalledWith({
+      id: "test-board-123",
+    });
+  });
+
+  it("calls executeCreateBoard when create button is clicked", () => {
+    render(
+      <BoardOptions
+        id="test-board-123"
+        visibilitySettings={defaultVisibilitySettings}
+        onSettingsChange={() => {}}
+      />
     );
+
+    // Open the popover
+    fireEvent.click(screen.getByRole("button"));
+
+    // Click the create button
+    fireEvent.click(screen.getByText("Create Board"));
+
+    expect(mockExecuteCreateBoard).toHaveBeenCalledWith({ title: "Untitled" });
   });
 });
