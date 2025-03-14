@@ -10,7 +10,7 @@ import ReadListButton from "@/app/(platform)/(dashboard)/board/[boardId]/_compon
 import { VoiceProvider } from "@/app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext";
 import { toast } from "sonner";
 import React, { ReactNode } from "react";
-import { useVoice } from "../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext";
+import { useVoice } from "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext";
 
 // Mock dependencies
 jest.mock("sonner", () => ({

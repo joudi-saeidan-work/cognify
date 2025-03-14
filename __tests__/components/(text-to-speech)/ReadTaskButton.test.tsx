@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import {
   render,
   screen,
@@ -7,7 +7,7 @@ import {
   act,
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import ReadTasksButton from "../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/ReadTasksButton";
+import ReadTasksButton from "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/ReadTasksButton";
 import { toast } from "sonner";
 
 // Manual mock setup
@@ -22,9 +22,9 @@ const mockSelectedVoice = {
   type: "Wavenet",
 };
 
-// Create a mock module factory
+// Mock the VoiceContext at the module level (not inside a test)
 jest.mock(
-  "../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext",
+  "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext",
   () => ({
     useVoice: jest.fn(),
   })
@@ -33,7 +33,7 @@ jest.mock(
 // Import the mock after defining it
 const {
   useVoice,
-} = require("../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext");
+} = require("../../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext");
 
 // Mock toast
 jest.mock("sonner", () => ({
@@ -44,24 +44,11 @@ jest.mock("sonner", () => ({
 
 // Mock SpeechModal
 jest.mock(
-  "../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/SpeechModal",
-  () => ({
-    __esModule: true,
-    default: ({
-      setShowModel,
-      url,
-    }: {
-      setShowModel: (value: boolean) => void;
-      url: string;
-    }) => (
-      <div data-testid="speech-modal">
-        Mock Speech Modal
-        <button data-testid="close-button" onClick={() => setShowModel(false)}>
-          Close
-        </button>
-      </div>
-    ),
-  })
+  "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/SpeechModal",
+  () => {
+    // Import your mock directly
+    return require("../../../__mocks__/SpeechModal").default;
+  }
 );
 
 describe("ReadTasksButton", () => {
