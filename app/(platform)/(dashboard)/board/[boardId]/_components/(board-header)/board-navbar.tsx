@@ -100,7 +100,7 @@ const BoardNavbar = ({
         duration-300
         transform
         translate-x-0
-        group-hover:translate-x-[150px] absolute left-[calc(100%-140px)] top-1/2 -translate-y-1/2"
+        group-hover:translate-x-[150px] absolute left-[calc(100%-125px)] top-1/2 -translate-y-1/2"
           >
             <ReadTasksButton
               username={user.firstName || "User"}

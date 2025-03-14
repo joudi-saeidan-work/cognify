@@ -46,7 +46,17 @@ export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
 
   const onSubmit = (formData: FormData) => {
     const title = formData.get("title") as string;
-    execute({ title, id: data.id });
+    execute({
+      title,
+      id: data.id,
+      image:
+        data.imageId && data.imageThumbUrl && data.imageFullUrl
+          ? `${data.imageId}|${data.imageThumbUrl}|${data.imageFullUrl}|${
+              data.imageLinkHTML || ""
+            }|${data.imageUserName || ""}`
+          : undefined,
+      color: data.color || undefined,
+    });
   };
   const onBlur = () => {
     formRef.current?.requestSubmit();

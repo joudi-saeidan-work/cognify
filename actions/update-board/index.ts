@@ -16,7 +16,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
       error: "Unauthorized",
     };
   }
-  const { title, id, image, color, isFavorite } = data;
+  const { title, id, image, color, isFavorite, coverImage } = data;
 
   if (image && color) {
     return { error: "You can only set either an image or a color, not both." };
@@ -36,8 +36,12 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   let board;
 
   try {
+    // Use updateMany to only update the fields that are provided
     board = await db.board.update({
-      where: { id, orgId },
+      where: {
+        id,
+        orgId,
+      },
       data: {
         title,
         ...(color
@@ -58,6 +62,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
               imageUserName,
             }),
         isFavorite,
+        ...(coverImage !== undefined && { coverImage }),
       },
     });
     await createAuditLog({
@@ -69,6 +74,7 @@ const handler = async (data: InputType): Promise<ReturnType> => {
   } catch (error) {
     return { error: "Failed to update" };
   }
+
   revalidatePath(`/board/${id}`);
   return { data: board };
 };
