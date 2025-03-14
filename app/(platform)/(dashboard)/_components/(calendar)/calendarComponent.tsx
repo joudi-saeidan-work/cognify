@@ -270,10 +270,6 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     setNewEventTitle(""); // Reset the event title
   };
 
-  // Modify handleEventClick
-  // (ToDo) we should also the delete the actual card from the database
-  // need when we click on the event instead of deleting it it should show a popover
-  // of the card details (title,list board, due date) and find another way to delete the card
   const handleEventClick = async (selected: EventClickArg) => {
     if (
       window.confirm(

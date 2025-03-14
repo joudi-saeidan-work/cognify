@@ -18,6 +18,7 @@ const config: Config = {
     "!app/**/*.d.ts",
     "!app/**/node_modules/**",
     "!app/**/api/**",
+    "!app/**/__mocks__/**",
   ],
   coverageThreshold: {
     global: {
@@ -30,6 +31,8 @@ const config: Config = {
   coverageDirectory: "coverage",
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
+    "^@/app/\\(marketing\\)/page$":
+      "<rootDir>/app/(marketing)/__mocks__/page.tsx",
   },
 };
 

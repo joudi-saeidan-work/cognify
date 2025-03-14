@@ -15,7 +15,7 @@ import { BoardTitleForm } from "./board-title-form";
 import AssistanceButton from "@/app/(platform)/(dashboard)/_components/(ai-agents)/assitance-button";
 import ResetControls from "@/app/(platform)/(dashboard)/_components/(header)/ResetControls";
 import ZoomControls from "@/app/(platform)/(dashboard)/_components/(header)/ZoomControls";
-import Calendar from "@/app/(platform)/(dashboard)/_components/(calendar)/calendar";
+import Calendar from "@/app/(platform)/(dashboard)/_components/(calendar)/calendarComponent";
 import DisplaySettings from "./display-settings";
 import BoardSettings from "./board-settings";
 import WelcomeModal from "../(text-to-speech)/WelcomeModal";

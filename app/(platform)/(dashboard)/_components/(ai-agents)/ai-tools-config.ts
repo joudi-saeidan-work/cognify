@@ -15,7 +15,6 @@ import MagicTodo from "@/app/(platform)/(dashboard)/_components/(ai-agents)/magi
 import Formalizer from "./formalizer";
 import Professor from "@/app/(platform)/(dashboard)/_components/(ai-agents)/professor";
 import Consultant from "@/app/(platform)/(dashboard)/_components/(ai-agents)/consultant";
-import Judge from "./judge";
 
 export interface AIToolConfig {
   id: string;

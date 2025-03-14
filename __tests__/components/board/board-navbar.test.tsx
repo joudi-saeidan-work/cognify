@@ -29,7 +29,7 @@ jest.mock("next-themes", () => ({
 
 // Mock child components
 jest.mock(
-  "../../../app/(platform)/(dashboard)/_components/(calendar)/calendar",
+  "../../../app/(platform)/(dashboard)/_components/(calendar)/calendarComponent",
   () => ({
     __esModule: true,
     default: () => <div data-testid="calendar" />,

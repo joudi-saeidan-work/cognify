@@ -376,27 +376,43 @@ describe("AudioRecorder", () => {
 
     // 1. Select an organization
     const orgSelect = screen.getByRole("combobox");
-    fireEvent.change(orgSelect, { target: { value: "org1" } });
+    await act(async () => {
+      fireEvent.change(orgSelect, { target: { value: "org1" } });
+    });
 
-    // Wait for board options to appear
+    // Wait for board dropdown to appear (find element instead of counting)
     await waitFor(() => {
-      const selects = screen.getAllByRole("combobox");
-      expect(selects.length).toBe(2);
+      // Look for the specific board select with the "Select Board" placeholder
+      const boardSelect = screen.getAllByRole("option", {
+        name: "Select Board",
+      });
+      expect(boardSelect.length).toBeGreaterThan(0);
     });
 
     // 2. Select a board
-    const boardSelect = screen.getAllByRole("combobox")[1];
-    fireEvent.change(boardSelect, { target: { value: "board1" } });
+    const selects = screen.getAllByRole("combobox");
+    expect(selects.length).toBe(2); // Now we can assert there are two selects
 
-    // Wait for list options to appear
+    const boardSelect = selects[1];
+    await act(async () => {
+      fireEvent.change(boardSelect, { target: { value: "board1" } });
+    });
+
+    // Wait for list dropdown to appear (find element instead of counting)
     await waitFor(() => {
-      const selects = screen.getAllByRole("combobox");
-      expect(selects.length).toBe(3);
+      // Look for the specific list select with the "Select List" placeholder
+      const listSelect = screen.getAllByRole("option", { name: "Select List" });
+      expect(listSelect.length).toBeGreaterThan(0);
     });
 
     // 3. Select a list
-    const listSelect = screen.getAllByRole("combobox")[2];
-    fireEvent.change(listSelect, { target: { value: "list1" } });
+    const updatedSelects = screen.getAllByRole("combobox");
+    expect(updatedSelects.length).toBe(3); // Now we can assert there are three selects
+
+    const listSelect = updatedSelects[2];
+    await act(async () => {
+      fireEvent.change(listSelect, { target: { value: "list1" } });
+    });
 
     // Record button should be enabled now that all selections are made
     await waitFor(() => {

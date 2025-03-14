@@ -1,8 +1,8 @@
-"use client"; // ✅ This is a client component
+"use client";
 
 import { useState } from "react";
 import { LayoutDashboardIcon, Star, User2 } from "lucide-react";
-import { Board } from "@prisma/client"; // ✅ Import Board type from Prisma
+import { Board } from "@prisma/client";
 import BoardItem from "./board-item";
 import CreateBoard from "./create-board";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,6 @@ interface BoardListProps {
 }
 
 const BoardList: React.FC<BoardListProps> = ({ boards }) => {
-  // const [favoriteBoards, setFavoriteBoards] = useState<string[]>([]);
   const [showFavorites, setShowFavorites] = useState(false); // track if we want to show fav boards
   const [loadingBoardId, setLoadingBoardId] = useState<string | null>(null);
 

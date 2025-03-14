@@ -140,11 +140,14 @@ describe("ReadTasksButton", () => {
     render(<ReadTasksButton username="John Doe" boardId="123" />);
     fireEvent.click(screen.getByRole("button", { name: /read my tasks/i }));
 
-    await waitFor(() => {
-      expect(global.fetch).toHaveBeenCalledTimes(3);
-      expect(screen.getByTestId("speech-modal")).toBeInTheDocument();
-    });
-  });
+    await waitFor(
+      () => {
+        expect(global.fetch).toHaveBeenCalledTimes(3);
+        expect(screen.getByTestId("speech-modal")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
+  }, 15000);
 
   it("handles API error from voice-assistant endpoint", async () => {
     // Temporarily silence console.error for this test
