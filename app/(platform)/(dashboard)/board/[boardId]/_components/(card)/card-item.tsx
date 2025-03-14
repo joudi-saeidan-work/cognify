@@ -188,7 +188,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
         className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 dark:hover:border-white/30 py-2 px-3 text-sm rounded-md shadow-md w-full"
         style={getCardBackground()}
       >
-        <form ref={formRef} action={onSubmit} className="w-full">
+        <form ref={formRef} action="#" className="w-full">
           <FormTextarea
             color={data.color}
             ref={textareaRef}

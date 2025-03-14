@@ -178,7 +178,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
 
     if (isEditing) {
       return (
-        <form className="m-1 py-0.5 space-y-4" action={onSubmit} ref={formRef}>
+        <form className="m-1 py-0.5 space-y-4" action="#" ref={formRef}>
           <div className={`relative ${isRecording ? "recording-active" : ""}`}>
             <FormTextarea
               color={color}
