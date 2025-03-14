@@ -6,7 +6,7 @@ import { Calendar as CalendarIcon, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card } from "@prisma/client";
-import { TimePicker } from "./time-picker";
+import { TimePicker } from "../../../../../../../components/time-picker";
 import { useAction } from "@/hooks/use-actions";
 import { toast } from "sonner";
 import { updateCard } from "@/actions/update-card";

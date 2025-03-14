@@ -167,7 +167,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
     const handleRecordingStateChange = (recording: boolean) => {
       setIsRecording(recording);
 
-      // When recording starts, make sure the textarea shows our transcription
+      // When recording starts, make sure the textarea shows transcription
       if (recording && ref && "current" in ref && ref.current) {
         ref.current.value = transcription;
         ref.current.readOnly = true; // Disable typing while recording

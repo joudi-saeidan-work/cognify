@@ -1,8 +1,4 @@
-// global import with npm
-// import { Medal } from "lucide-react";
-// import google fonts
 import { Poppins } from "next/font/google";
-// How to import local font using next js
 import localFont from "next/font/local";
 
 import Link from "next/link";
@@ -26,17 +22,9 @@ const MarketingPage = () => {
           headingfont.className
         )}
       >
-        {/* This is a component from lucide react which came from when we have
-          installed shacm UI and chose the default style */}
-        {/* <Medal className="h6 w-6 mr-2" />
-          No 1 Task Management */}
-
         <h1 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-teal-600 to-teal-400 text-transparent bg-clip-text w-fit tracking-wide">
           Say Goodbye to Chaos.
         </h1>
-        {/* <div className="text-3xl md:text-6xl bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white px-4 p-2 rounded-md pb-4 w-fit">
-          Work Smarter.
-        </div> */}
 
         <p
           className={cn(

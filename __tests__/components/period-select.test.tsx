@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { TimePeriodSelect } from "@/app/(platform)/(dashboard)/board/[boardId]/_components/(date-time-picker)/period-select";
+import { TimePeriodSelect } from "@/components/period-select";
 
 // Mock console methods to prevent warnings in test output
 beforeAll(() => {

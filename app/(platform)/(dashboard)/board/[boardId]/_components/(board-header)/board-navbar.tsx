@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { dark } from "@clerk/themes";
 import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
-import BookmarkBar from "@/components/bookmark/bookmark-bar";
+import BookmarkBar from "@/app/(platform)/(dashboard)/_components/bookmark/bookmark-bar";
 import { BoardTitleForm } from "./board-title-form";
 import AssistanceButton from "@/app/(platform)/(dashboard)/_components/(ai-agents)/assitance-button";
 import ResetControls from "@/app/(platform)/(dashboard)/_components/(header)/ResetControls";

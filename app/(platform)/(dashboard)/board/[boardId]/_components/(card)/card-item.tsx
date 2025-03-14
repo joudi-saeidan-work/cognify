@@ -171,7 +171,6 @@ export const CardItem = ({ data, index }: CardItemProps) => {
       return { backgroundColor: data.color };
     }
 
-    // Use a CSS variable approach for theme-aware backgrounds
     return {
       backgroundColor: "var(--card-bg-color)",
     };

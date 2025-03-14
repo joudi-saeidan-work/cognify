@@ -5,7 +5,7 @@ import { TimePickerInput } from "@/app/(platform)/(dashboard)/board/[boardId]/_c
 import {
   type TimePickerType,
   type Period,
-} from "@/app/(platform)/(dashboard)/board/[boardId]/_components/(date-time-picker)/time-picker-utils";
+} from "@/components/time-picker-utils";
 
 // Mock the Input component
 jest.mock("@/components/ui/input", () => ({

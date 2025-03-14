@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Loader2,
-  Save,
-  X,
-  CheckSquare,
-  ListTodo,
-  WandSparkles,
-} from "lucide-react";
+import { Loader2, Save, X, CheckSquare, WandSparkles } from "lucide-react";
 import { useChat } from "ai/react";
 import { Input } from "@/components/ui/input";
 import { AIToolConfig } from "./ai-tools-config";

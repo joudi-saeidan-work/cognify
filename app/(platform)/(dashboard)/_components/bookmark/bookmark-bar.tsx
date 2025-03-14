@@ -14,8 +14,7 @@ import { toast } from "sonner";
 import { createBookmarkFolder } from "@/actions/create-bookmark-folder/index";
 import { createBookmark } from "@/actions/create-bookmark";
 import type { BookmarkFolder, Bookmark as BookmarkType } from "@prisma/client";
-import { Hint } from "../hint";
-
+import { Hint } from "@/components/hint";
 interface BookmarkBarProps {
   folders: (BookmarkFolder & { bookmarks: BookmarkType[] })[];
   bookmarks: BookmarkType[];

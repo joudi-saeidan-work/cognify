@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { TimePicker } from "@/app/(platform)/(dashboard)/board/[boardId]/_components/(date-time-picker)/time-picker";
+import { TimePicker } from "@/components/time-picker";
 
 // Mock the child components
 jest.mock(

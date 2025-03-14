@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   CalendarPlus,
   Medal,
@@ -49,17 +43,14 @@ interface RoutineResult {
 }
 
 const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
-  // -- Form Input States --
   const [goal, setGoal] = useState("");
   const [daysAvailable, setDaysAvailable] = useState<string[]>([]);
   const [challenges, setChallenges] = useState<string[]>([]);
 
-  // -- Result State --
   const [routineResult, setRoutineResult] = useState<RoutineResult | null>(
     null
   );
 
-  // Add this with your other state variables
   const [loading, setLoading] = useState(false);
 
   const DAYS = [
@@ -71,7 +62,6 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
     "Saturday",
     "Sunday",
   ];
-  const SHORT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
   const CHALLENGE_OPTIONS = [
     "Procrastination",
@@ -83,7 +73,6 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
     "Work-life balance",
   ];
 
-  // Updated parsing logic to handle markdown-formatted JSON
   const { handleSubmit, isLoading, setInput } = useChat({
     api: config.apiRoute,
     onFinish: (response) => {
@@ -125,8 +114,8 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-end sm:p-5">
       <div className="bg-black/50 absolute inset-0" onClick={onClose} />
-    <div
-      className={cn(
+      <div
+        className={cn(
           "z-50 flex h-full w-full flex-col rounded-t-lg sm:h-auto sm:max-h-[85vh] sm:w-full sm:max-w-[550px] sm:rounded-lg bg-card border border-border shadow-xl overflow-hidden",
           "animate-in slide-in-from-bottom-10 fade-in-0 duration-300 ease-in-out"
         )}
@@ -177,24 +166,24 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
                 className="space-y-3"
               >
                 {/* Goal Input */}
-              <div className="space-y-1.5">
-                <Label htmlFor="goal" className="text-xs font-medium">
+                <div className="space-y-1.5">
+                  <Label htmlFor="goal" className="text-xs font-medium">
                     What's your goal?
-                </Label>
+                  </Label>
                   <Textarea
-                  id="goal"
+                    id="goal"
                     placeholder="E.g., Learn piano, Run a marathon, Launch a podcast..."
                     className="resize-none h-20 text-sm"
-                  value={goal}
+                    value={goal}
                     onChange={(e) => setGoal(e.target.value)}
                   />
-              </div>
+                </div>
 
                 {/* Challenges */}
-              <div className="space-y-1.5">
+                <div className="space-y-1.5">
                   <Label className="text-xs font-medium block">
                     What challenges might you face?
-                </Label>
+                  </Label>
                   <div className="grid grid-cols-2 gap-1.5">
                     {CHALLENGE_OPTIONS.map((challenge) => (
                       <div
@@ -217,27 +206,27 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
                         </label>
                       </div>
                     ))}
+                  </div>
                 </div>
-              </div>
 
                 {/* Submit Button */}
-              <Button
+                <Button
                   type="submit"
                   disabled={!goal || isLoading || loading}
                   className="w-full"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Generating...
-                  </>
-                ) : (
+                    </>
+                  ) : (
                     <>
                       <Medal className="mr-2 h-4 w-4" />
                       Generate Smart Routine
                     </>
-                )}
-              </Button>
+                  )}
+                </Button>
               </form>
             </div>
           ) : (

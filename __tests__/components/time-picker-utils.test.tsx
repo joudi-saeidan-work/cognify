@@ -21,7 +21,7 @@ import {
   display12HourValue,
   type Period,
   type TimePickerType,
-} from "@/app/(platform)/(dashboard)/board/[boardId]/_components/(date-time-picker)/time-picker-utils";
+} from "@/components/time-picker-utils";
 
 // Mock console methods to prevent warnings in test output
 beforeAll(() => {
