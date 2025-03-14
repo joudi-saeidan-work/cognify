@@ -14,6 +14,22 @@ import { VoiceProvider } from "../../../app/(platform)/(dashboard)/board/[boardI
 // Add this at the top, before your mock implementations
 global.fetch = jest.fn() as jest.MockedFunction<typeof fetch>;
 
+// Suppress console logs and errors during tests
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
+beforeAll(() => {
+  // Suppress React warnings and console logs/errors during tests
+  console.log = jest.fn();
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  // Restore original console methods after tests
+  console.log = originalConsoleLog;
+  console.error = originalConsoleError;
+});
+
 // Mock the VoiceContext
 jest.mock(
   "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(text-to-speech)/VoiceContext",
@@ -129,8 +145,12 @@ const originalQuotes = [
 ];
 
 // Create a custom render function that includes the provider
-function renderWithVoiceContext(ui: React.ReactNode, renderOptions = {}) {
-  return render(<>{ui}</>, renderOptions);
+async function renderWithVoiceContext(ui: React.ReactNode, renderOptions = {}) {
+  let result: any;
+  await act(async () => {
+    result = render(<>{ui}</>, renderOptions);
+  });
+  return result;
 }
 
 // Reset mocks between tests
@@ -138,12 +158,19 @@ beforeEach(() => {
   jest.resetAllMocks();
 
   // Now this will work
-  (global.fetch as jest.Mock).mockImplementation(() =>
-    Promise.resolve({
+  (global.fetch as jest.Mock).mockImplementation((url) => {
+    if (url.includes("/api/boards/")) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockBoardData),
+      });
+    }
+
+    return Promise.resolve({
       ok: true,
       json: () => Promise.resolve({ title: "Test Board", lists: [] }),
-    })
-  );
+    });
+  });
 
   const defaultVoices = [
     {
@@ -177,7 +204,9 @@ describe("WelcomeModal", () => {
   };
 
   it("shows task reading UI after loading", async () => {
-    render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    await act(async () => {
+      render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    });
 
     // Test loading state ends
     expect(
@@ -191,7 +220,7 @@ describe("WelcomeModal", () => {
   });
 
   it("renders with the user's name and motivational quote", async () => {
-    renderWithVoiceContext(
+    await renderWithVoiceContext(
       <WelcomeModal username="John Doe" boardId="board-1" />
     );
 
@@ -218,14 +247,16 @@ describe("WelcomeModal", () => {
 
     (global.fetch as jest.Mock).mockImplementationOnce(() => fetchPromise);
 
-    render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    await act(async () => {
+      render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    });
 
     // Verify loading is shown
     expect(screen.getByText(/loading your tasks/i)).toBeInTheDocument();
 
     // Resolve the fetch to complete loading
     await act(async () => {
-      resolveFetch({
+      resolveFetch!({
         ok: true,
         json: () => Promise.resolve(mockBoardData),
       });
@@ -238,7 +269,9 @@ describe("WelcomeModal", () => {
   });
 
   it("shows the voice information when a voice is selected", async () => {
-    render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    await act(async () => {
+      render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    });
 
     // Should display the selected voice info
     await waitFor(() => {
@@ -251,8 +284,8 @@ describe("WelcomeModal", () => {
     // Clear any previous calls
     (global.fetch as jest.Mock).mockClear();
 
-    // Setup mock responses that match what the component expects
-    (global.fetch as jest.Mock).mockImplementation((url, options) => {
+    // Setup mock responses for different API endpoints
+    (global.fetch as jest.Mock).mockImplementation((url) => {
       if (url === "/api/boards/board-1/content") {
         return Promise.resolve({
           ok: true,
@@ -263,21 +296,25 @@ describe("WelcomeModal", () => {
           ok: true,
           json: () =>
             Promise.resolve({
-              // Include any fields the component expects in the response
-              message: "Test response",
+              messages: [{ content: [{ text: "Test response" }] }],
             }),
         });
       } else if (url === "/api/getSpeech") {
         return Promise.resolve({
           ok: true,
-          // Return a valid audio URL string
-          text: () => Promise.resolve("data:audio/mpeg;base64,mockedAudioData"),
+          text: () =>
+            Promise.resolve(
+              JSON.stringify([{ link: "https://example.com/audio.mp3" }])
+            ),
         });
       }
-      return Promise.reject(new Error(`Unexpected URL: ${url}`));
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+      });
     });
 
-    // Use a simpler approach - test for the error message instead
+    // Use act for the initial render
     await act(async () => {
       render(<WelcomeModal username="John Doe" boardId="board-1" />);
     });
@@ -287,12 +324,12 @@ describe("WelcomeModal", () => {
       expect(screen.queryByText(/loading your tasks/i)).not.toBeInTheDocument();
     });
 
-    // Click the button
+    // Click the button within act
     await act(async () => {
       fireEvent.click(screen.getByText("Yes, please"));
     });
 
-    // Test for API call instead of UI component
+    // Test for API calls
     expect(global.fetch).toHaveBeenCalledWith(
       "/api/voice-assistant",
       expect.objectContaining({
@@ -303,15 +340,13 @@ describe("WelcomeModal", () => {
       })
     );
 
-    // Check for either the speech modal OR an error message
-    await waitFor(() => {
-      // Try to find either the speech modal or the error message
-      const speechModal = screen.queryByTestId("speech-modal");
-      const errorMessage = screen.queryByText(/Failed to generate speech/i);
-
-      // At least one of them should be present
-      expect(speechModal || errorMessage).not.toBeNull();
-    });
+    // Wait for the speech modal to appear
+    await waitFor(
+      () => {
+        expect(screen.queryByTestId("speech-modal")).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 
   it("shows an error message when no voice is selected", async () => {
@@ -320,7 +355,9 @@ describe("WelcomeModal", () => {
       selectedVoice: null,
     });
 
-    render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    await act(async () => {
+      render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    });
 
     // Wait for loading to complete
     await waitFor(() => {
@@ -328,9 +365,8 @@ describe("WelcomeModal", () => {
     });
 
     // Click the "Yes, please" button
-    const readButton = screen.getByText("Yes, please");
     await act(async () => {
-      fireEvent.click(readButton);
+      fireEvent.click(screen.getByText("Yes, please"));
     });
 
     // Should show error message
@@ -340,19 +376,23 @@ describe("WelcomeModal", () => {
   });
 
   it("handles API errors gracefully", async () => {
-    // Mock fetch to return an error
+    // Mock fetch to return an error for voice-assistant
     (global.fetch as jest.Mock).mockImplementation((url) => {
       if (url === "/api/boards/board-1/content") {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve(mockBoardData),
         });
+      } else if (url === "/api/voice-assistant") {
+        return Promise.resolve({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+        });
       }
-      // All other API calls will fail
       return Promise.resolve({
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
+        ok: true,
+        json: () => Promise.resolve({}),
       });
     });
 
@@ -370,7 +410,7 @@ describe("WelcomeModal", () => {
       fireEvent.click(screen.getByText("Yes, please"));
     });
 
-    // Check for error message - wait for it to appear
+    // Check for error message
     await waitFor(
       () => {
         const errorElement = screen.getByText(
@@ -383,40 +423,32 @@ describe("WelcomeModal", () => {
   });
 
   it("handles closing the modal", async () => {
-    render(<WelcomeModal username="John Doe" boardId="board-1" />);
-
-    // Click the "No, thanks" button
-    const closeButton = screen.getByText("No, thanks");
     await act(async () => {
-      fireEvent.click(closeButton);
+      render(<WelcomeModal username="John Doe" boardId="board-1" />);
     });
 
-    // Modal should be closed (this depends on how Dialog handles state)
-    // In a real test, you'd expect the modal content to be removed from the DOM
+    // Click the "No, thanks" button
+    await act(async () => {
+      fireEvent.click(screen.getByText("No, thanks"));
+    });
+
+    // The Dialog mock handles open state, so we don't need to check DOM removal
   });
 
   it("meets accessibility standards for keyboard users", async () => {
     // Mock fetch to simulate loading state
-    global.fetch = jest.fn().mockImplementation(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(() => {
-            resolve({
-              ok: true,
-              json: () => Promise.resolve({ title: "Test Board", lists: [] }),
-            });
-          }, 100)
-        )
+    global.fetch = jest.fn().mockImplementation(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve(mockBoardData),
+      })
     );
 
-    renderWithVoiceContext(
+    await renderWithVoiceContext(
       <WelcomeModal username="John Doe" boardId="board-1" />
     );
 
-    // First verify loading state
-    expect(screen.getByText(/loading your tasks/i)).toBeInTheDocument();
-
-    // Then wait for loading to complete and the text to appear
+    // Wait for loading to complete
     await waitFor(() => {
       expect(
         screen.getByText(/would you like me to read/i)
@@ -432,7 +464,9 @@ describe("WelcomeModal", () => {
   });
 
   it("handles board updates through event listeners", async () => {
-    render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    await act(async () => {
+      render(<WelcomeModal username="John Doe" boardId="board-1" />);
+    });
 
     // Wait for initial load
     await waitFor(() => {

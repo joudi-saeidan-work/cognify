@@ -16,6 +16,25 @@ jest.mock("../../../actions/create-list", () => ({
 // Now it's safe to import the component
 import { ListForm } from "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(list)/list-form";
 
+// Suppress console logs and errors during tests
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
+beforeAll(() => {
+  // Suppress console logs and errors during tests
+  console.log = jest.fn();
+  console.error = jest.fn();
+
+  // Mock HTMLFormElement.requestSubmit
+  HTMLFormElement.prototype.requestSubmit = jest.fn();
+});
+
+afterAll(() => {
+  // Restore original console methods after tests
+  console.log = originalConsoleLog;
+  console.error = originalConsoleError;
+});
+
 // Move all jest.mock calls to the top (Jest hoists these)
 jest.mock("next/navigation", () => ({
   useParams: jest.fn().mockReturnValue({ boardId: "board-123" }),
@@ -61,9 +80,9 @@ jest.mock("sonner", () => ({
   },
 }));
 
-// Mock FormInput properly
+// Mock FormInput properly - use defaultValue instead of value
 jest.mock("../../../components/form/form-input", () => ({
-  FormInput: React.forwardRef(
+  FormInput: React.forwardRef<HTMLInputElement, any>(
     ({ id, disabled, placeholder, errors, className }: any, ref) => (
       <input
         data-testid="form-input"
@@ -73,11 +92,13 @@ jest.mock("../../../components/form/form-input", () => ({
         placeholder={placeholder}
         defaultValue=""
         className={className}
+        ref={ref}
       />
     )
   ),
 }));
 
+// Create a proper mock for form-submit with proper handling
 jest.mock("../../../components/form/form-submit", () => ({
   FormSubmit: jest.fn().mockImplementation(({ children, disabled }) => (
     <button type="submit" disabled={disabled} data-testid="form-submit">
@@ -118,6 +139,35 @@ jest.mock(
     ),
   })
 );
+
+// Mock the form component to handle action prop correctly
+jest.mock("react", () => {
+  const originalReact = jest.requireActual("react");
+  return {
+    ...originalReact,
+    createElement: (type: any, props: any, ...children: any[]) => {
+      if (type === "form" && props && typeof props.action === "function") {
+        // Create a modified props object without the function action
+        const { action, ...restProps } = props;
+
+        // Add onSubmit handler that calls the action function with FormData
+        return originalReact.createElement(
+          type,
+          {
+            ...restProps,
+            onSubmit: (e: any) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              action(formData);
+            },
+          },
+          ...children
+        );
+      }
+      return originalReact.createElement(type, props, ...children);
+    },
+  };
+});
 
 // Get references to the mocked modules
 const { useParams, useRouter } = jest.requireMock("next/navigation");

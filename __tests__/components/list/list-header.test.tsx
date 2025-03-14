@@ -39,19 +39,29 @@ jest.mock(
   })
 );
 
-// First, add a mock for HTMLFormElement.requestSubmit before all imports
-// JSDOM doesn't implement this method
+// Suppress all console errors and logs during tests
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
 beforeAll(() => {
   // Mock requestSubmit without trying to call this.submit()
   HTMLFormElement.prototype.requestSubmit = jest.fn();
+
+  // Suppress console logs and errors during tests
+  console.log = jest.fn();
+  console.error = jest.fn();
 });
 
-// Then in the FormInput mock, ensure we're using defaultValue properly
+afterAll(() => {
+  // Restore original console methods after tests
+  console.log = originalConsoleLog;
+  console.error = originalConsoleError;
+});
+
+// Then in the FormInput mock, ensure we're using defaultValue properly without value
 jest.mock("../../../components/form/form-input", () => ({
   FormInput: React.forwardRef<HTMLInputElement, any>(
     ({ id, disabled, placeholder, defaultValue, onBlur, className }, ref) => {
-      // Use a simple onChange handler for controlled components
-      const [value, setValue] = React.useState(defaultValue || "");
       return (
         <input
           data-testid="form-input"
@@ -59,8 +69,7 @@ jest.mock("../../../components/form/form-input", () => ({
           name={id}
           disabled={disabled}
           placeholder={placeholder}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
+          defaultValue={defaultValue}
           onBlur={onBlur}
           className={className}
           ref={ref}
@@ -181,54 +190,26 @@ jest.mock("../../../components/ui/popover", () => ({
   ),
 }));
 
-// Mock the form component to avoid issues with the 'action' prop
-jest.mock("react-dom", () => {
-  const original = jest.requireActual("react-dom");
-  return {
-    ...original,
-    // Override the createPortal implementation
-    // This ensures forms with actions don't trigger warnings
-    __esModule: true,
-    flushSync: original.flushSync,
-    createPortal: original.createPortal,
-    // Custom implementation for action prop
-    unstable_batchedUpdates: (fn: Function) => fn(),
-  };
-});
-
-// Alternatively, if modifying react-dom is too invasive:
-// Create a custom Form component to use in your tests
+// Create a custom Form component for testing that doesn't use an action prop
 const TestForm = ({
   children,
   onSubmit,
 }: {
   children: React.ReactNode;
-  onSubmit?: any;
+  onSubmit?: (e: React.FormEvent) => void;
 }) => {
   return (
-    <form data-testid="edit-form" onSubmit={onSubmit}>
+    <form
+      data-testid="edit-form"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (onSubmit) onSubmit(e);
+      }}
+    >
       {children}
     </form>
   );
 };
-
-// Then mock the ListHeader component to use this TestForm
-jest.mock(
-  "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(list)/list-header",
-  () => {
-    const actual = jest.requireActual(
-      "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(list)/list-header"
-    );
-    return {
-      ...actual,
-      ListHeader: (props: any) => {
-        const ActualListHeader = actual.ListHeader;
-        // Replace the form with our test form
-        return <ActualListHeader {...props} TestForm={TestForm} />;
-      },
-    };
-  }
-);
 
 describe("ListHeader", () => {
   const mockList = {

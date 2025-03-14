@@ -54,10 +54,46 @@ jest.mock(
 describe("ReadTasksButton", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock fetch to prevent actual network requests
+    global.fetch = jest.fn().mockImplementation((url) => {
+      if (url.includes("/api/voice-assistant")) {
+        return Promise.resolve({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              messages: [{ content: [{ text: "Mocked assistant response" }] }],
+            }),
+        });
+      } else if (url.includes("/api/getSpeech")) {
+        return Promise.resolve({
+          ok: true,
+          text: () =>
+            Promise.resolve(
+              JSON.stringify({
+                audioUrl: "https://example.com/mock-audio.mp3",
+              })
+            ),
+        });
+      }
+
+      // Fallback for any other fetch calls
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({}),
+        text: () => Promise.resolve("{}"),
+      });
+    });
+
     // Set default mock implementation
     useVoice.mockImplementation(() => ({
       selectedVoice: mockSelectedVoice,
     }));
+  });
+
+  afterEach(() => {
+    // Restore the global fetch
+    jest.restoreAllMocks();
   });
 
   it("renders correctly", () => {
@@ -111,6 +147,10 @@ describe("ReadTasksButton", () => {
   });
 
   it("handles API error from voice-assistant endpoint", async () => {
+    // Temporarily silence console.error for this test
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+
     // Setup globals first
     global.fetch = jest
       .fn()
@@ -136,9 +176,19 @@ describe("ReadTasksButton", () => {
         })
       );
     });
+
+    // Verify error was logged (but silenced)
+    expect(console.error).toHaveBeenCalled();
+
+    // Restore original console.error
+    console.error = originalConsoleError;
   });
 
   it("handles invalid response format from getSpeech API", async () => {
+    // Temporarily silence console.error for this test
+    const originalConsoleError = console.error;
+    console.error = jest.fn();
+
     // Setup mocks correctly
     global.fetch = jest
       .fn()
@@ -167,6 +217,9 @@ describe("ReadTasksButton", () => {
     await waitFor(() => {
       expect(screen.getByTestId("speech-modal")).toBeInTheDocument();
     });
+
+    // Restore original console.error
+    console.error = originalConsoleError;
   });
 
   it("formats board data correctly with lists and cards", async () => {
@@ -219,7 +272,7 @@ describe("ReadTasksButton", () => {
 
   it("formats board data correctly when no lists exist", async () => {
     const emptyBoard = {
-      title: "Empty Board",
+      title: "Empty board",
       lists: [],
     };
 

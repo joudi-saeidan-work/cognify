@@ -10,6 +10,22 @@ import "@testing-library/jest-dom";
 import { ListContainer } from "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(list)/list-container";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
+// Suppress console logs and errors during tests
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
+beforeAll(() => {
+  // Suppress console logs and errors during tests
+  console.log = jest.fn();
+  console.error = jest.fn();
+});
+
+afterAll(() => {
+  // Restore original console methods after tests
+  console.log = originalConsoleLog;
+  console.error = originalConsoleError;
+});
+
 // Mock the required modules
 jest.mock("@hello-pangea/dnd", () => ({
   DragDropContext: ({
@@ -215,7 +231,10 @@ describe("ListContainer", () => {
       type: "list",
     };
 
-    (global as any).mockOnDragEnd(dragEndEvent);
+    // Wrap the state update in act()
+    await act(async () => {
+      (global as any).mockOnDragEnd(dragEndEvent);
+    });
 
     // Check if updateListOrder was called with the correct arguments
     await waitFor(() => {
@@ -239,7 +258,10 @@ describe("ListContainer", () => {
       type: "card",
     };
 
-    (global as any).mockOnDragEnd(dragEndEvent);
+    // Wrap the state update in act()
+    await act(async () => {
+      (global as any).mockOnDragEnd(dragEndEvent);
+    });
 
     // Check if updateCardOrder was called with the correct arguments
     await waitFor(() => {
@@ -287,7 +309,10 @@ describe("ListContainer", () => {
       type: "card",
     };
 
-    (global as any).mockOnDragEnd(dragEndEvent);
+    // Wrap the state update in act()
+    await act(async () => {
+      (global as any).mockOnDragEnd(dragEndEvent);
+    });
 
     // Check that no update actions were called
     expect(updateListOrder).not.toHaveBeenCalled();
@@ -304,7 +329,10 @@ describe("ListContainer", () => {
       type: "card",
     };
 
-    (global as any).mockOnDragEnd(dragEndEvent);
+    // Wrap the state update in act()
+    await act(async () => {
+      (global as any).mockOnDragEnd(dragEndEvent);
+    });
 
     // Check that no update actions were called
     expect(updateListOrder).not.toHaveBeenCalled();
