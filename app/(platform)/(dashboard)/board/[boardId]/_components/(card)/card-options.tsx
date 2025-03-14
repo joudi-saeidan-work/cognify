@@ -302,33 +302,45 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
 
         <DropdownMenuContent side="right" align="start" className="w-48">
           {/* Magic Todo*/}
-          <DropdownMenuItem onClick={handleMagicTodo}>
+          <DropdownMenuItem
+            onClick={handleMagicTodo}
+            data-testid="magic-todo-item"
+          >
             <div className="flex items-center gap-2">
               <WandSparkles className="w-4 h-4" />
               Magic ToDo
             </div>
           </DropdownMenuItem>
           {/* Label Option */}
-          <DropdownMenuItem onClick={() => setLabelPickerOpen(true)}>
+          <DropdownMenuItem
+            onClick={() => setLabelPickerOpen(true)}
+            data-testid="label-item"
+          >
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4" />
               {`${cardData?.labelId ? "Edit" : "Add"} Label`}
             </div>
           </DropdownMenuItem>
           {/* Note Option */}
-          <DropdownMenuItem onClick={handleExpandToNote}>
+          <DropdownMenuItem
+            onClick={handleExpandToNote}
+            data-testid="note-item"
+          >
             <div className="flex items-center gap-2">
               <NotebookPen className="w-4 h-4" />
               {`${cardData?.description ? "Edit" : "Open as"} Note`}
             </div>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setDatePickerOpen(true)}>
+          <DropdownMenuItem
+            onClick={() => setDatePickerOpen(true)}
+            data-testid="due-date-item"
+          >
             <CalendarPlus className="h-4 w-4" />
             {cardData?.dueDate ? "Edit Due Date" : "Set Due Date"}
           </DropdownMenuItem>
           <Separator className="my-2" />
           {/* Copy Option */}
-          <DropdownMenuItem onClick={onCopy}>
+          <DropdownMenuItem onClick={onCopy} data-testid="copy-item">
             <div className="flex items-center gap-2">
               <Copy className="w-4 h-4" />
               Copy
@@ -336,7 +348,11 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
           </DropdownMenuItem>
 
           {/* Delete Option */}
-          <DropdownMenuItem className="text-red-500" onClick={onDelete}>
+          <DropdownMenuItem
+            className="text-red-500"
+            onClick={onDelete}
+            data-testid="delete-item"
+          >
             <div className="flex items-center gap-2">
               <Trash className="w-4 h-4" />
               Delete
