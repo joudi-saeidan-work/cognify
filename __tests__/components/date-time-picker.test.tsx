@@ -1,7 +1,23 @@
 // Import test utilities
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
 import "@testing-library/jest-dom";
+
+// Mock console methods to prevent log messages in test output
+beforeAll(() => {
+  jest.spyOn(console, "log").mockImplementation(() => {});
+  jest.spyOn(console, "error").mockImplementation(() => {});
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
 
 // Mock Pinecone
 jest.mock("@/lib/pinecone", () => ({
@@ -179,7 +195,6 @@ jest.mock("@/hooks/use-actions", () => ({
   }),
 }));
 
-// Now import the component
 import { DateTimePicker } from "@/app/(platform)/(dashboard)/board/[boardId]/_components/(date-time-picker)/date-time-picker";
 
 describe("DateTimePicker Component", () => {
@@ -246,8 +261,10 @@ describe("DateTimePicker Component", () => {
     const onClose = jest.fn();
     render(<DateTimePicker data={mockCard} open={true} onClose={onClose} />);
 
-    // Click the date selection button in our mock calendar
-    fireEvent.click(screen.getByTestId("select-date"));
+    // Click the date selection button in our mock calendar using act()
+    act(() => {
+      fireEvent.click(screen.getByTestId("select-date"));
+    });
 
     // Wait for state updates and check if update was called
     await waitFor(() => {
@@ -265,11 +282,15 @@ describe("DateTimePicker Component", () => {
     const onClose = jest.fn();
     render(<DateTimePicker data={mockCard} open={true} onClose={onClose} />);
 
-    // First select a date
-    fireEvent.click(screen.getByTestId("select-date"));
+    // First select a date with act()
+    act(() => {
+      fireEvent.click(screen.getByTestId("select-date"));
+    });
 
-    // Then select a start time
-    fireEvent.click(screen.getByTestId("set-start-time"));
+    // Then select a start time with act()
+    act(() => {
+      fireEvent.click(screen.getByTestId("set-start-time"));
+    });
 
     // Wait for the update to be called
     await waitFor(() => {
@@ -280,8 +301,10 @@ describe("DateTimePicker Component", () => {
       );
     });
 
-    // Now set an end time
-    fireEvent.click(screen.getByTestId("set-end-time"));
+    // Now set an end time with act()
+    act(() => {
+      fireEvent.click(screen.getByTestId("set-end-time"));
+    });
 
     // Wait for the second update
     await waitFor(() => {
@@ -307,8 +330,10 @@ describe("DateTimePicker Component", () => {
     // Clear any previous calls
     mockDispatch.mockClear();
 
-    // Select a date
-    fireEvent.click(screen.getByTestId("select-date"));
+    // Select a date with act()
+    act(() => {
+      fireEvent.click(screen.getByTestId("select-date"));
+    });
 
     // Wait for update to be called and dispatch to be triggered
     await waitFor(() => {
@@ -324,17 +349,21 @@ describe("DateTimePicker Component", () => {
     });
   });
 
-  it("shows time picker only when a date is selected", () => {
+  it("shows time picker only when a date is selected", async () => {
     const onClose = jest.fn();
     render(<DateTimePicker data={mockCard} open={true} onClose={onClose} />);
 
     // Time picker should not be visible initially for card without date
     expect(screen.queryByTestId("time-picker")).not.toBeInTheDocument();
 
-    // Select a date
-    fireEvent.click(screen.getByTestId("select-date"));
+    // Select a date with act()
+    act(() => {
+      fireEvent.click(screen.getByTestId("select-date"));
+    });
 
     // Time picker should now be visible
-    expect(screen.getByTestId("time-picker")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("time-picker")).toBeInTheDocument();
+    });
   });
 });

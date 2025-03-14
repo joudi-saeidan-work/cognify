@@ -59,6 +59,7 @@ export const TimePeriodSelect = React.forwardRef<
           "flex rounded-md bg-transparent p-0.5 gap-0.5",
           className
         )}
+        data-testid="period-select-wrapper"
       >
         <button
           type="button"

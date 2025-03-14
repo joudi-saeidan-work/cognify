@@ -9,6 +9,16 @@ import {
 import "@testing-library/jest-dom";
 import { LiveRecorder } from "@/app/audio-recorder/_components/live-recorder";
 
+// Mock console methods to prevent warnings in test output
+beforeAll(() => {
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  jest.spyOn(console, "log").mockImplementation(() => {});
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
+
 // Add type definitions for SpeechRecognition to fix TypeScript errors
 declare global {
   interface Window {

@@ -99,6 +99,17 @@ global.Audio = jest.fn().mockImplementation(() => ({
 // Mock URL.createObjectURL
 global.URL.createObjectURL = jest.fn().mockReturnValue("mock-audio-url");
 
+beforeAll(() => {
+  // Mock console methods
+  jest.spyOn(console, "error").mockImplementation(() => {});
+  jest.spyOn(console, "log").mockImplementation(() => {});
+});
+
+afterAll(() => {
+  // Restore console methods
+  jest.restoreAllMocks();
+});
+
 describe("AudioRecorder", () => {
   // Reset mocks before each test
   beforeEach(() => {
@@ -139,8 +150,17 @@ describe("AudioRecorder", () => {
 
   // Basic rendering tests
 
-  it("renders the recording button correctly", () => {
-    render(<AudioRecorder />);
+  it("renders the recording button correctly", async () => {
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
+
+    // Wait for initial async operations to complete
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
+    });
 
     // Check for record button
     const recordButton = screen.getByRole("button", {
@@ -160,8 +180,17 @@ describe("AudioRecorder", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the settings button", () => {
-    render(<AudioRecorder />);
+  it("renders the settings button", async () => {
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
+
+    // Wait for initial async operations
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
+    });
 
     // Check for settings button
     const settingsButton = screen.getByRole("button", { name: "Settings" });
@@ -169,7 +198,9 @@ describe("AudioRecorder", () => {
   });
 
   it("attempts to load organizations on mount", async () => {
-    render(<AudioRecorder />);
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
 
     // Verify fetch was called
     await waitFor(() => {
@@ -179,8 +210,17 @@ describe("AudioRecorder", () => {
     });
   });
 
-  it("has a disabled record button without selections", () => {
-    render(<AudioRecorder />);
+  it("has a disabled record button without selections", async () => {
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
+
+    // Wait for initial async operations
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
+    });
 
     // Get the record button
     const recordButton = screen.getByRole("button", {
@@ -197,47 +237,73 @@ describe("AudioRecorder", () => {
     );
   });
 
-  it("toggles the settings panel when settings button is clicked", () => {
-    render(<AudioRecorder />);
+  it("toggles the settings panel when settings button is clicked", async () => {
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
+
+    // Wait for initial async operations
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
+    });
 
     // Initially, settings panel should be visible because no selections are made
     expect(screen.getByText("Select Organization")).toBeInTheDocument();
 
     // Click the close button on the settings panel
-    const closeButton = screen.getByRole("button", { name: "×" });
-    fireEvent.click(closeButton);
+    await act(async () => {
+      const closeButton = screen.getByRole("button", { name: "×" });
+      fireEvent.click(closeButton);
+    });
 
     // Settings panel should be hidden
     expect(screen.queryByText("Select Organization")).not.toBeInTheDocument();
 
     // Click the settings button to show the panel again
-    const settingsButton = screen.getByRole("button", { name: "Settings" });
-    fireEvent.click(settingsButton);
+    await act(async () => {
+      const settingsButton = screen.getByRole("button", { name: "Settings" });
+      fireEvent.click(settingsButton);
+    });
 
     // Settings panel should be visible again
     expect(screen.getByText("Select Organization")).toBeInTheDocument();
   });
 
   it("shows organization options in the dropdown", async () => {
-    render(<AudioRecorder />);
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
 
     // Wait for organizations to load
     await waitFor(() => {
-      // Find the organization dropdown
-      const orgSelect = screen.getByRole("combobox");
-
-      // Check that it has options
-      expect(orgSelect).toBeInTheDocument();
-
-      // Check that the Test Organization option exists
-      const options = screen.getAllByRole("option");
-      expect(options.length).toBeGreaterThan(1); // At least the default option and our test org
-      expect(options[1]).toHaveTextContent("Test Organization");
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
     });
+
+    // Check if organization select appears
+    const orgSelect = await screen.findByRole("combobox");
+    expect(orgSelect).toBeInTheDocument();
+
+    // Check for organization option
+    const options = screen.getAllByRole("option");
+    expect(options.length).toBeGreaterThan(1); // At least default + test org
+    expect(options[1]).toHaveTextContent("Test Organization");
   });
 
-  it("displays the recording disabled message", () => {
-    render(<AudioRecorder />);
+  it("displays the recording disabled message", async () => {
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
+
+    // Wait for initial async operations
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
+    });
 
     // Check for the disabled message
     const disabledMessage = screen.getByText(
@@ -246,8 +312,17 @@ describe("AudioRecorder", () => {
     expect(disabledMessage).toBeInTheDocument();
   });
 
-  it("automatically shows settings panel when selections are missing", () => {
-    render(<AudioRecorder />);
+  it("automatically shows settings panel when selections are missing", async () => {
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
+
+    // Wait for initial async operations
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
+    });
 
     // Settings panel should be visible initially
     expect(screen.getByText("Select Organization")).toBeInTheDocument();
@@ -257,36 +332,38 @@ describe("AudioRecorder", () => {
   });
 
   it("shows board options when an organization is selected", async () => {
-    render(<AudioRecorder />);
+    await act(async () => {
+      render(<AudioRecorder />);
+    });
 
     // Wait for organizations to load
     await waitFor(() => {
-      const orgSelect = screen.getByRole("combobox");
-      expect(orgSelect).toBeInTheDocument();
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
     });
 
+    // Wait for organization select to appear
+    const orgSelect = await screen.findByRole("combobox");
+    expect(orgSelect).toBeInTheDocument();
+
     // Select an organization
-    const orgSelect = screen.getByRole("combobox");
-    fireEvent.change(orgSelect, { target: { value: "org1" } });
+    await act(async () => {
+      fireEvent.change(orgSelect, { target: { value: "org1" } });
+    });
 
     // Wait for board options to appear
     await waitFor(() => {
       // After selecting an organization, we should have two select elements
       const selects = screen.getAllByRole("combobox");
       expect(selects.length).toBe(2);
-
-      // The second select should be for boards
-      const boardSelect = selects[1];
-      expect(boardSelect).toBeInTheDocument();
-
-      // Check that the Test Board option exists
-      const options = within(boardSelect).getAllByRole("option");
-      expect(options.length).toBeGreaterThan(1); // At least the default option and our test board
-      expect(options[1]).toHaveTextContent("Test Board");
     });
-  });
 
-  // Additional tests to improve coverage
+    // Verify board select has the correct option
+    const boardSelect = screen.getAllByRole("combobox")[1];
+    const boardOptions = within(boardSelect).getAllByRole("option");
+    expect(boardOptions[1]).toHaveTextContent("Test Board");
+  });
 
   it("completes the full organization/board/list selection process", async () => {
     render(<AudioRecorder />);
@@ -406,46 +483,49 @@ describe("AudioRecorder", () => {
 
   // Fixed test - improving MediaRecorder mock
   it("shows UI changes when recording is started", async () => {
-    render(<AudioRecorder />);
-
-    // Complete the selection process first
-    await waitFor(() => {
-      const orgSelect = screen.getByRole("combobox");
-      expect(orgSelect).toBeInTheDocument();
+    await act(async () => {
+      render(<AudioRecorder />);
     });
 
-    const orgSelect = screen.getByRole("combobox");
-    fireEvent.change(orgSelect, { target: { value: "org1" } });
+    // Wait for initial async operations
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
+    });
+
+    // Complete the selection process
+    const orgSelect = await screen.findByRole("combobox");
+
+    await act(async () => {
+      fireEvent.change(orgSelect, { target: { value: "org1" } });
+    });
 
     await waitFor(() => {
       expect(screen.getAllByRole("combobox").length).toBe(2);
     });
 
     const boardSelect = screen.getAllByRole("combobox")[1];
-    fireEvent.change(boardSelect, { target: { value: "board1" } });
+
+    await act(async () => {
+      fireEvent.change(boardSelect, { target: { value: "board1" } });
+    });
 
     await waitFor(() => {
       expect(screen.getAllByRole("combobox").length).toBe(3);
     });
 
     const listSelect = screen.getAllByRole("combobox")[2];
-    fireEvent.change(listSelect, { target: { value: "list1" } });
 
-    // Make sure button is enabled
-    await waitFor(() => {
-      const recordButton = screen.getByRole("button", {
-        name: /start recording/i,
-      });
-      expect(recordButton).not.toBeDisabled();
+    await act(async () => {
+      fireEvent.change(listSelect, { target: { value: "list1" } });
     });
 
-    // Clear existing mock calls to ensure clean test state
-    mockStart.mockClear();
-
-    // Now button should be enabled
-    const recordButton = screen.getByRole("button", {
+    // Now the record button should be enabled
+    const recordButton = await screen.findByRole("button", {
       name: /start recording/i,
     });
+    expect(recordButton).toBeEnabled();
 
     // Simulate starting a recording
     await act(async () => {
@@ -456,7 +536,6 @@ describe("AudioRecorder", () => {
     expect(mockStart).toHaveBeenCalled();
 
     // Mock the class change that happens when recording starts
-    // (This is testing a side effect of the click handler that's difficult to test directly)
     await waitFor(() => {
       const audioButton = screen.getByRole("button", { name: /recording/i });
       expect(audioButton).toHaveAttribute("aria-label", "Stop recording");
@@ -474,37 +553,59 @@ describe("AudioRecorder", () => {
       writable: true,
     });
 
-    render(<AudioRecorder />);
-
-    // Complete the selection process first
-    await waitFor(() => {
-      const orgSelect = screen.getByRole("combobox");
-      expect(orgSelect).toBeInTheDocument();
+    await act(async () => {
+      render(<AudioRecorder />);
     });
 
-    const orgSelect = screen.getByRole("combobox");
-    fireEvent.change(orgSelect, { target: { value: "org1" } });
+    // Wait for initial async operations
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalledWith(
+        "/api/get-organizations-with-boards"
+      );
+    });
+
+    // Complete the selection process
+    const orgSelect = await screen.findByRole("combobox");
+
+    await act(async () => {
+      fireEvent.change(orgSelect, { target: { value: "org1" } });
+    });
 
     await waitFor(() => {
-      const boardSelect = screen.getAllByRole("combobox")[1];
+      expect(screen.getAllByRole("combobox").length).toBe(2);
+    });
+
+    const boardSelect = screen.getAllByRole("combobox")[1];
+
+    await act(async () => {
       fireEvent.change(boardSelect, { target: { value: "board1" } });
     });
 
     await waitFor(() => {
-      const listSelect = screen.getAllByRole("combobox")[2];
+      expect(screen.getAllByRole("combobox").length).toBe(3);
+    });
+
+    const listSelect = screen.getAllByRole("combobox")[2];
+
+    await act(async () => {
       fireEvent.change(listSelect, { target: { value: "list1" } });
     });
 
     // Now button should be enabled
-    const recordButton = screen.getByRole("button", {
+    const recordButton = await screen.findByRole("button", {
       name: /start recording/i,
     });
-    expect(recordButton).not.toBeDisabled();
+    expect(recordButton).toBeEnabled();
+
+    // Clear any previous calls
+    (console.error as jest.Mock).mockClear();
 
     // Click to start recording, which should trigger the permission error
-    fireEvent.click(recordButton);
+    await act(async () => {
+      fireEvent.click(recordButton);
+    });
 
-    // Verify getUserMedia was called (tried to access microphone)
+    // Instead of checking the console.error call, check that getUserMedia was called
     expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
       audio: true,
     });
@@ -569,13 +670,8 @@ describe("AudioRecorder", () => {
       }
     });
 
-    // Since we've triggered the media recorder events, we should be able to verify
-    // that the processing APIs were called (even if state is hard to test)
     expect(mockStart).toHaveBeenCalled();
     expect(mockStop).toHaveBeenCalled();
-
-    // Difficult to test processing state directly as it's component internal state
-    // that's set in async callbacks, but we've verified the MediaRecorder API was used
   });
 
   it("shows validation message when no boards are available", async () => {
