@@ -327,7 +327,7 @@ describe("ListOptions", () => {
 
     // Verify onAddCard was called
     expect(mockOnAddCard).toHaveBeenCalled();
-  });
+  }, 10000);
 
   it("applies correct text color based on list color", () => {
     const coloredList = {

@@ -44,7 +44,7 @@ jest.mock("../../../components/bookmark/bookmark-bar", () => ({
 jest.mock(
   "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(board-header)/board-title-form",
   () => ({
-    BordTitleForm: () => <div data-testid="board-title-form" />,
+    BoardTitleForm: () => <div data-testid="board-title-form" />,
   })
 );
 
@@ -221,7 +221,6 @@ describe("BoardNavbar Component", () => {
     );
     fireEvent.click(toggleColorblindButton);
 
-    // Check that state was updated (we can't directly check state, but we can verify the handler worked)
     const boardSettings = screen.getByTestId("board-settings");
     expect(boardSettings).toBeInTheDocument();
   });
@@ -232,7 +231,6 @@ describe("BoardNavbar Component", () => {
     const changeVoiceButton = screen.getByTestId("change-model-button");
     fireEvent.click(changeVoiceButton);
 
-    // Check that state was updated (we can't directly check state, but we can verify the handler worked)
     const boardSettings = screen.getByTestId("board-settings");
     expect(boardSettings).toBeInTheDocument();
   });

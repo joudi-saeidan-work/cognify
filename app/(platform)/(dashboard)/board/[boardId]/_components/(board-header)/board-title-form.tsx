@@ -15,7 +15,7 @@ interface BoardTitleFormProps {
   data: Board;
 }
 
-export const BordTitleForm = ({ data }: BoardTitleFormProps) => {
+export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
   const { execute, fieldErrors } = useAction(updateBoard, {
     onSuccess: (data) => {
       toast.success(`Board ${data.title} Updated!`);

@@ -11,7 +11,7 @@ import { dark } from "@clerk/themes";
 import { Home } from "lucide-react";
 import { useRouter } from "next/navigation";
 import BookmarkBar from "@/components/bookmark/bookmark-bar";
-import { BordTitleForm } from "./board-title-form";
+import { BoardTitleForm } from "./board-title-form";
 import AssistanceButton from "@/app/(platform)/(dashboard)/_components/(ai-agents)/assitance-button";
 import ResetControls from "@/app/(platform)/(dashboard)/_components/(header)/ResetControls";
 import ZoomControls from "@/app/(platform)/(dashboard)/_components/(header)/ZoomControls";
@@ -98,7 +98,7 @@ const BoardNavbar = ({
       </Hint>
       <Separator orientation="vertical" className="h-6 bg-muted-foreground" />
       <div className="group relative flex items-center">
-        <BordTitleForm data={data} />
+        <BoardTitleForm data={data} />
         {user && (
           <div
             className="        transition-transform

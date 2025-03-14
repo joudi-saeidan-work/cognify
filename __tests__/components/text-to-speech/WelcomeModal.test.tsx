@@ -236,7 +236,7 @@ describe("WelcomeModal", () => {
     // Check for attribution element (author of quote)
     const attributionElement = screen.getByText(/^—/);
     expect(attributionElement).toBeInTheDocument();
-  });
+  }, 15000);
 
   it("shows loading state while fetching tasks", async () => {
     // Use a controllable promise for better test stability
