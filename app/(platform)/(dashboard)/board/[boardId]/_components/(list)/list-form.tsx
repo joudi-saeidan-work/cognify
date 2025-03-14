@@ -47,6 +47,13 @@ export const ListForm = () => {
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") {
       disableEditing();
+    } else if (
+      e.key === "Enter" &&
+      !isEditing &&
+      document.activeElement ===
+        document.querySelector('button[aria-label="Add a new list"]')
+    ) {
+      enableEditing();
     }
   };
 
@@ -105,8 +112,10 @@ export const ListForm = () => {
       <button
         onClick={enableEditing}
         className="w-full rounded-md bg-background/50 hover:bg-background/80 transition p-3 flex items-center font-medium text-sm text-foreground backdrop-blur-sm"
+        aria-label="Add a new list"
+        aria-expanded={isEditing}
       >
-        <Plus className="h-4 w-4 mr-2" />
+        <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
         Add a list
       </button>
     </ListWrapper>
