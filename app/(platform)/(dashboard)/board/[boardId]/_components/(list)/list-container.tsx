@@ -153,6 +153,9 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
             {...provided.droppableProps}
             ref={provided.innerRef}
             className="flex gap-x-3 h-full"
+            aria-label="Board lists"
+            role="region"
+            aria-roledescription="Draggable list container"
           >
             {orderedData.map((list, index) => {
               return <ListItem key={list.id} index={index} data={list} />;

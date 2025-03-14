@@ -44,11 +44,16 @@ export const ListItem = ({ data, index }: ListItemProps) => {
           {...provided.draggableProps}
           ref={provided.innerRef}
           className="shrink-0 h-full w-[272px] select-none"
+          aria-roledescription="Draggable list"
+          aria-label={`List: ${data.title} with ${data.cards.length} cards`}
         >
           <div
             {...provided.dragHandleProps}
             className="w-full rounded-md bg-background"
             style={data.color ? { backgroundColor: data.color } : undefined}
+            tabIndex={0}
+            role="button"
+            aria-label={`Drag to reorder ${data.title}`}
           >
             <ListHeader onAddCard={enableEditing} data={data} />
             <Droppable droppableId={data.id} type="card">

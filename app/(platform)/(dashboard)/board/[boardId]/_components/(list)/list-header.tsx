@@ -155,8 +155,12 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
         ) : (
           <div
             onClick={enableEditing}
-            className={`w-full text-sm px-2.5 py-1 h-7 font-semibold border-transparent truncate  ${getTextColor()}`}
+            onKeyDown={(e) => e.key === "Enter" && enableEditing()}
+            className={`w-full text-sm px-2.5 py-1 h-7 font-semibold border-transparent truncate ${getTextColor()}`}
             title={data.title}
+            tabIndex={0}
+            role="button"
+            aria-label={`Edit list title: ${title}`}
           >
             <Hint description={`Rename ${title}`}>
               <p>{title}</p>

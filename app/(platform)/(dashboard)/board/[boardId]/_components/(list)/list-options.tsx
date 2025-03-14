@@ -185,6 +185,15 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
                   isUpdatingColor ? "opacity-50 pointer-events-none" : ""
                 }`}
                 onClick={() => handleColorSelect({ card, list })}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && handleColorSelect({ card, list })
+                }
+                tabIndex={0}
+                role="button"
+                aria-label={`Select color ${index + 1}`}
+                aria-selected={
+                  selectedColor?.card === card || selectedColor?.list === list
+                }
               >
                 {/* ListColorBlock */}
                 <div
