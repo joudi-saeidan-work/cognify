@@ -145,8 +145,40 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
   };
 
   const getTextColor = () => {
-    if (data?.color && data?.color !== "bg-background")
-      return "text-neutral-700";
+    if (data?.color && data?.color !== "bg-background") {
+      // Helper function to determine if a color is light or dark
+      const isLightColor = (hexColor: string) => {
+        // If it's a hex color
+        if (hexColor.startsWith("#")) {
+          const hex = hexColor.replace("#", "");
+          const r = parseInt(hex.substring(0, 2), 16) || 0;
+          const g = parseInt(hex.substring(2, 4), 16) || 0;
+          const b = parseInt(hex.substring(4, 6), 16) || 0;
+
+          // Calculate perceived brightness (weighted RGB values)
+          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+          return brightness > 128;
+        }
+
+        // For named colors or RGB/HSL values, we'll use a simple mapping
+        // of known light colors used in the app
+        const lightColors = ["#F28D8D", "#9F9F9F", "#FFD700", "#FFEC8B"];
+        // Safely access data.color with null check
+        const colorValue = data.color || "";
+        return lightColors.some(
+          (lc) =>
+            colorValue.includes(lc) ||
+            (colorValue.toLowerCase &&
+              colorValue.toLowerCase().includes(lc.toLowerCase()))
+        );
+      };
+
+      // Use dark text on light backgrounds, light text on dark backgrounds
+      // We already checked data.color is truthy above
+      return isLightColor(data.color as string)
+        ? "text-neutral-900"
+        : "text-white";
+    }
     return "text-foreground";
   };
 
@@ -159,6 +191,7 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
             className={`h-auto w-auto p-2 hover:${getTextColor()} ${getTextColor()} hover:bg-transparent`}
             variant="ghost"
             disabled={isUpdatingColor}
+            aria-label="Change list color"
           >
             {isUpdatingColor ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -228,6 +261,7 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
           <Button
             className={`h-auto w-auto p-2 hover:${getTextColor()} ${getTextColor()} hover:bg-transparent`}
             variant="ghost"
+            aria-label="More options"
           >
             <Hint description="More options">
               <p>
@@ -239,8 +273,9 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
         <PopoverContent className="px-0 pt-3 pb-3" side="bottom" align="start">
           <Button
             onClick={onAddCard}
-            className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm hover:bg-neutral-500/10"
+            className="flex items-center gap-2 w-full h-full px-2 py-1.5 justify-start font-normal text-sm hover:bg-neutral-500/10 text-neutral-800 dark:text-gray-100"
             variant="ghost"
+            aria-label="Add Card"
           >
             <Plus className="h-4 w-4" />
             Add Card
@@ -252,6 +287,7 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
               className="flex items-center gap-2 rounded-sm w-full h-full px-2 py-1.5 justify-start font-normal text-sm"
               variant="ghost"
               disabled={isCopying}
+              aria-label="Copy List"
             >
               {isCopying ? (
                 <>
@@ -273,6 +309,7 @@ export const ListOptions = ({ data, onAddCard }: ListOptionsProps) => {
               className="flex items-center gap-2 text-red-500 rounded-sm w-full h-full px-2 py-1.5 justify-start font-normal text-sm"
               variant="ghost"
               disabled={isDeleting}
+              aria-label="Delete List"
             >
               {isDeleting ? (
                 <>

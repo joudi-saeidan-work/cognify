@@ -294,17 +294,24 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
           <Button
             size="sm"
             variant="ghost"
+            aria-label="Card Options"
             className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent dark:hover:bg-transparent -mr-2 -mt-3"
           >
             <MoreHorizontal className="h-3 w-3" />
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent side="right" align="start" className="w-48">
+        <DropdownMenuContent
+          side="right"
+          align="start"
+          className="w-48"
+          aria-label="Card Options Dropdown"
+        >
           {/* Magic Todo*/}
           <DropdownMenuItem
             onClick={handleMagicTodo}
             data-testid="magic-todo-item"
+            aria-label="Magic ToDo"
           >
             <div className="flex items-center gap-2">
               <WandSparkles className="w-4 h-4" />
@@ -315,6 +322,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
           <DropdownMenuItem
             onClick={() => setLabelPickerOpen(true)}
             data-testid="label-item"
+            aria-label="Label Picker"
           >
             <div className="flex items-center gap-2">
               <Tag className="w-4 h-4" />
@@ -325,6 +333,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
           <DropdownMenuItem
             onClick={handleExpandToNote}
             data-testid="note-item"
+            aria-label="Note Picker"
           >
             <div className="flex items-center gap-2">
               <NotebookPen className="w-4 h-4" />
@@ -334,13 +343,18 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
           <DropdownMenuItem
             onClick={() => setDatePickerOpen(true)}
             data-testid="due-date-item"
+            aria-label="Due Date Picker"
           >
             <CalendarPlus className="h-4 w-4" />
             {cardData?.dueDate ? "Edit Due Date" : "Set Due Date"}
           </DropdownMenuItem>
           <Separator className="my-2" />
           {/* Copy Option */}
-          <DropdownMenuItem onClick={onCopy} data-testid="copy-item">
+          <DropdownMenuItem
+            onClick={onCopy}
+            data-testid="copy-item"
+            aria-label="Copy Card"
+          >
             <div className="flex items-center gap-2">
               <Copy className="w-4 h-4" />
               Copy
@@ -352,6 +366,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
             className="text-red-500"
             onClick={onDelete}
             data-testid="delete-item"
+            aria-label="Delete Card"
           >
             <div className="flex items-center gap-2">
               <Trash className="w-4 h-4" />
@@ -366,11 +381,21 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
         <Dialog
           open={showAiResponseDialog}
           onOpenChange={setShowAiResponseDialog}
+          aria-label="AI Response Dialog"
         >
-          <DialogContent className="p-6 space-y-4">
-            <DialogTitle className="text-lg font-semibold">
+          <DialogContent
+            className="p-6 space-y-4"
+            aria-describedby="ai-response-dialog-description"
+          >
+            <DialogTitle
+              id="ai-response-dialog-description"
+              className="sr-only"
+            >
               AI Generated Response
-            </DialogTitle>
+            </DialogTitle>  
+            <p id="ai-response-dialog-description" className="sr-only">
+              AI Generated Response for card.
+            </p>
             <div className="space-y-4">
               <div>
                 <p className="text-sm font-semibold">Title:</p>
@@ -389,6 +414,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
               <Button
                 onClick={handleAcceptAiResponse}
                 className="bg-blue-500 text-white"
+                aria-label="Accept AI Response"
               >
                 Accept
               </Button>
@@ -396,6 +422,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
                 onClick={handleRejectAiResponse}
                 variant="secondary"
                 className="bg-gray-300 text-gray-700"
+                aria-label="Reject AI Response"
               >
                 Reject
               </Button>
@@ -412,6 +439,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
         boardId={params.boardId as string}
         currentLabel={cardData?.labelId || null}
         labels={labels}
+        aria-label="Label Picker Dialog"
       />
 
       {/* Date Picker Dialog */}
@@ -419,6 +447,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
         open={datePickerOpen}
         onClose={() => setDatePickerOpen(false)}
         data={data}
+        aria-label="Date Picker Dialog"
       />
     </div>
   );

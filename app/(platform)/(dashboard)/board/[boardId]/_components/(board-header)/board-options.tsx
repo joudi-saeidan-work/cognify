@@ -66,6 +66,7 @@ const BoardOptions = ({
         <Button
           className="h-auto w-auto p-2 hover:bg-neutral-500/10"
           variant="ghost"
+          aria-label="Board Options"
         >
           <MoreHorizontal className="h-4 w-4" />
         </Button>
@@ -74,6 +75,7 @@ const BoardOptions = ({
         className="w-64 px-0 py-3 shadow-md rounded-lg bg-white"
         side="bottom"
         align="start"
+        aria-label="Board Options Popover"
       >
         <div className="px-5">
           <h3 className="text-start text-neutral-900 pb-3">Board Settings</h3>
@@ -85,21 +87,25 @@ const BoardOptions = ({
               onChange={(checked) =>
                 onSettingsChange("showZoomControls", checked)
               }
+              aria-label="Zoom Controls"
             />
             <SettingItem
               label="Theme"
               checked={visibilitySettings.showThemes}
               onChange={(checked) => onSettingsChange("showThemes", checked)}
+              aria-label="Theme"
             />
             <SettingItem
               label="Bookmark"
               checked={visibilitySettings.showBookmarks}
               onChange={(checked) => onSettingsChange("showBookmarks", checked)}
+              aria-label="Bookmark"
             />
             <SettingItem
               label="Assistance"
               checked={visibilitySettings.showAssistant}
               onChange={(checked) => onSettingsChange("showAssistant", checked)}
+              aria-label="Assistance"
             />
           </div>
 
@@ -112,6 +118,7 @@ const BoardOptions = ({
             disabled={isLoading}
             className="flex items-center gap-2 w-full px-3 py-1.5 justify-start text-sm text-red-500 hover:bg-neutral-500/10"
             variant="ghost"
+            aria-label="Delete Board"
           >
             <Trash className="h-4 w-4" />
             Delete Board
@@ -122,6 +129,7 @@ const BoardOptions = ({
             onClick={onCreate}
             className="flex items-center gap-2 w-full px-3 py-1.5 justify-start text-sm hover:bg-neutral-500/10"
             variant="ghost"
+            aria-label="Create Board"
           >
             <Plus className="h-4 w-4" />
             Create Board

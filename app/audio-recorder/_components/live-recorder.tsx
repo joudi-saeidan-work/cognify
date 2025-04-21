@@ -148,9 +148,9 @@ export const LiveRecorder = ({
         title={isRecording ? "Stop recording" : "Start voice input"}
       >
         {isRecording ? (
-          <StopCircle className="h-3.5 w-3.5" />
+          <StopCircle className="h-3.5 w-3.5" aria-label="Stop recording" />
         ) : (
-          <Mic className="h-3.5 w-3.5" />
+          <Mic className="h-3.5 w-3.5" aria-label="Start recording" />
         )}
       </button>
 

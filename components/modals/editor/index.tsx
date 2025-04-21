@@ -81,7 +81,13 @@ export const ContentForm = () => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       {id ? ( // Only render content if `id` exists
-        <DialogContent className="rounded-lg shadow-lg bg-background border  w-[85%] h-[95%] mx-auto flex flex-col">
+        <DialogContent
+          className="rounded-lg shadow-lg bg-background border  w-[85%] h-[95%] mx-auto flex flex-col"
+          aria-describedby="editor-modal-description"
+        >
+          <p id="editor-modal-description" className="sr-only">
+            Edit the card description.
+          </p>
           <DialogTitle className="hidden">Edit Card</DialogTitle>
           {!cardData ? (
             <></>
@@ -99,6 +105,9 @@ export const ContentForm = () => {
               </Button>
             </div>
           )}
+          <p id="dialog-description" className="sr-only">
+            Save the card description.
+          </p>
         </DialogContent>
       ) : null}
     </Dialog>

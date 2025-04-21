@@ -31,6 +31,7 @@ export const FormSubmit = ({
       variant={variant}
       size="sm"
       className={cn(className)}
+      aria-label="Form Submit"
     >
       {children}
     </Button>

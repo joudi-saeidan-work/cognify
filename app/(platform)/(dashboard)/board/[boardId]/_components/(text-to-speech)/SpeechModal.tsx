@@ -90,6 +90,9 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
         className="p-0 overflow-hidden bg-white dark:bg-gray-900 border-0 rounded-xl shadow-xl max-w-sm w-full"
         aria-describedby="speech-modal-description"
       >
+        <p id="speech-modal-description" className="sr-only">
+          Playing tasks for today.
+        </p>
         <DialogTitle className="sr-only">Playing Tasks</DialogTitle>
         <div className="relative p-6 space-y-5" id="speech-modal-description">
           <motion.div
@@ -185,6 +188,7 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
             onClick={handleClose}
             variant="outline"
             className="w-full border-gray-200 text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 hover:bg-gray-100 transition-colors"
+            aria-label="Close"
           >
             Close
           </Button>
@@ -198,6 +202,7 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
           className="hidden"
+          aria-label="Audio Player"
         />
       </DialogContent>
     </Dialog>

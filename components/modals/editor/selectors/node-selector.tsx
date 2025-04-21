@@ -133,7 +133,7 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
           <span className="whitespace-nowrap text-sm">
             {activeBasicItem.name}
           </span>
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" aria-label="Chevron Down" />
         </Button>
       </PopoverTrigger>
       <PopoverContent sideOffset={5} align="start" className="w-48 p-1">
@@ -156,7 +156,7 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
               <span>{item.name}</span>
             </div>
             {activeBasicItem.name === item.name && (
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4" aria-label="Check" />
             )}
           </EditorBubbleItem>
         ))}
@@ -178,7 +178,9 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
               </div>
               <span>{item.name}</span>
             </div>
-            {activeListItem.name === item.name && <Check className="h-4 w-4" />}
+            {activeListItem.name === item.name && (
+              <Check className="h-4 w-4" aria-label="Check" />
+            )}
           </EditorBubbleItem>
         ))}
       </PopoverContent>

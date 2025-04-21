@@ -12,6 +12,7 @@ const SpeechModal = ({
     <span data-testid="audio-url">{url}</span>
     <button
       data-testid="close-speech-button"
+      aria-label="Close"
       onClick={() => setShowModel(false)}
     >
       Close

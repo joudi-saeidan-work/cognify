@@ -34,6 +34,7 @@ const NavBar = () => {
           setZoomLevel={setZoomLevel}
           colorBlindMode={colorBlindMode}
           setColorBlindMode={setColorBlindMode}
+          aria-label="Display Settings"
         />
         <Separator orientation="vertical" className="h-6 dark:bg-muted" />
         <UserButton
@@ -47,6 +48,7 @@ const NavBar = () => {
               },
             },
           }}
+          aria-label="User Button"
         />
       </div>
     </nav>

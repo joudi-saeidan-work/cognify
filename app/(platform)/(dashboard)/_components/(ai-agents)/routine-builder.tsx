@@ -129,6 +129,7 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
           <button
             onClick={onClose}
             className="ml-auto rounded-full h-6 w-6 inline-flex items-center justify-center transition-colors hover:bg-muted"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
@@ -214,6 +215,7 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
                   type="submit"
                   disabled={!goal || isLoading || loading}
                   className="w-full"
+                  aria-label="Generate Smart Routine"
                 >
                   {isLoading ? (
                     <>
@@ -317,6 +319,7 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
                 size="sm"
                 className="mt-2 w-full"
                 onClick={() => setRoutineResult(null)}
+                aria-label="Create Another Routine"
               >
                 Create Another Routine
               </Button>

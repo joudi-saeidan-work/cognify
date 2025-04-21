@@ -70,6 +70,7 @@ const NoteWhiz = ({ open, onClose, config }: NoteWhizProps) => {
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted transition-colors"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
@@ -100,6 +101,7 @@ const NoteWhiz = ({ open, onClose, config }: NoteWhizProps) => {
             onClick={() => setMessages([])}
             disabled={isLoading}
             className="shrink-0"
+            aria-label="Clear Chat"
           >
             <Trash className="h-4 w-4" />
           </Button>
@@ -112,9 +114,15 @@ const NoteWhiz = ({ open, onClose, config }: NoteWhizProps) => {
             disabled={isLoading}
             onBlur={handleBlur}
             className="flex-grow"
+            aria-label="Type your message..."
           />
 
-          <Button type="submit" disabled={isLoading} className="shrink-0">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="shrink-0"
+            aria-label="Send"
+          >
             {isLoading ? <Loader2 className="animate-spin h-4 w-4" /> : "Send"}
           </Button>
         </form>
@@ -138,6 +146,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
         "mb-4 flex items-start",
         isAIMessage ? "justify-start" : "justify-end"
       )}
+      aria-label={isAIMessage ? "AI Message" : "User Message"}
     >
       {isAIMessage && (
         <div className="mr-2 shrink-0 h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
@@ -152,6 +161,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
             ? "bg-muted text-foreground"
             : "bg-primary text-primary-foreground"
         )}
+        aria-label={isAIMessage ? "AI Message" : "User Message"}
       >
         <p className="whitespace-pre-line text-sm">{message.content}</p>
       </div>
@@ -163,6 +173,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
           width={32}
           height={32}
           className="ml-2 rounded-full w-8 h-8 object-cover"
+          aria-label="User Avatar"
         />
       )}
     </div>
@@ -191,7 +202,9 @@ const EmptyState = ({ message }: { message: any }) => {
       <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-1">
         <Bot className="h-5 w-5 text-primary" />
       </div>
-      <p className="text-center text-sm">{message}</p>
+      <p className="text-center text-sm" aria-label="Empty State Message">
+        {message}
+      </p>
     </div>
   );
 };
@@ -199,7 +212,9 @@ const EmptyState = ({ message }: { message: any }) => {
 const ErrorMessage = ({ error }: { error: Error }) => {
   return (
     <div className="p-2 text-red-500 text-sm bg-red-50 rounded-lg border border-red-100">
-      Error: {error.message || "Failed to process request"}
+      <p aria-label="Error Message">
+        Error: {error.message || "Failed to process request"}
+      </p>
     </div>
   );
 };

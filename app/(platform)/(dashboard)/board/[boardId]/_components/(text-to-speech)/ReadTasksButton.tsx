@@ -147,7 +147,7 @@ const ReadTasksButton = ({ username, boardId }: ReadTasksButtonProps) => {
         >
           {loading ? (
             <svg
-              className="animate-spin h-4 w-4 text-blue-500"
+              className="animate-spin h-4 w-4 text-blue-700"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"

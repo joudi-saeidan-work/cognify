@@ -221,7 +221,11 @@ export const LabelPicker = ({
         <DialogContent
           className="p-0 overflow-hidden max-w-xs dark:bg-slate-800 bg-white"
           style={getDialogPosition()}
+          aria-describedby="label-picker-description"
         >
+          <p id="label-picker-description" className="sr-only">
+            Select a label for the card.
+          </p>
           <DialogTitle className="text-center pt-5 px-6 text-sm font-semibold text-gray-600 dark:text-gray-300">
             {creatingLabel
               ? editingLabel
@@ -286,6 +290,7 @@ export const LabelPicker = ({
                           size="icon"
                           className="h-7 w-7 dark:hover:bg-slate-600"
                           onClick={() => startEditingLabel(label)}
+                          aria-label="Edit Label"
                         >
                           <Pencil className="h-3 w-3" />
                         </Button>
@@ -294,6 +299,7 @@ export const LabelPicker = ({
                           size="icon"
                           className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30"
                           onClick={() => handleDeleteLabel(label.id)}
+                          aria-label="Delete Label"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -307,6 +313,7 @@ export const LabelPicker = ({
                     variant="outline"
                     className="w-full text-sm dark:bg-slate-700 dark:text-white dark:border-slate-600 dark:hover:bg-slate-600"
                     onClick={handleRemoveLabel}
+                    aria-label="Remove Label"
                   >
                     Remove Label
                   </Button>
@@ -321,6 +328,7 @@ export const LabelPicker = ({
                     setSelectedColor(LABEL_COLORS[0].bg);
                     setCreatingLabel(true);
                   }}
+                  aria-label="Create Label"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create a new label
@@ -382,6 +390,7 @@ export const LabelPicker = ({
                       setNewLabelText("");
                       setEditingLabel(null);
                     }}
+                    aria-label="Cancel"
                   >
                     Cancel
                   </Button>
@@ -389,6 +398,7 @@ export const LabelPicker = ({
                     <Button
                       className="dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
                       onClick={handleUpdateLabel}
+                      aria-label="Update Label"
                     >
                       Update
                     </Button>
@@ -396,6 +406,7 @@ export const LabelPicker = ({
                     <Button
                       className="dark:bg-slate-600 dark:text-white dark:hover:bg-slate-500"
                       onClick={handleCreateLabel}
+                      aria-label="Create Label"
                     >
                       Create
                     </Button>

@@ -34,6 +34,7 @@ export const FormPopOver = ({
         align={align}
         sideOffset={sideOffset}
         className="w-80 h-full pt-3 "
+        aria-label="Form Popover"
       >
         <div className="text-sm font-medium text-neutral-600 pb-4">
           <FormPicker data={board} />

@@ -68,6 +68,7 @@ const DisplaySettings = ({
           variant="ghost"
           size="icon"
           className="relative hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          aria-label="Display Settings"
         >
           <Settings className="h-4 w-4" />
           <span className="sr-only">Display settings</span>
@@ -86,6 +87,7 @@ const DisplaySettings = ({
             size="sm"
             onClick={resetSettings}
             className="h-8 px-2 text-xs hover:bg-slate-100 dark:hover:bg-slate-800"
+            aria-label="Reset Settings"
           >
             <RotateCcw className="h-3.5 w-3.5 mr-1" />
             Reset
@@ -109,6 +111,7 @@ const DisplaySettings = ({
                 onClick={handleZoomOut}
                 className="h-7 w-7 rounded-lg"
                 disabled={zoomLevel <= 50}
+                aria-label="Zoom Out"
               >
                 <ZoomOut className="h-3.5 w-3.5" />
               </Button>
@@ -145,6 +148,7 @@ const DisplaySettings = ({
               "flex items-center rounded-lg my-1 cursor-pointer transition-colors",
               theme === "light" && "bg-slate-100 dark:bg-slate-800"
             )}
+            aria-label="Light Mode"
           >
             <div className="mr-2 h-5 w-5 rounded-full bg-yellow-100 flex items-center justify-center">
               <Sun className="h-3.5 w-3.5 text-yellow-600" />
@@ -159,6 +163,7 @@ const DisplaySettings = ({
               "flex items-center rounded-lg my-1 cursor-pointer transition-colors",
               theme === "dark" && "bg-slate-100 dark:bg-slate-800"
             )}
+            aria-label="Dark Mode"
           >
             <div className="mr-2 h-5 w-5 rounded-full bg-indigo-900 flex items-center justify-center">
               <Moon className="h-3.5 w-3.5 text-indigo-200" />
@@ -176,6 +181,7 @@ const DisplaySettings = ({
             "flex items-center rounded-lg my-1 cursor-pointer transition-colors",
             colorBlindMode && "bg-slate-100 dark:bg-slate-800"
           )}
+          aria-label="Color Blind Mode"
         >
           <div className="mr-2 h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center">
             <Eye className="h-3.5 w-3.5 text-blue-600" />
@@ -189,6 +195,7 @@ const DisplaySettings = ({
                   ? "bg-green-500"
                   : "bg-slate-300 dark:bg-slate-700"
               )}
+              aria-label="Color Blind Mode Toggle"
             >
               <div
                 className={cn(

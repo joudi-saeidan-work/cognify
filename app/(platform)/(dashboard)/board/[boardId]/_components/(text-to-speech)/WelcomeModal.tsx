@@ -345,7 +345,13 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="p-0 overflow-hidden bg-white dark:bg-gray-900 border-0 rounded-xl shadow-xl max-w-sm w-full">
+        <DialogContent
+          className="p-0 overflow-hidden bg-white dark:bg-gray-900 border-0 rounded-xl shadow-xl max-w-sm w-full"
+          aria-describedby="welcome-modal-description"
+        >
+          <p id="welcome-modal-description" className="sr-only">
+            Welcome modal for the user.
+          </p>
           <div className="p-6 space-y-6">
             <div className="flex flex-col items-center text-center space-y-2">
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full">
@@ -380,7 +386,7 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
                     aria-live="polite"
                   >
                     <svg
-                      className="animate-spin h-4 w-4 text-blue-500"
+                      className="animate-spin h-4 w-4 text-blue-700"
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
                       viewBox="0 0 24 24"
@@ -413,7 +419,7 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
                 {selectedVoice && (
                   <div className="flex items-center mt-2">
                     <div className="h-2 w-2 rounded-full bg-green-500 mr-2"></div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-gray-700 dark:text-gray-400">
                       Using {selectedVoice.name} ({selectedVoice.language},{" "}
                       {selectedVoice.country})
                     </p>
@@ -440,13 +446,15 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
                 variant="outline"
                 className="border-gray-200 text-gray-700 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 hover:bg-gray-100 transition-colors"
                 disabled={loading}
+                aria-label="No, thanks"
               >
                 No, thanks
               </Button>
               <Button
                 onClick={onReadTask}
-                className="bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                className="bg-blue-700 hover:bg-blue-800 text-white transition-colors"
                 disabled={loading || fetchingTasks}
+                aria-label="Read Tasks"
               >
                 {loading ? (
                   <span className="flex items-center">
@@ -482,7 +490,11 @@ const WelcomeModal = ({ username, boardId }: WelcomeModalProps) => {
       </Dialog>
 
       {showSpeechModal && audioUrl && (
-        <SpeechModal setShowModel={setShowSpeechModal} url={audioUrl} />
+        <SpeechModal
+          setShowModel={setShowSpeechModal}
+          url={audioUrl}
+          aria-label="Speech Modal"
+        />
       )}
     </>
   );

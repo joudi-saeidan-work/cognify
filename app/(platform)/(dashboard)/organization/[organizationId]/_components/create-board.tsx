@@ -31,7 +31,8 @@ const CreateBoard = () => {
       variant="ghost"
       onClick={handleCreateBoard}
       disabled={isLoading}
-      className="aspect-video relative h-full w-full bg-muted rounded-sm flex flex-col gap-y-1 justify-center items-center hover:opacity-75 transition"
+      className="aspect-video relative h-full w-[95%] md:w-full bg-muted rounded-sm flex flex-col gap-y-1 justify-center items-center hover:opacity-75 transition"
+      aria-label="Create Board"
     >
       {isLoading ? (
         <div className="flex flex-col items-center gap-y-2">

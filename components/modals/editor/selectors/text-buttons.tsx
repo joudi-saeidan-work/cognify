@@ -46,7 +46,7 @@ export const TextButtons = () => {
     },
   ];
   return (
-    <div className="flex">
+    <div className="flex" aria-label="Text Buttons">
       {items.map((item) => (
         <EditorBubbleItem
           key={item.name}
@@ -54,10 +54,15 @@ export const TextButtons = () => {
             item.command(editor);
           }}
         >
-          <Button size="sm" className="rounded-none" variant="ghost">
+          <Button
+            size="sm"
+            className="rounded-none"
+            variant="ghost"
+            aria-label={item.name}
+          >
             <item.icon
               className={cn("h-4 w-4", {
-                "text-blue-500": item.isActive(editor),
+                "text-blue-700": item.isActive(editor),
               })}
             />
           </Button>

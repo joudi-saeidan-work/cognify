@@ -77,7 +77,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
     <div className="flex items-center gap-2 p-2">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" aria-label="Open Bookmarks">
             <Hint description="Open Bookmarks">
               <span className="flex items-center gap-2">
                 <Folder className="h-4 w-4 mr-2" />
@@ -95,6 +95,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setActiveFolder(null)}
+                aria-label="Back"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
@@ -116,6 +117,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                   variant="ghost"
                   className="w-full justify-start p-2"
                   onClick={() => setActiveFolder(folder.id)}
+                  aria-label={`Open ${folder.title}`}
                 >
                   <Folder className="h-4 w-4 mr-2" />
                   {folder.title}
@@ -133,6 +135,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                 className="flex items-center p-2 hover:bg-secondary"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={`Open ${bookmark.title}`}
               >
                 <div className="flex items-center">
                   <img
@@ -153,8 +156,12 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                         e.currentTarget
                       );
                     }}
+                    aria-label="Favicon"
                   />
-                  <p className="text-blue-600 underline text-sm">
+                  <p
+                    className="text-blue-600 underline text-sm"
+                    aria-label={bookmark.title}
+                  >
                     {bookmark.title}
                   </p>
                 </div>
@@ -179,6 +186,9 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                       }))
                     }
                     autoFocus
+                    aria-label={
+                      isCreating === "folder" ? "Folder name" : "Bookmark title"
+                    }
                   />
                   {/* Show folder or bookmark title errors */}
                   {isCreating === "folder" && fieldErrorsFolder?.title && (
@@ -204,6 +214,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                           url: e.target.value,
                         }))
                       }
+                      aria-label="Bookmark URL"
                     />
                     {/* Show URL validation errors */}
                     {fieldErrorsBookmark?.url && (
@@ -222,6 +233,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                       setNewItemData({ title: "", url: "" });
                     }}
                     size="sm"
+                    aria-label="Add"
                   >
                     Add
                   </Button>
@@ -232,6 +244,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                       setIsCreating(null);
                       setNewItemData({ title: "", url: "" });
                     }}
+                    aria-label="Cancel"
                   >
                     Cancel
                   </Button>
@@ -244,6 +257,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                   size="sm"
                   className="w-1/2 rounded-none hover:bg-secondary"
                   onClick={() => setIsCreating("folder")}
+                  aria-label="New Folder"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   New Folder
@@ -254,6 +268,7 @@ const BookmarkBar = ({ folders, bookmarks }: BookmarkBarProps) => {
                   size="sm"
                   className="w-1/2 rounded-none hover:bg-secondary"
                   onClick={() => setIsCreating("bookmark")}
+                  aria-label="New Bookmark"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   New Bookmark

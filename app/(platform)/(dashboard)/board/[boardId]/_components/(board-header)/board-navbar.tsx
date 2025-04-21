@@ -76,6 +76,7 @@ const BoardNavbar = ({
       className="w-full flex items-center px-4 gap-x-4 
         backdrop-blur-sm border-b 
        "
+      aria-label="Board Navbar"
     >
       {user ? (
         <WelcomeModal username={user.firstName || "User"} boardId={data.id} />
@@ -87,6 +88,7 @@ const BoardNavbar = ({
           onClick={handleOnClick}
           className="hover:bg-slate-100 dark:hover:bg-black p-2 rounded-md disabled:opacity-50 disabled:pointer-events-none"
           disabled={isLoading}
+          aria-label="Go to Home"
         >
           <Home className="h-4 w-4 text-foreground" />
         </button>
@@ -96,7 +98,7 @@ const BoardNavbar = ({
         <BoardTitleForm data={data} />
         {user && (
           <div
-            className="        transition-transform
+            className="transition-transform
         duration-300
         transform
         translate-x-0
@@ -105,6 +107,7 @@ const BoardNavbar = ({
             <ReadTasksButton
               username={user.firstName || "User"}
               boardId={data.id}
+              aria-label="Read Tasks"
             />
           </div>
         )}
@@ -113,12 +116,13 @@ const BoardNavbar = ({
       {/* Right section */}
       <div className="ml-auto flex items-center gap-x-4">
         <div className="hidden md:flex items-center gap-x-4">
-          <Calendar boardId={data.id} />
+          <Calendar boardId={data.id} aria-label="Calendar" />
           {visibilitySettings.showBookmarks && (
             <>
               <BookmarkBar
                 folders={folders}
                 bookmarks={bookmarksWithoutFolders}
+                aria-label="Bookmark Bar"
               />
             </>
           )}
@@ -130,21 +134,28 @@ const BoardNavbar = ({
           colorBlindMode={colorBlindMode}
           setColorBlindMode={setColorBlindMode}
           onModelChange={handleModelChange}
+          aria-label="Board Settings"
         />
-        <Separator orientation="vertical" className="h-6 bg-muted-foreground" />
+        <Separator
+          orientation="vertical"
+          className="h-6 bg-muted-foreground hidden md:flex"
+        />
         {visibilitySettings.showAvatar && (
-          <UserButton
-            afterSignOutUrl="/"
-            appearance={{
-              baseTheme: theme === "dark" ? dark : undefined,
-              elements: {
-                avatarBox: {
-                  height: 35,
-                  width: 35,
+          <div className="hidden md:flex">
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                baseTheme: theme === "dark" ? dark : undefined,
+                elements: {
+                  avatarBox: {
+                    height: 35,
+                    width: 35,
+                  },
                 },
-              },
-            }}
-          />
+              }}
+              aria-label="User Button"
+            />
+          </div>
         )}
       </div>
     </div>

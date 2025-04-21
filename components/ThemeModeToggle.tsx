@@ -62,7 +62,7 @@ export function ThemeToggle({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" aria-label="Toggle theme">
           <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
@@ -74,18 +74,24 @@ export function ThemeToggle({
           className={`${dropdownBackgroundColor}`}
         >
           Light
-          <Sun className="ml-2 h-4 w-4" />
+          <Sun className="ml-2 h-4 w-4" aria-label="Light theme" />
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
           Dark
-          <Moon className="ml-2 h-4 w-4" />
+          <Moon className="ml-2 h-4 w-4" aria-label="Dark theme" />
         </DropdownMenuItem>
         <DropdownMenuItem onClick={toggleColorBlindMode}>
           Color Blind Mode
           {colorBlindMode ? (
-            <Eye className="ml-2 h-4 w-4 text-blue-500" />
+            <Eye
+              className="ml-2 h-4 w-4 text-blue-900 dark:text-blue-300"
+              aria-label="Color Blind Mode"
+            />
           ) : (
-            <EyeOff className="ml-2 h-4 w-4 text-gray-500" />
+            <EyeOff
+              className="ml-2 h-4 w-4 text-gray-900 dark:text-gray-300"
+              aria-label="Color Blind Mode Off"
+            />
           )}
         </DropdownMenuItem>
       </DropdownMenuContent>

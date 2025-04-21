@@ -82,7 +82,12 @@ export const HighlightSelector = ({
   return (
     <Popover modal={true} open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <Button size="sm" className="gap-2 rounded-none" variant="ghost">
+        <Button
+          size="sm"
+          className="gap-2 rounded-none"
+          variant="ghost"
+          aria-label="Highlight Selector"
+        >
           <span
             className={cx(
               "rounded-sm px-1",
@@ -91,7 +96,7 @@ export const HighlightSelector = ({
           >
             <Highlighter className="size-4" />
           </span>
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" aria-label="Chevron Down" />
         </Button>
       </PopoverTrigger>
 
@@ -101,7 +106,10 @@ export const HighlightSelector = ({
         align="start"
       >
         <div>
-          <div className="my-1 px-2 text-sm font-semibold text-muted-foreground">
+          <div
+            className="my-1 px-2 text-sm font-semibold text-muted-foreground"
+            aria-label="Background"
+          >
             Background
           </div>
           {HIGHLIGHT_COLORS.map(({ name, color, colorTailwind }) => (
@@ -128,7 +136,7 @@ export const HighlightSelector = ({
                 </div>
                 <span>{name}</span>
                 {activeHighlightItem?.name === name && (
-                  <Check className="h-4 w-4" />
+                  <Check className="h-4 w-4" aria-label="Check" />
                 )}
               </div>
             </EditorBubbleItem>

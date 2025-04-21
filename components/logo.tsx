@@ -7,10 +7,18 @@ const headingFont = localFont({ src: "../public/fonts/font.woff2" });
 
 export const Logo = () => {
   return (
-    <Link href="/">
+    <Link href="/" aria-label="Logo">
       <div className="hover:opacity-75 transition items-center gap-x-2 hidden md:flex">
-        <Image src="/logo.svg" alt="Logo" height={30} width={30} />
-        <p className={cn("text-md ", headingFont.className)}>Cognify</p>
+        <Image
+          src="/logo.svg"
+          alt="Logo"
+          height={30}
+          width={30}
+          aria-label="Logo"
+        />
+        <p className={cn("text-md ", headingFont.className)} aria-label="Logo">
+          Cognify
+        </p>
       </div>
     </Link>
   );

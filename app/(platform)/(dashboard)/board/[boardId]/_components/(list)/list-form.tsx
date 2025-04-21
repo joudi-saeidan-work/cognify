@@ -99,6 +99,7 @@ export const ListForm = () => {
               size="sm"
               variant="ghost"
               disabled={isLoading}
+              aria-label="Cancel"
             >
               <X className="h-5 w-5" />
             </Button>

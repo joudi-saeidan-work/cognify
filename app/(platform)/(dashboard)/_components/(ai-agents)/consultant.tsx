@@ -112,6 +112,7 @@ ${analysis.advice}
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted/80 transition-colors"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
@@ -134,6 +135,7 @@ ${analysis.advice}
             disabled={!scenario.trim() || isLoading}
             className="h-8 text-xs"
             variant="default"
+            aria-label="Consult"
           >
             {isLoading ? (
               <>
@@ -156,6 +158,7 @@ ${analysis.advice}
                 size="sm"
                 className="h-7 px-2 text-xs"
                 onClick={copyFullAnalysis}
+                aria-label="Copy All"
               >
                 <Copy className="h-3.5 w-3.5 mr-1.5" />
                 Copy All
@@ -167,6 +170,7 @@ ${analysis.advice}
               <button
                 onClick={() => toggleSection("pros")}
                 className="flex items-center justify-between w-full text-left text-xs font-medium"
+                aria-label="Toggle Pros"
               >
                 <span className="flex items-center gap-1.5">
                   <ThumbsUp className="h-3.5 w-3.5 text-green-500" />
@@ -195,6 +199,7 @@ ${analysis.advice}
               <button
                 onClick={() => toggleSection("cons")}
                 className="flex items-center justify-between w-full text-left text-xs font-medium"
+                aria-label="Toggle Cons"
               >
                 <span className="flex items-center gap-1.5">
                   <ThumbsDown className="h-3.5 w-3.5 text-red-500" />
@@ -223,6 +228,7 @@ ${analysis.advice}
               <button
                 onClick={() => toggleSection("advice")}
                 className="flex items-center justify-between w-full text-left text-xs font-medium"
+                aria-label="Toggle Advice"
               >
                 <span className="flex items-center gap-1.5">
                   <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
@@ -241,6 +247,7 @@ ${analysis.advice}
                   <button
                     onClick={() => copyToClipboard(analysis.advice)}
                     className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Copy Advice"
                   >
                     <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
                   </button>

@@ -71,6 +71,7 @@ export const TimePeriodSelect = React.forwardRef<
               ? "bg-primary/10 text-primary"
               : "text-muted-foreground hover:text-foreground"
           )}
+          aria-label="AM"
         >
           AM
         </button>
@@ -84,6 +85,7 @@ export const TimePeriodSelect = React.forwardRef<
               ? "bg-primary/10 text-primary"
               : "text-muted-foreground hover:text-foreground"
           )}
+          aria-label="PM"
         >
           PM
         </button>

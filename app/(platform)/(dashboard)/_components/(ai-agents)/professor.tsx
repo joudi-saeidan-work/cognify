@@ -96,6 +96,7 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted/80 transition-colors"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
@@ -104,6 +105,7 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
         <form
           onSubmit={handleFormSubmit}
           className="p-2.5 flex flex-col gap-2.5"
+          aria-label="Teach me"
         >
           <Textarea
             value={topic}
@@ -118,6 +120,7 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
             disabled={!topic.trim() || isLoading}
             className="h-8 text-xs"
             variant="default"
+            aria-label="Teach me"
           >
             {isLoading ? (
               <>
@@ -138,6 +141,7 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
               <button
                 onClick={() => toggleSection("explanation")}
                 className="flex items-center justify-between w-full text-left text-xs font-medium"
+                aria-label="Toggle Explanation"
               >
                 <span className="flex items-center gap-1.5">
                   <BookOpen className="h-3.5 w-3.5 text-primary" />
@@ -158,6 +162,7 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
                   <button
                     onClick={() => copyToClipboard(lessonContent.explanation)}
                     className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Copy Explanation"
                   >
                     <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
                   </button>
@@ -170,6 +175,7 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
               <button
                 onClick={() => toggleSection("example")}
                 className="flex items-center justify-between w-full text-left text-xs font-medium"
+                aria-label="Toggle Example"
               >
                 <span className="flex items-center gap-1.5">
                   <Code className="h-3.5 w-3.5 text-primary" />
@@ -190,6 +196,7 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
                   <button
                     onClick={() => copyToClipboard(lessonContent.example)}
                     className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Copy Example"
                   >
                     <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
                   </button>

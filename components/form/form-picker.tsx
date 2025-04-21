@@ -97,15 +97,18 @@ export const FormPicker = ({ data }: FormPickerProps) => {
                 color: undefined,
               });
             }}
+            aria-label="Remove Cover"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-3.5 h-3.5" aria-label="Remove Cover" />
             Remove Cover
           </Button>
         </div>
       )}
       <div className="flex flex-col gap-2">
         <div>
-          <p className="text-xs font-semibold mb-2">Colors</p>
+          <p className="text-xs font-semibold mb-2" aria-label="Colors">
+            Colors
+          </p>
           <div className="grid grid-cols-3 gap-2 mb-4">
             {coverImageOptions
               .filter((option) => !option.background.includes("gradient"))
@@ -128,7 +131,10 @@ export const FormPicker = ({ data }: FormPickerProps) => {
                   {selectedOption?.type === "color" &&
                     selectedOption.value === color.background && (
                       <div className="absolute inset-y-0 h-full w-full bg-black/30 flex items-center justify-center">
-                        <Check className="h-4 w-4 text-white" />
+                        <Check
+                          className="h-4 w-4 text-white"
+                          aria-label="Check"
+                        />
                       </div>
                     )}
                 </div>
@@ -137,7 +143,9 @@ export const FormPicker = ({ data }: FormPickerProps) => {
         </div>
 
         <div>
-          <p className="text-xs font-semibold mb-2">Gradients</p>
+          <p className="text-xs font-semibold mb-2" aria-label="Gradients">
+            Gradients
+          </p>
           <div className="grid grid-cols-3 gap-2 mb-4">
             {coverImageOptions
               .filter((option) => option.background.includes("gradient"))
@@ -160,7 +168,10 @@ export const FormPicker = ({ data }: FormPickerProps) => {
                   {selectedOption?.type === "color" &&
                     selectedOption.value === color.background && (
                       <div className="absolute inset-y-0 h-full w-full bg-black/30 flex items-center justify-center">
-                        <Check className="h-4 w-4 text-white" />
+                        <Check
+                          className="h-4 w-4 text-white"
+                          aria-label="Check"
+                        />
                       </div>
                     )}
                 </div>
@@ -169,7 +180,9 @@ export const FormPicker = ({ data }: FormPickerProps) => {
         </div>
 
         <div>
-          <p className="text-xs font-semibold mb-2">Images</p>
+          <p className="text-xs font-semibold mb-2" aria-label="Images">
+            Images
+          </p>
           <div className="grid grid-cols-3 gap-2 overflow-y-auto max-h-[350px]">
             {limitedImages.map((image) => (
               <div
@@ -196,13 +209,17 @@ export const FormPicker = ({ data }: FormPickerProps) => {
                 {selectedOption?.type === "image" &&
                   (selectedOption.value as string).startsWith(image.id) && (
                     <div className="absolute inset-y-0 h-full w-full bg-black/30 flex items-center justify-center">
-                      <Check className="h-4 w-4 text-white" />
+                      <Check
+                        className="h-4 w-4 text-white"
+                        aria-label="Check"
+                      />
                     </div>
                   )}
                 <Link
                   href={image.links.html}
                   target="_blank"
                   className="opacity-0 group-hover:opacity-100 absolute bottom-0 w-full text-[7px] truncate text-white hover:underline p-1 bg-black/50"
+                  aria-label="Image Source"
                 >
                   {image.user.name}
                 </Link>

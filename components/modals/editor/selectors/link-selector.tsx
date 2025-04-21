@@ -41,17 +41,23 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
   if (!editor) return null;
 
   return (
-    <Popover modal={true} open={open} onOpenChange={onOpenChange}>
+    <Popover
+      modal={true}
+      open={open}
+      onOpenChange={onOpenChange}
+      aria-label="Link Selector"
+    >
       <PopoverTrigger asChild>
         <Button
           size="sm"
           variant="ghost"
           className="gap-2 rounded-none border-none"
+          aria-label="Link Selector"
         >
           <p className="text-base">↗</p>
           <p
             className={cn("underline decoration-stone-400 underline-offset-4", {
-              "text-blue-500": editor.isActive("link"),
+              "text-blue-700": editor.isActive("link"),
             })}
           >
             Link
@@ -93,11 +99,11 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
                 onOpenChange(false);
               }}
             >
-              <Trash className="h-4 w-4" />
+              <Trash className="h-4 w-4" aria-label="Trash" />
             </Button>
           ) : (
             <Button size="icon" className="h-8">
-              <Check className="h-4 w-4" />
+              <Check className="h-4 w-4" aria-label="Check" />
             </Button>
           )}
         </form>

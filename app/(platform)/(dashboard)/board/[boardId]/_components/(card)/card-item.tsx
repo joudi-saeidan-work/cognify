@@ -211,7 +211,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          role="input"
+          role="article"
           className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 dark:hover:border-white/30 pt-2 pb-3 px-4 text-sm rounded-md shadow-sm w-full"
           style={{
             ...provided.draggableProps.style,
@@ -232,6 +232,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
                   color: getContrastColor(labelObj.color || "#61bd4f"),
                 }}
                 onClick={() => setIsLabelPickerOpen(true)}
+                aria-label="Edit Label"
               >
                 {labelObj.name || "Label"}
               </div>
@@ -246,10 +247,14 @@ export const CardItem = ({ data, index }: CardItemProps) => {
             boardId={boardId}
             currentLabel={data.labelId}
             labels={labels}
+            aria-label="Label Picker"
           />
 
           <div className="flex flex-col mt-3">
-            <Hint description={data.description ? "Open Card" : "Rename Card"}>
+            <Hint
+              description={data.description ? "Open Card" : "Rename Card"}
+              aria-label="Card Title"
+            >
               <span
                 onClick={enableEditing}
                 className={`whitespace-pre-wrap break-words font-medium overflow-hidden text-ellipsis  ${getTextColor()}`}
@@ -261,7 +266,10 @@ export const CardItem = ({ data, index }: CardItemProps) => {
 
           <div className={`flex items-center mt-4 gap-1`}>
             {data.description && (
-              <Hint description="This card has notes">
+              <Hint
+                description="This card has notes"
+                aria-label="This card has notes"
+              >
                 <NotebookPen
                   className={`h-3 w-3 text-gray-600`}
                   aria-label="This card has notes"
@@ -278,6 +286,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
                     width: "fit-content",
                     backgroundColor: data.color || undefined,
                   }}
+                  aria-label="Open Date Picker"
                 >
                   <CalendarIcon className="mr-1 h-3 w-3 -mt-[1px]" />
                   <span className="text-sm font-medium">
@@ -306,6 +315,7 @@ export const CardItem = ({ data, index }: CardItemProps) => {
             data={data}
             open={isDatePickerOpen}
             onClose={() => setIsDatePickerOpen(false)}
+            aria-label="Date Picker"
           />
         </div>
       )}

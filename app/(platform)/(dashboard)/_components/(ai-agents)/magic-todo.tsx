@@ -201,6 +201,7 @@ const MagicTodo = ({ onClose, open, config }: MagicTodoProps) => {
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted transition-colors"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
@@ -223,6 +224,7 @@ const MagicTodo = ({ onClose, open, config }: MagicTodoProps) => {
             onClick={handleSubmit}
             disabled={!inputText || isLoading}
             className="w-full bg-primary hover:bg-primary/90"
+            aria-label="Create Magic Todo"
           >
             {isLoading ? (
               <Loader2 className="animate-spin h-4 w-4 mr-2" />
@@ -323,6 +325,7 @@ const MagicTodo = ({ onClose, open, config }: MagicTodoProps) => {
             <Button
               onClick={handleSave}
               className="w-full bg-primary hover:bg-primary/90"
+              aria-label="Save to Board"
             >
               <Save className="mr-2 h-4 w-4" />
               Save to Board

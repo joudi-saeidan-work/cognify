@@ -502,6 +502,7 @@ export const AudioRecorder = (): JSX.Element => {
             <button
               className="close-button"
               onClick={() => setShowSettings(false)}
+              aria-label="Close Settings"
             >
               ×
             </button>
@@ -525,6 +526,7 @@ export const AudioRecorder = (): JSX.Element => {
                     <select
                       value={selectedBoard}
                       onChange={(e) => setSelectedBoard(e.target.value)}
+                      aria-label="Select Board"
                     >
                       <option value="">Select Board</option>
                       {organizations
@@ -536,7 +538,10 @@ export const AudioRecorder = (): JSX.Element => {
                         ))}
                     </select>
                   ) : (
-                    <div className="validation-message">
+                    <div
+                      className="validation-message"
+                      aria-label="No boards available in this organization"
+                    >
                       No boards available in this organization
                     </div>
                   )}
@@ -562,7 +567,10 @@ export const AudioRecorder = (): JSX.Element => {
                             ))}
                         </select>
                       ) : (
-                        <div className="validation-message">
+                        <div
+                          className="validation-message"
+                          aria-label="No lists available in this board"
+                        >
                           No lists available in this board
                         </div>
                       )}

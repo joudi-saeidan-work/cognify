@@ -40,12 +40,12 @@ export const ListItem = ({ data, index }: ListItemProps) => {
   return (
     <Draggable draggableId={data.id} index={index}>
       {(provided) => (
-        <li
+        <div
           {...provided.draggableProps}
           ref={provided.innerRef}
           className="shrink-0 h-full w-[272px] select-none"
-          aria-roledescription="Draggable list"
-          aria-label={`List: ${data.title} with ${data.cards.length} cards`}
+          aria-roledescription="Draggable list item"
+          aria-label={`${data.title} with ${data.cards.length} cards`}
         >
           <div
             {...provided.dragHandleProps}
@@ -67,9 +67,11 @@ export const ListItem = ({ data, index }: ListItemProps) => {
                   )}
                 >
                   {data.cards.map((card, index) => (
-                    <CardItem index={index} key={card.id} data={card} />
+                    <li key={card.id} className="list-none">
+                      <CardItem index={index} data={card} />
+                    </li>
                   ))}
-                  {provided.placeholder}
+                  <li className="list-none contents">{provided.placeholder}</li>
                 </ol>
               )}
             </Droppable>
@@ -82,7 +84,7 @@ export const ListItem = ({ data, index }: ListItemProps) => {
               disableEditing={disableEditing}
             />
           </div>
-        </li>
+        </div>
       )}
     </Draggable>
   );

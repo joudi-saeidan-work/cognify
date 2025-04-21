@@ -38,11 +38,17 @@ const BoardList: React.FC<BoardListProps> = ({ boards }) => {
         <Button
           variant="ghost"
           className={`text-lg hover:bg-transparent flex items-center gap-x-2 ${
-            !showFavorites ? "text-blue-500" : "text-gray-500"
+            !showFavorites
+              ? "text-blue-900 dark:text-blue-300"
+              : "text-gray-900 dark:text-gray-300"
           }`}
           onClick={() => setShowFavorites(false)} //
+          aria-label="All Boards Button"
         >
-          <LayoutDashboardIcon className="w-5 h-5" />
+          <LayoutDashboardIcon
+            className="w-5 h-5"
+            aria-label="All Boards Icon"
+          />
           All
         </Button>
 
@@ -50,17 +56,20 @@ const BoardList: React.FC<BoardListProps> = ({ boards }) => {
         <Button
           variant="ghost"
           className={`text-lg hover:bg-transparent flex items-center gap-x-2 ${
-            showFavorites ? "text-yellow-400" : "text-gray-500"
+            showFavorites
+              ? "text-yellow-600 dark:text-yellow-300"
+              : "text-gray-900 dark:text-gray-300"
           }`}
           onClick={() => setShowFavorites(true)}
+          aria-label="Favorites Button"
         >
-          <Star className="w-5 h-5" />
+          <Star className="w-5 h-5" aria-label="Favorites Icon" />
           Favorites
         </Button>
       </div>
 
       {/* Board List (Filtered Based on `showFavorites`) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {displayedBoards.length > 0 ? (
           displayedBoards.map((board) => (
             <BoardItem
@@ -68,14 +77,15 @@ const BoardList: React.FC<BoardListProps> = ({ boards }) => {
               board={board}
               isLoading={loadingBoardId === board.id}
               onBoardClick={handleBoardClick}
+              aria-label="Board Item"
             />
           ))
         ) : (
-          <p className="text-gray-500 text-center col-span-full">
+          <p className="text-gray-900 dark:text-gray-300 text-center col-span-full">
             {showFavorites ? "No favorite boards yet." : ""}
           </p>
         )}
-        {!showFavorites && <CreateBoard />}
+        {!showFavorites && <CreateBoard aria-label="Create Board" />}
       </div>
     </div>
   );

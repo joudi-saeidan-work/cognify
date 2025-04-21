@@ -59,7 +59,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             </Label>
           ) : null}{" "}
           <TextareaAutosize
-            style={{ backgroundColor: color || "#FFFFFF" }}
+            style={{ backgroundColor: color || "inherit" }}
             onKeyDown={onKeyDown}
             onBlur={onBlur}
             onClick={onClick}
@@ -71,7 +71,7 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
             id={id}
             disabled={pending || disabled}
             className={cn(
-              " focus-visible:ring-0 focus-visible:ring-offset-0 ring-0 focus:ring-0 outline-none shadow-sm ",
+              "focus-visible:ring-0 focus-visible:ring-offset-0 ring-0 focus:ring-0 outline-none shadow-sm text-foreground",
               className
             )}
             aria-describedby={`${id}-error`}

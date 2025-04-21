@@ -38,8 +38,11 @@ const MarketingPage = () => {
           className="mt-6 px-6 py-3 text-lg font-semibold bg-teal-600 hover:bg-teal-500"
           size="lg"
           asChild
+          aria-label="Try Cognify"
         >
-          <Link href="/sign-up">Try Cognify</Link>
+          <Link aria-label="Try Cognify" href="/sign-up">
+            Try Cognify
+          </Link>
         </Button>
       </div>
     </div>

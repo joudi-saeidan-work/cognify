@@ -33,9 +33,10 @@ export function NavMain({
               asChild
               tooltip={item.title}
               onClick={handleClick}
+              aria-label={item.title}
             >
               <div className="flex items-center gap-2">
-                {item.icon && <item.icon />}
+                {item.icon && <item.icon aria-label={item.title} />}
                 <span>{item.title}</span>
               </div>
             </SidebarMenuButton>

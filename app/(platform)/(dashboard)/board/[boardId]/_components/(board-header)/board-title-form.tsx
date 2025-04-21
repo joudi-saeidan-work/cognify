@@ -98,6 +98,7 @@ export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
               className="font-bold text-lg h-auto w-auto p-1 px-2 text-foreground"
               variant="ghost"
               onClick={enableEditing}
+              aria-label={`Rename ${title}`}
             >
               {title}
             </Button>
@@ -106,7 +107,12 @@ export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
           {/* Add Cover Button - Only shows on hover */}
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
             <FormPopOver board={data}>
-              <Button variant="ghost" size="sm" className="h-auto p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-1"
+                aria-label={`Change Cover`}
+              >
                 <ImageIcon className="h-4 w-4" />
                 {data.color || data.imageFullUrl ? (
                   <span>Change Cover</span>

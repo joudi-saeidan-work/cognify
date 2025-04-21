@@ -154,15 +154,24 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
             ref={provided.innerRef}
             className="flex gap-x-3 h-full"
             aria-label="Board lists"
-            role="region"
-            aria-roledescription="Draggable list container"
           >
             {orderedData.map((list, index) => {
-              return <ListItem key={list.id} index={index} data={list} />;
+              return (
+                <li key={list.id} className="list-none">
+                  <ListItem index={index} data={list} />
+                </li>
+              );
             })}
-            {provided.placeholder}
-            <ListForm />
-            <div className="flex-shrink-0 w-1" />
+            {/* Placeholder needs to be in an li */}
+            <li className="list-none contents">{provided.placeholder}</li>
+            {/* Form needs to be in an li */}
+            <li className="list-none">
+              <ListForm />
+            </li>
+            {/* This spacer div should be in an li or removed if not needed */}
+            <li className="list-none">
+              <div className="flex-shrink-0 w-1" />
+            </li>
           </ol>
         )}
       </Droppable>

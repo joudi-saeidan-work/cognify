@@ -169,6 +169,7 @@ const BoardSettings = ({
           variant="ghost"
           size="icon"
           className="relative hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          aria-label="Board Settings"
         >
           <Settings className="h-4 w-4" />
           <span className="sr-only">Board settings</span>
@@ -190,6 +191,7 @@ const BoardSettings = ({
             size="sm"
             onClick={() => setDisplayOpen(!displayOpen)}
             className="w-full flex justify-between items-center font-bold"
+            aria-label="Display Settings"
           >
             <span className="text-xs">Display Settings</span>
             {displayOpen ? (
@@ -215,6 +217,7 @@ const BoardSettings = ({
                     onClick={handleZoomOut}
                     className="h-7 w-7 rounded-lg"
                     disabled={zoomLevel <= 50}
+                    aria-label="Zoom Out"
                   >
                     <ZoomOut className="h-3.5 w-3.5" />
                   </Button>
@@ -234,6 +237,7 @@ const BoardSettings = ({
                     onClick={handleZoomIn}
                     className="h-7 w-7 rounded-lg"
                     disabled={zoomLevel >= 200}
+                    aria-label="Zoom In"
                   >
                     <ZoomIn className="h-3.5 w-3.5" />
                   </Button>
@@ -257,6 +261,7 @@ const BoardSettings = ({
                       backgroundColor:
                         theme === "light" ? "#FFFBCC" : "#4B5563",
                     }}
+                    aria-label="Light Mode"
                   >
                     <Sun
                       className={cn(
@@ -283,6 +288,7 @@ const BoardSettings = ({
                     style={{
                       backgroundColor: theme === "dark" ? "#1E3A8A" : "#E5E7EB",
                     }}
+                    aria-label="Dark Mode"
                   >
                     <Moon
                       className={cn(
@@ -304,6 +310,7 @@ const BoardSettings = ({
                   "flex items-center rounded-lg my-1 cursor-pointer transition-colors",
                   colorBlindMode && "bg-slate-100 dark:bg-slate-800"
                 )}
+                aria-label="Color Blind Mode"
               >
                 <div className="mr-2 h-5 w-5 rounded-full bg-blue-100 flex items-center justify-center">
                   <Eye className="h-3.5 w-3.5 text-blue-600" />
@@ -335,6 +342,7 @@ const BoardSettings = ({
                 size="sm"
                 onClick={resetSettings}
                 className="w-full flex items-center justify-center gap-2"
+                aria-label="Reset Settings"
               >
                 <RotateCcw className="h-4 w-4" />
                 Reset Settings
@@ -352,6 +360,7 @@ const BoardSettings = ({
             size="sm"
             onClick={() => setVoiceSettingsOpen(!voiceSettingsOpen)}
             className="w-full flex justify-between items-center font-bold"
+            aria-label="Voice Assistant Settings"
           >
             <span className="text-xs">Voice Assistant Settings</span>
             {voiceSettingsOpen ? (
@@ -446,6 +455,7 @@ const BoardSettings = ({
             size="sm"
             onClick={() => setActionsOpen(!actionsOpen)}
             className="w-full flex justify-between items-center font-bold"
+            aria-label="Board Actions"
           >
             <span className="text-xs">Board Actions</span>
             {actionsOpen ? (
@@ -461,6 +471,7 @@ const BoardSettings = ({
                 disabled={isLoadingDelete}
                 className="flex items-center gap-2 w-full px-3 py-1.5 justify-start text-sm text-red-500 hover:bg-neutral-500/10"
                 variant="ghost"
+                aria-label="Delete Board"
               >
                 <Trash className="h-4 w-4" />
                 Delete Board
@@ -470,6 +481,7 @@ const BoardSettings = ({
                 onClick={onCreate}
                 className="flex items-center gap-2 w-full px-3 py-1.5 justify-start text-sm hover:bg-neutral-500/10"
                 variant="ghost"
+                aria-label="Create Board"
               >
                 <Plus className="h-4 w-4" />
                 Create Board

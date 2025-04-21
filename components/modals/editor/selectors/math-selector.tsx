@@ -25,6 +25,7 @@ export const MathSelector = () => {
           editor.chain().focus().setLatex({ latex }).run();
         }
       }}
+      aria-label="Math Selector"
     >
       <SigmaIcon
         className={cn("size-4", { "text-blue-500": editor.isActive("math") })}

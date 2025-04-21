@@ -54,7 +54,7 @@ export function TimePicker({
   const endPeriodRef = React.useRef<HTMLButtonElement>(null);
 
   return (
-    <div className="w-full py-2 px-1">
+    <div className="w-full py-2 px-1" aria-label="Time Picker">
       <div className="space-y-4">
         <div className="flex items-center space-x-2">
           <Checkbox
@@ -69,7 +69,9 @@ export function TimePicker({
             }}
             className="h-4 w-4"
           />
-          <Label htmlFor="add-time">Add time</Label>
+          <Label htmlFor="add-time" aria-label="Add time">
+            Add time
+          </Label>
         </div>
 
         {addTime && (
@@ -85,6 +87,7 @@ export function TimePicker({
                   ref={startHourRef}
                   onRightFocus={() => startMinuteRef.current?.focus()}
                   className="w-[48px] text-sm bg-transparent"
+                  aria-label="Start Hour"
                 />
                 <span className="text-muted-foreground">:</span>
                 <TimePickerInput
@@ -95,6 +98,7 @@ export function TimePicker({
                   onLeftFocus={() => startHourRef.current?.focus()}
                   onRightFocus={() => startPeriodRef.current?.focus()}
                   className="w-[48px] text-sm bg-transparent"
+                  aria-label="Start Minute"
                 />
                 <TimePeriodSelect
                   period={startPeriod}
@@ -104,6 +108,7 @@ export function TimePicker({
                   ref={startPeriodRef}
                   onLeftFocus={() => startMinuteRef.current?.focus()}
                   className="ml-1"
+                  aria-label="Start Period"
                 />
               </div>
             </div>
@@ -143,6 +148,7 @@ export function TimePicker({
                       ref={endHourRef}
                       onRightFocus={() => endMinuteRef.current?.focus()}
                       className="w-[48px] text-sm bg-transparent"
+                      aria-label="End Hour"
                     />
                     <span className="text-muted-foreground">:</span>
                     <TimePickerInput
@@ -153,6 +159,7 @@ export function TimePicker({
                       onLeftFocus={() => endHourRef.current?.focus()}
                       onRightFocus={() => endPeriodRef.current?.focus()}
                       className="w-[48px] text-sm bg-transparent"
+                      aria-label="End Minute"
                     />
                     <TimePeriodSelect
                       period={endPeriod}
@@ -162,6 +169,7 @@ export function TimePicker({
                       ref={endPeriodRef}
                       onLeftFocus={() => endMinuteRef.current?.focus()}
                       className="ml-1"
+                      aria-label="End Period"
                     />
                   </div>
                 </div>

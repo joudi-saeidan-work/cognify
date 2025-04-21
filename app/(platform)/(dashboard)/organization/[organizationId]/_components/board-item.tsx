@@ -57,18 +57,20 @@ const BoardItem = ({
     <Link
       key={board.id}
       href={`/board/${board.id}`}
-      style={{ backgroundImage: `url(${board.imageThumbUrl})` }}
-      className={`group relative aspect-video bg-no-repeat bg-center bg-cover bg-sky-700 rounded-sm h-full w-full p-2 overflow-hidden ${
+      className={`group relative aspect-video bg-no-repeat bg-center bg-cover bg-sky-700 rounded-sm h-full w-[95%] md:w-full p-2 overflow-hidden ${
         isLoadingState ? "opacity-70 pointer-events-none" : ""
       }`}
       onClick={handleClick}
+      aria-label="Board Item"
     >
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition" />
 
       {/* Board Title (Top Center) */}
       <div className="absolute top-2 text-lg font-semibold text-white bg-black/50 px-2 py-1 rounded">
-        {board.title}
+        <p className="text-sm sm:text-base text-white font-semibold truncate">
+          {board.title}
+        </p>
       </div>
 
       {/* Star Button (Top Right) */}
@@ -78,6 +80,7 @@ const BoardItem = ({
           className="w-6 h-6 hover:bg-transparent"
           onClick={handleBoardUpdate}
           disabled={isUpdatingBoard}
+          aria-label="Favorite Board"
         >
           <Star
             className={`w-10 h-10 ${

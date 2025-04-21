@@ -162,7 +162,10 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
             role="button"
             aria-label={`Edit list title: ${title}`}
           >
-            <Hint description={`Rename ${title}`}>
+            <Hint
+              description={`Rename ${title}`}
+              aria-label={`Rename ${title}`}
+            >
               <p>{title}</p>
             </Hint>
           </div>
@@ -170,8 +173,16 @@ export const ListHeader = ({ data, onAddCard }: ListHeaderProps) => {
       </div>
 
       <div className="flex items-center shrink-0">
-        <ReadListButton username="User" listData={data} />
-        <ListOptions data={data} onAddCard={onAddCard} />
+        <ReadListButton
+          username="User"
+          listData={data}
+          aria-label="Read List"
+        />
+        <ListOptions
+          data={data}
+          onAddCard={onAddCard}
+          aria-label="List Options"
+        />
       </div>
     </div>
   );

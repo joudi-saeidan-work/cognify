@@ -374,7 +374,11 @@ const Calendar = ({ boardId }: { boardId: string }) => {
     <div>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetTrigger asChild>
-          <Button variant="outline" className="gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            aria-label="Open Calendar"
+          >
             <Hint description="Open Calendar">
               <span className="flex items-center gap-2">
                 <CalendarIcon className="h-4 w-4" />
@@ -397,6 +401,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                 variant="ghost"
                 onClick={() => setIsSheetOpen(false)}
                 className="bg-background shadow-lg hover:bg-accent border relative z-[99999]"
+                aria-label="Close Calendar"
               >
                 <ChevronLeftIcon className="h-6 w-6" />
               </Button>
@@ -408,6 +413,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                     ? "bg-slate-300 dark:bg-slate-700 border-slate-400 dark:border-slate-600"
                     : ""
                 }`}
+                aria-label="Calendar View"
               >
                 <CalendarIcon className="h-6 w-6" />
               </Button>
@@ -419,6 +425,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                     ? "bg-slate-300 dark:bg-slate-700 border-slate-400 dark:border-slate-600"
                     : ""
                 }`}
+                aria-label="Events View"
               >
                 <CheckCircleIcon className="h-6 w-6" />
               </Button>
@@ -430,6 +437,7 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                     ? "bg-slate-300 dark:bg-slate-700 border-slate-400 dark:border-slate-600"
                     : ""
                 }`}
+                aria-label="Notifications View"
               >
                 <BellIcon className="h-6 w-6" />
               </Button>
@@ -662,9 +670,15 @@ const Calendar = ({ boardId }: { boardId: string }) => {
         </SheetContent>
       </Sheet>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent
+          className="sm:max-w-md"
+          aria-describedby="calendar-dialog-description"
+        >
           <DialogHeader>
             <DialogTitle className="text-xl">Create New Event</DialogTitle>
+            <p id="calendar-dialog-description" className="sr-only">
+              Create a new event to add to the calendar.
+            </p>
           </DialogHeader>
           <form onSubmit={handleAddEvent} className="space-y-4">
             <Input
@@ -732,10 +746,13 @@ const Calendar = ({ boardId }: { boardId: string }) => {
                 type="button"
                 variant="outline"
                 onClick={handleCloseDialog}
+                aria-label="Cancel"
               >
                 Cancel
               </Button>
-              <Button type="submit">Create Event</Button>
+              <Button type="submit" aria-label="Create Event">
+                Create Event
+              </Button>
             </div>
           </form>
         </DialogContent>

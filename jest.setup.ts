@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-
+import "jest-axe/extend-expect";
 // Mock the next/font modules
 jest.mock("next/font/google", () => ({
   Poppins: jest.fn().mockImplementation(() => ({

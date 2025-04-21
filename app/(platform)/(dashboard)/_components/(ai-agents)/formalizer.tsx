@@ -96,6 +96,7 @@ const Formalizer = ({ onClose, open, config }: FormalizerProps) => {
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted/80 transition-colors"
+            aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
@@ -104,6 +105,7 @@ const Formalizer = ({ onClose, open, config }: FormalizerProps) => {
         <form
           onSubmit={handleFormSubmit}
           className="p-2.5 flex flex-col gap-2.5"
+          aria-label="Formalize Text"
         >
           <Textarea
             value={inputText}
@@ -122,6 +124,7 @@ const Formalizer = ({ onClose, open, config }: FormalizerProps) => {
                 value={selectedStyle || ""}
                 onValueChange={setSelectedStyle}
                 disabled={isLoading}
+                aria-label="Select Style"
               >
                 <SelectTrigger className="text-xs h-8 px-3 bg-background border-border w-full">
                   <SelectValue placeholder="Select style" />
@@ -150,6 +153,7 @@ const Formalizer = ({ onClose, open, config }: FormalizerProps) => {
             disabled={!inputText || !selectedStyle || isLoading}
             className="h-8 text-xs"
             variant="default"
+            aria-label="Convert Text"
           >
             {isLoading ? (
               <>
@@ -172,6 +176,7 @@ const Formalizer = ({ onClose, open, config }: FormalizerProps) => {
                 size="sm"
                 className="h-7 px-2 text-xs"
                 onClick={() => copyToClipboard(convertedText)}
+                aria-label="Copy Converted Text"
               >
                 <Copy className="h-3.5 w-3.5 mr-1.5" />
                 Copy

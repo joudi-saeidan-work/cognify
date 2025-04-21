@@ -65,9 +65,19 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
   );
 
   return (
-    <Popover modal={true} open={open} onOpenChange={onOpenChange}>
+    <Popover
+      modal={true}
+      open={open}
+      onOpenChange={onOpenChange}
+      aria-label="Color Selector"
+    >
       <PopoverTrigger asChild>
-        <Button size="sm" className="gap-2 rounded-none" variant="ghost">
+        <Button
+          size="sm"
+          className="gap-2 rounded-none"
+          variant="ghost"
+          aria-label="Color Selector"
+        >
           <span
             className="rounded-sm px-1"
             style={{
@@ -76,7 +86,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
           >
             A
           </span>
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4" aria-label="Chevron Down" />
         </Button>
       </PopoverTrigger>
 
@@ -113,7 +123,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
                 </div>
                 <span>{name}</span>
                 {activeColorItem?.name === name && (
-                  <Check className="h-4 w-4" />
+                  <Check className="h-4 w-4" aria-label="Check" />
                 )}
               </div>
             </EditorBubbleItem>

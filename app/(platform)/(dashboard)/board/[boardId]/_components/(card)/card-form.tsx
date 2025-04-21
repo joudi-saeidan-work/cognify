@@ -123,9 +123,35 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
         return "text-neutral-900 dark:text-white";
       }
 
-      // For colored cards, keep current behavior
+      // For colored cards, determine text color based on background brightness
       if (color && color !== "bg-background") {
-        return "text-neutral-700";
+        // Helper function to determine if a color is light or dark
+        const isLightColor = (hexColor: string) => {
+          // If it's a hex color
+          if (hexColor.startsWith("#")) {
+            const hex = hexColor.replace("#", "");
+            const r = parseInt(hex.substring(0, 2), 16) || 0;
+            const g = parseInt(hex.substring(2, 4), 16) || 0;
+            const b = parseInt(hex.substring(4, 6), 16) || 0;
+
+            // Calculate perceived brightness (weighted RGB values)
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 128;
+          }
+
+          // For named colors or RGB/HSL values, we'll use a simple mapping
+          // of known light colors used in the app
+          const lightColors = ["#F28D8D", "#9F9F9F", "#FFD700", "#FFEC8B"];
+          return lightColors.some(
+            (lc) =>
+              color.includes(lc) ||
+              (color.toLowerCase &&
+                color.toLowerCase().includes(lc.toLowerCase()))
+          );
+        };
+
+        // Use dark text on light backgrounds, light text on dark backgrounds
+        return isLightColor(color) ? "text-neutral-900" : "text-white";
       }
 
       // For non-colored cards, use Tailwind's dark mode
@@ -216,6 +242,7 @@ export const CardForm = forwardRef<HTMLTextAreaElement, CardFormProps>(
           variant="ghost"
           onClick={enableEditing}
           disabled={isCreating}
+          aria-label="Add Card"
         >
           {
             <>

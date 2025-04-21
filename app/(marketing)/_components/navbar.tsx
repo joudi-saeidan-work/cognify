@@ -7,15 +7,20 @@ export const NavBar = () => {
       <div className="md:max-w-screen-2xl mx-auto flex items-center w-full justify-between">
         <Logo />
         <div className="space-x-4 md:block md:w-auto flex items-center justify-between w-full">
-          <Button size="sm" variant="outline" asChild>
-            <Link href="/sign-in">Login</Link>
+          <Button size="sm" variant="outline" asChild aria-label="Login">
+            <Link href="/sign-in" aria-label="Login">
+              Login
+            </Link>
           </Button>
           <Button
             size="sm"
             className="font-semibold bg-teal-600 hover:bg-teal-500"
             asChild
+            aria-label="Try Cognify"
           >
-            <Link href="/sign-up">Try Cognify</Link>
+            <Link href="/sign-up" aria-label="Try Cognify">
+              Try Cognify
+            </Link>
           </Button>
         </div>
       </div>

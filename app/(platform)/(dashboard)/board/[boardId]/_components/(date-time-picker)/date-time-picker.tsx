@@ -221,7 +221,13 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="w-auto p-0">
+      <DialogContent
+        className="w-auto p-0"
+        aria-describedby="date-time-picker-dialog-description"
+      >
+        <p id="date-time-picker-dialog-description" className="sr-only">
+          Update the date and time of the card.
+        </p>
         <div className="pt-6">
           <div className="max-h-[350px] overflow-y-auto">
             <Calendar
@@ -229,6 +235,7 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
               selected={date || undefined}
               onSelect={handleDateChange}
               initialFocus
+              aria-label="Date Picker"
             />
             {date && (
               <>
@@ -250,6 +257,7 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
                     className="w-full font-medium"
                     onClick={handleClear}
                     disabled={isLoading}
+                    aria-label="Clear Selection"
                   >
                     <Trash className="h-4 w-4 mr-2" />
                     Clear Selection
