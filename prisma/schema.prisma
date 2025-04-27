@@ -128,21 +128,6 @@ model Bookmark {
   @@index([folderId])
   @@index([orgId])
 }
-
-model Recording {
-  id          String   @id @default(uuid())
-  orgId       String
-  title       String?  // Optional title derived from transcription
-  audioUrl    String   @db.Text  // URL to the stored audio file
-  transcript  String?  @db.Text  // The transcribed text
-  status      String   // 'pending', 'processed', 'failed'
-  duration    Int      // Duration in seconds
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([orgId])
-}
-
 // Label model
 model Label {
   id        String @id @default(uuid())
