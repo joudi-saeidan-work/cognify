@@ -117,11 +117,11 @@ describe("BoardList", () => {
 
     // All toggle should be highlighted
     const allButton = screen.getByText("All");
-    expect(allButton.closest("button")).toHaveClass("text-blue-700");
+    expect(allButton.closest("button")).toHaveClass("text-blue-900");
 
     // Favorites toggle should not be highlighted
     const favoritesButton = screen.getByText("Favorites");
-    expect(favoritesButton.closest("button")).toHaveClass("text-gray-700");
+    expect(favoritesButton.closest("button")).toHaveClass("text-gray-900");
   });
 
   it("filters boards when favorites toggle is clicked", () => {
@@ -142,11 +142,11 @@ describe("BoardList", () => {
 
     // Favorites toggle should be highlighted
     const favoritesButton = screen.getByText("Favorites");
-    expect(favoritesButton.closest("button")).toHaveClass("text-yellow-400");
+    expect(favoritesButton.closest("button")).toHaveClass("text-yellow-600");
 
     // All toggle should not be highlighted
     const allButton = screen.getByText("All");
-    expect(allButton.closest("button")).toHaveClass("text-gray-700");
+    expect(allButton.closest("button")).toHaveClass("text-gray-900");
 
     // Create board button should not be visible in favorites mode
     expect(screen.queryByTestId("create-board")).not.toBeInTheDocument();
@@ -168,7 +168,7 @@ describe("BoardList", () => {
 
     // All toggle should be highlighted
     const allButton = screen.getByText("All");
-    expect(allButton.closest("button")).toHaveClass("text-blue-700");
+    expect(allButton.closest("button")).toHaveClass("text-blue-900");
   });
 
   it("sets loading state when a board is clicked", () => {

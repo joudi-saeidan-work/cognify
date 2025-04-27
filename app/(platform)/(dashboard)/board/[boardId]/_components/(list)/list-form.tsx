@@ -73,6 +73,7 @@ export const ListForm = () => {
           action={onSubmit}
           ref={formRef}
           className="w-full p-3 rounded-md bg-background/50 space-y-4 shadow-md backdrop-blur-sm"
+          aria-label="Create new list"
         >
           <FormInput
             errors={fieldErrors}
@@ -81,13 +82,17 @@ export const ListForm = () => {
             className="text-sm px-2 py-1 h-7 font-medium border-transparent hover:border-input focus:border-input transition bg-background/60"
             placeholder="Enter list title..."
             disabled={isLoading}
+            aria-label="New list title"
           />
           <input hidden value={params.boardId} name="boardId" />
           <div className="flex items-center gap-x-1">
             <FormSubmit disabled={isLoading}>
               {isLoading ? (
                 <div className="flex items-center gap-x-1">
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2
+                    className="h-4 w-4 animate-spin"
+                    aria-hidden="true"
+                  />
                   <span>Creating...</span>
                 </div>
               ) : (
@@ -101,7 +106,7 @@ export const ListForm = () => {
               disabled={isLoading}
               aria-label="Cancel"
             >
-              <X className="h-5 w-5" />
+              <X className="h-5 w-5" aria-hidden="true" />
             </Button>
           </div>
         </form>
@@ -115,6 +120,8 @@ export const ListForm = () => {
         className="w-full rounded-md bg-background/50 hover:bg-background/80 transition p-3 flex items-center font-medium text-sm text-foreground backdrop-blur-sm"
         aria-label="Add a new list"
         aria-expanded={isEditing}
+        aria-haspopup="dialog"
+        role="button"
       >
         <Plus className="h-4 w-4 mr-2" aria-hidden="true" />
         Add a list

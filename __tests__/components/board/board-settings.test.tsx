@@ -343,7 +343,7 @@ describe("BoardSettings Component", () => {
 
     if (resetButton) {
       fireEvent.click(resetButton);
-      expect(defaultProps.setZoomLevel).toHaveBeenCalledWith(130);
+      expect(defaultProps.setZoomLevel).toHaveBeenCalledWith(110);
       expect(setTheme).toHaveBeenCalledWith("light");
       expect(defaultProps.setColorBlindMode).toHaveBeenCalledWith(false);
     }

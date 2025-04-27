@@ -342,4 +342,19 @@ describe("ListForm", () => {
       expect(toastMock.error).toHaveBeenCalledWith("Error creating list");
     }
   });
+
+  it("renders with correct accessibility attributes when in editing state", async () => {
+    render(<ListForm />);
+
+    // Enter editing state
+    await act(async () => {
+      fireEvent.click(screen.getByText(/add a list/i));
+    });
+
+    // Check for aria-label on the form - using querySelector directly to avoid role conflicts
+    const formElement = document.querySelector(
+      'form[aria-label="Create new list"]'
+    );
+    expect(formElement).toBeInTheDocument();
+  });
 });

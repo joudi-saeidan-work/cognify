@@ -338,4 +338,29 @@ describe("ListContainer", () => {
     expect(updateListOrder).not.toHaveBeenCalled();
     expect(updateCardOrder).not.toHaveBeenCalled();
   });
+
+  it("renders with correct accessibility attributes", () => {
+    const { container } = render(
+      <ListContainer boardId={mockBoardId} data={mockLists} />
+    );
+
+    // Check for role="region" on the container div
+    const regionElement = container.querySelector('div[role="region"]');
+    expect(regionElement).toBeInTheDocument();
+    expect(regionElement).toHaveAttribute("aria-label", "Board lists");
+
+    // Check for role="listitem" on list item divs
+    const listItems = container.querySelectorAll('div[role="listitem"]');
+    expect(listItems.length).toBe(mockLists.length + 1); // +1 for the list form
+
+    // Check for role="none" on placeholder
+    const placeholderItem = container.querySelector('div[role="none"]');
+    expect(placeholderItem).toBeInTheDocument();
+
+    // Check for role="presentation" on spacer
+    const presentationItem = container.querySelector(
+      'div[role="presentation"]'
+    );
+    expect(presentationItem).toBeInTheDocument();
+  });
 });

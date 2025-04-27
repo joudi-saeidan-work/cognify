@@ -58,7 +58,7 @@ describe("CreateBoard", () => {
     render(<CreateBoard />);
 
     const createButton = screen.getByRole("button", {
-      name: /create new board/i,
+      name: "Create Board",
     });
     expect(createButton).toBeInTheDocument();
     expect(createButton).not.toBeDisabled();
@@ -84,7 +84,7 @@ describe("CreateBoard", () => {
     render(<CreateBoard />);
 
     const createButton = screen.getByRole("button", {
-      name: /create new board/i,
+      name: "Create Board",
     });
     fireEvent.click(createButton);
 
@@ -113,7 +113,7 @@ describe("CreateBoard", () => {
     render(<CreateBoard />);
 
     const createButton = screen.getByRole("button", {
-      name: /create new board/i,
+      name: "Create Board",
     });
     fireEvent.click(createButton);
 
@@ -151,7 +151,7 @@ describe("CreateBoard", () => {
     render(<CreateBoard />);
 
     const createButton = screen.getByRole("button", {
-      name: /create new board/i,
+      name: "Create Board",
     });
     fireEvent.click(createButton);
 

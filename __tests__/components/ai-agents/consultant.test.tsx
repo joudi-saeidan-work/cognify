@@ -122,7 +122,7 @@ describe("Consultant", () => {
 
     // Find the close button by its icon (X is inside an SVG)
     const closeButton = screen.getByRole("button", {
-      name: "", // The X button doesn't have text
+      name: "Close", // The X button has aria-label="Close"
     });
 
     // Make sure we're getting the right button

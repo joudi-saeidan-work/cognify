@@ -211,12 +211,15 @@ export const CardItem = ({ data, index }: CardItemProps) => {
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           ref={provided.innerRef}
-          role="article"
+          role="listitem"
           className="group relative flex flex-col justify-between border-2 border-transparent hover:border-black/30 dark:hover:border-white/30 pt-2 pb-3 px-4 text-sm rounded-md shadow-sm w-full"
           style={{
             ...provided.draggableProps.style,
             ...getCardBackground(),
           }}
+          aria-roledescription="Draggable card"
+          aria-label={`Card: ${data.title}`}
+          data-testid="card-item"
         >
           <div className="absolute -right-1.5 -top-1.5">
             <CardOptions data={data} labels={labels} />
@@ -232,7 +235,8 @@ export const CardItem = ({ data, index }: CardItemProps) => {
                   color: getContrastColor(labelObj.color || "#61bd4f"),
                 }}
                 onClick={() => setIsLabelPickerOpen(true)}
-                aria-label="Edit Label"
+                aria-label={`Label: ${labelObj.name || "Label"}`}
+                role="button"
               >
                 {labelObj.name || "Label"}
               </div>
@@ -257,7 +261,12 @@ export const CardItem = ({ data, index }: CardItemProps) => {
             >
               <span
                 onClick={enableEditing}
-                className={`whitespace-pre-wrap break-words font-medium overflow-hidden text-ellipsis  ${getTextColor()}`}
+                className={`whitespace-pre-wrap break-words font-medium overflow-hidden text-ellipsis ${getTextColor()}`}
+                role="button"
+                tabIndex={0}
+                aria-label={`${data.description ? "Open" : "Rename"} card: ${
+                  data.title
+                }`}
               >
                 {data.title}
               </span>

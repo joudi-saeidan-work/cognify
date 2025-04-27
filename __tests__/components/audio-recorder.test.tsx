@@ -254,7 +254,9 @@ describe("AudioRecorder", () => {
 
     // Click the close button on the settings panel
     await act(async () => {
-      const closeButton = screen.getByRole("button", { name: "×" });
+      const closeButton = screen.getByRole("button", {
+        name: "Close Settings",
+      });
       fireEvent.click(closeButton);
     });
 
@@ -328,7 +330,9 @@ describe("AudioRecorder", () => {
     expect(screen.getByText("Select Organization")).toBeInTheDocument();
 
     // This is testing the useEffect that ensures settings are shown when selections are missing
-    expect(screen.getByRole("button", { name: "×" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Close Settings" })
+    ).toBeInTheDocument();
   });
 
   it("shows board options when an organization is selected", async () => {
@@ -462,7 +466,7 @@ describe("AudioRecorder", () => {
     fireEvent.change(listSelect, { target: { value: "list1" } });
 
     // After all selections are made, settings can be closed
-    const closeButton = screen.getByRole("button", { name: "×" });
+    const closeButton = screen.getByRole("button", { name: "Close Settings" });
     fireEvent.click(closeButton);
 
     // Settings panel should be closed

@@ -44,7 +44,7 @@ export const ListItem = ({ data, index }: ListItemProps) => {
           {...provided.draggableProps}
           ref={provided.innerRef}
           className="shrink-0 h-full w-[272px] select-none"
-          aria-roledescription="Draggable list item"
+          aria-roledescription="Draggable list"
           aria-label={`${data.title} with ${data.cards.length} cards`}
         >
           <div
@@ -58,21 +58,21 @@ export const ListItem = ({ data, index }: ListItemProps) => {
             <ListHeader onAddCard={enableEditing} data={data} />
             <Droppable droppableId={data.id} type="card">
               {(provided) => (
-                <ol
+                <div
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={cn(
                     "mx-1 px-1 py-0.5 flex flex-col gap-y-2",
                     data.cards.length > 0 ? "mt-2" : "mt-0"
                   )}
+                  role="list"
+                  aria-label={`Cards in ${data.title}`}
                 >
                   {data.cards.map((card, index) => (
-                    <li key={card.id} className="list-none">
-                      <CardItem index={index} data={card} />
-                    </li>
+                    <CardItem key={card.id} index={index} data={card} />
                   ))}
-                  <li className="list-none contents">{provided.placeholder}</li>
-                </ol>
+                  <div role="none">{provided.placeholder}</div>
+                </div>
               )}
             </Droppable>
             <CardForm

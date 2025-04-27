@@ -149,30 +149,33 @@ export const ListContainer = ({ data, boardId }: ListContainerProps) => {
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="lists" type="list" direction="horizontal">
         {(provided) => (
-          <ol
+          <div
             {...provided.droppableProps}
             ref={provided.innerRef}
             className="flex gap-x-3 h-full"
             aria-label="Board lists"
+            role="region"
           >
             {orderedData.map((list, index) => {
               return (
-                <li key={list.id} className="list-none">
+                <div key={list.id} role="listitem" aria-label={list.title}>
                   <ListItem index={index} data={list} />
-                </li>
+                </div>
               );
             })}
-            {/* Placeholder needs to be in an li */}
-            <li className="list-none contents">{provided.placeholder}</li>
-            {/* Form needs to be in an li */}
-            <li className="list-none">
+            {/* Placeholder needs to be in an appropriate container */}
+            <div className="contents" role="none">
+              {provided.placeholder}
+            </div>
+            {/* Form needs to be in an appropriate container */}
+            <div role="listitem" aria-label="Add new list">
               <ListForm />
-            </li>
-            {/* This spacer div should be in an li or removed if not needed */}
-            <li className="list-none">
+            </div>
+            {/* This spacer div */}
+            <div role="presentation">
               <div className="flex-shrink-0 w-1" />
-            </li>
-          </ol>
+            </div>
+          </div>
         )}
       </Droppable>
     </DragDropContext>

@@ -371,8 +371,8 @@ describe("CardItem Component", () => {
 
     render(<CardItem data={cardWithDateTime} index={0} />);
 
-    // Use getByRole to find the button that contains the date and time
-    const button = screen.getByRole("button");
+    // Use getByRole with name option to find the specific button
+    const button = screen.getByRole("button", { name: /Open Date Picker/i });
     expect(button).toBeInTheDocument();
 
     // Check that the button contains the formatted date
@@ -449,8 +449,22 @@ describe("CardItem Component", () => {
 
     const { container } = render(<CardItem data={cardWithColor} index={0} />);
 
-    // Find the main card div
-    const cardDiv = container.querySelector('div[role="input"]');
+    // Find the main card div using the updated role
+    const cardDiv = container.querySelector('div[role="listitem"]');
     expect(cardDiv).toHaveStyle("background-color: #FF5733");
+  });
+
+  it("renders with correct accessibility attributes", () => {
+    const { container } = render(<CardItem data={mockCard} index={0} />);
+
+    const cardElement = container.querySelector(
+      '[aria-roledescription="Draggable card"]'
+    );
+    expect(cardElement).toBeInTheDocument();
+    expect(cardElement).toHaveAttribute(
+      "aria-label",
+      `Card: ${mockCard.title}`
+    );
+    expect(cardElement).toHaveAttribute("role", "listitem");
   });
 });

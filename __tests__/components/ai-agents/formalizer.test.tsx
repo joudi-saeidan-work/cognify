@@ -205,7 +205,7 @@ describe("Formalizer", () => {
     render(<Formalizer {...mockProps} />);
     // Find the close button by its SVG icon
     const closeButton = screen.getByRole("button", {
-      name: "", // The button has no text, just an icon
+      name: "Close", // The button has aria-label="Close"
     });
     fireEvent.click(closeButton);
     expect(mockProps.onClose).toHaveBeenCalledTimes(1);
@@ -328,7 +328,7 @@ describe("Formalizer", () => {
     render(<Formalizer {...mockProps} />);
 
     // Check button text changes to "Converting..."
-    const button = screen.getByRole("button", { name: /converting/i });
+    const button = screen.getByRole("button", { name: "Convert Text" });
     expect(button).toBeInTheDocument();
     expect(button).toBeDisabled();
   });

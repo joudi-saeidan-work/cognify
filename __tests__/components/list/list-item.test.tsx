@@ -77,8 +77,8 @@ jest.mock(
 jest.mock(
   "../../../app/(platform)/(dashboard)/board/[boardId]/_components/(card)/card-item",
   () => ({
-    CardItem: ({ data, index }: { data: any; index: number }) => (
-      <div data-testid={`card-item-${data.id}`} data-index={index}>
+    CardItem: ({ data }: any) => (
+      <div data-testid="card-item" id={`card-item-${data.id}`}>
         {data.title}
       </div>
     ),
@@ -253,26 +253,29 @@ describe("ListItem", () => {
     const { container } = render(<ListItem data={mockList} index={0} />);
 
     // Check the list element
-    const listElement = container.querySelector("li");
+    const listElement = container.querySelector(
+      "div[aria-roledescription='Draggable list']"
+    );
     expect(listElement).toHaveAttribute(
       "aria-roledescription",
       "Draggable list"
     );
-    expect(listElement).toHaveAttribute(
+
+    // Check for the role="list" on the div element
+    const listContainer = container.querySelector("div[role='list']");
+    expect(listContainer).toBeInTheDocument();
+
+    // Check for aria-label on the div element
+    expect(listContainer).toHaveAttribute(
       "aria-label",
-      "List: Test List with 2 cards"
+      `Cards in ${mockList.title}`
     );
 
-    // In the component, the div that receives dragHandleProps also gets the accessibility attributes
-    // However, in our test mock, we're only adding data-drag-handle to dragHandleProps
-    // So we verify that the div inside the li element has the correct tabIndex and other attributes
-    const divWithDragHandleProps =
-      container.querySelector("[data-drag-handle]");
-    expect(divWithDragHandleProps).toBeInTheDocument();
-
-    // The parent div of the drag handle should have these attributes
-    const parentDiv = divWithDragHandleProps?.closest("div");
-    expect(parentDiv).toHaveAttribute("tabIndex", "0");
+    // Check for cards rendered directly as CardItem components
+    const cardContainers = container.querySelectorAll(
+      "[data-testid='card-item']"
+    );
+    expect(cardContainers.length).toBe(mockList.cards.length);
   });
 
   it("renders with empty cards array", () => {

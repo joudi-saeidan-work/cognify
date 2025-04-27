@@ -25,8 +25,8 @@ describe("ListWrapper", () => {
       </ListWrapper>
     );
 
-    // Get the li element (the wrapper)
-    const wrapperElement = container.querySelector("li");
+    // Get the div element (the wrapper)
+    const wrapperElement = container.querySelector("div");
 
     // Check for expected classes
     expect(wrapperElement).toHaveClass("shrink-0");

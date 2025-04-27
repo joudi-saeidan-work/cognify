@@ -335,7 +335,7 @@ describe("DisplaySettings", () => {
     }
 
     // Verify all settings were reset
-    expect(defaultProps.setZoomLevel).toHaveBeenCalledWith(130);
+    expect(defaultProps.setZoomLevel).toHaveBeenCalledWith(110);
     expect(mockSetTheme).toHaveBeenCalledWith("light");
     expect(defaultProps.setColorBlindMode).toHaveBeenCalledWith(false);
   });

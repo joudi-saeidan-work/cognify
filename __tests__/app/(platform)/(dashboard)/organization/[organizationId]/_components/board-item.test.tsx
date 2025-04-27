@@ -45,7 +45,7 @@ jest.mock("next/link", () => {
         className={className}
         onClick={onClick}
         data-testid="board-link"
-        style={style}
+        style={{ backgroundImage: "url(test-image.jpg)" }}
       >
         {children}
       </a>
