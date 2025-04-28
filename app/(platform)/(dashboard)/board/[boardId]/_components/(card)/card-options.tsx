@@ -94,23 +94,31 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
 
   const { execute: executeCardUpdate, isLoading } = useAction(updateCard, {
     onSuccess: (data) => {
-      toast.success(cardData?.dueDate ? "Date updated!" : "Date removed!");
-      dispatch({
-        type: "UPDATE_EVENT",
-        payload: {
-          id: cardData?.id,
-          title: cardData?.title,
-          dueDate: cardData?.dueDate || undefined,
-          start: cardData?.start || undefined,
-          end: cardData?.end || undefined,
-          allDay: cardData?.allDay,
-          backgroundColor: cardData?.color || undefined,
-        },
-      });
+      if (aiResponse) {
+        toast.success(`Card "${data.title}" updated with Magic ToDo!`);
+
+        queryClient.invalidateQueries(["card"]);
+
+        queryClient.invalidateQueries(["board"]);
+      } else {
+        toast.success(cardData?.dueDate ? "Date updated!" : "Date removed!");
+        dispatch({
+          type: "UPDATE_EVENT",
+          payload: {
+            id: cardData?.id,
+            title: cardData?.title,
+            dueDate: cardData?.dueDate || undefined,
+            start: cardData?.start || undefined,
+            end: cardData?.end || undefined,
+            allDay: cardData?.allDay,
+            backgroundColor: cardData?.color || undefined,
+          },
+        });
+      }
     },
     onError: (error) => {
-      toast.error("Failed to update date!");
-      console.error("Failed to update date:", error);
+      toast.error("Failed to update card!");
+      console.error("Failed to update card:", error);
     },
   });
 
@@ -180,7 +188,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
     }
   };
 
-  const handleAcceptAiResponse = () => {
+  const handleAcceptAiResponse = async () => {
     if (!aiResponse) return;
 
     const titleValue = aiResponse.title;
@@ -236,12 +244,14 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
       content: descriptionContent,
     });
 
-    executeCardUpdate({
+    await executeCardUpdate({
       id: cardData?.id as string,
       title: titleValue,
       boardId: params.boardId as string,
       description: descriptionJSON,
     });
+
+    await queryClient.invalidateQueries(["card", cardData?.id]);
 
     setShowAiResponseDialog(false);
   };
@@ -392,7 +402,7 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
               className="sr-only"
             >
               AI Generated Response
-            </DialogTitle>  
+            </DialogTitle>
             <p id="ai-response-dialog-description" className="sr-only">
               AI Generated Response for card.
             </p>
