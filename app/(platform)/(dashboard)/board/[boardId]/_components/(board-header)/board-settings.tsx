@@ -185,7 +185,7 @@ const BoardSettings = ({
         <DropdownMenuSeparator className="my-2" />
 
         {/* Display Settings */}
-        <div>
+        <div className="flex flex-col">
           <Button
             variant="ghost"
             size="sm"
@@ -201,7 +201,7 @@ const BoardSettings = ({
             )}
           </Button>
           {displayOpen && (
-            <div className="pb-3 pt-2">
+            <div className="pb-3 pt-2 px-2">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium pl-2">Zoom</span>
@@ -354,7 +354,7 @@ const BoardSettings = ({
         <DropdownMenuSeparator className="my-3" />
 
         {/* Voice Assistant Settings */}
-        <div>
+        <div className="flex flex-col">
           <Button
             variant="ghost"
             size="sm"
@@ -370,7 +370,7 @@ const BoardSettings = ({
             )}
           </Button>
           {voiceSettingsOpen && (
-            <div className="py-3 space-y-3">
+            <div className="pb-3 pt-2 px-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium">Gender</span>
                 <select
@@ -449,7 +449,7 @@ const BoardSettings = ({
         <DropdownMenuSeparator className="my-3" />
 
         {/* Board Actions */}
-        <div>
+        <div className="flex flex-col">
           <Button
             variant="ghost"
             size="sm"
@@ -465,7 +465,7 @@ const BoardSettings = ({
             )}
           </Button>
           {actionsOpen && (
-            <div className="py-1">
+            <div className="pb-3 pt-2 px-2">
               <Button
                 onClick={onDelete}
                 disabled={isLoadingDelete}
