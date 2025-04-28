@@ -11,11 +11,14 @@ import {
   ThumbsUp,
   ThumbsDown,
   Lightbulb,
+  MessageSquare,
+  ScrollText,
 } from "lucide-react";
 import { useChat } from "ai/react";
 import { AIToolConfig } from "./ai-tools-config";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ConsultantProps {
   onClose: () => void;
@@ -37,6 +40,7 @@ const Consultant = ({ onClose, open, config }: ConsultantProps) => {
     cons: true,
     advice: true,
   });
+  const [activeTab, setActiveTab] = useState<string>("input");
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
@@ -52,6 +56,7 @@ const Consultant = ({ onClose, open, config }: ConsultantProps) => {
         // Try to parse the response as JSON
         const parsedContent = JSON.parse(response.content);
         setAnalysis(parsedContent);
+        setActiveTab("results");
       } catch (e) {
         // If parsing fails, use the raw response
         toast.error("Could not parse response properly", { duration: 3000 });
@@ -111,151 +116,190 @@ ${analysis.advice}
           </h3>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted/80 transition-colors"
+            className="text-muted-foreground hover:text-foreground rounded-full p-0.5 hover:bg-muted/80 transition-colors"
             aria-label="Close"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <form
-          onSubmit={handleFormSubmit}
-          className="p-2.5 flex flex-col gap-2.5"
-        >
-          <Textarea
-            value={scenario}
-            onChange={(e) => setScenario(e.target.value)}
-            placeholder="Describe your situation or decision..."
-            className="resize-none h-20 text-sm bg-background border-border focus-visible:ring-1 focus-visible:ring-primary"
-            disabled={isLoading}
-          />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 w-full rounded-none">
+            <TabsTrigger value="input" className="flex items-center gap-1.5">
+              <MessageSquare className="h-4 w-4" />
+              <span>Situation</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="results"
+              disabled={!analysis}
+              className="flex items-center gap-1.5"
+            >
+              <ScrollText className="h-4 w-4" />
+              <span>Analysis</span>
+            </TabsTrigger>
+          </TabsList>
 
-          <Button
-            type="submit"
-            disabled={!scenario.trim() || isLoading}
-            className="h-8 text-xs"
-            variant="default"
-            aria-label="Consult"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin h-3 w-3 mr-1.5" />
-                Analyzing...
-              </>
-            ) : (
-              "Consult"
-            )}
-          </Button>
-        </form>
+          <TabsContent value="input" className="p-3 m-0">
+            <form onSubmit={handleFormSubmit} className="flex flex-col gap-3">
+              <div className="space-y-1">
+                <label htmlFor="scenario" className="text-xs font-medium">
+                  Describe your situation or decision
+                </label>
+                <Textarea
+                  id="scenario"
+                  value={scenario}
+                  onChange={(e) => setScenario(e.target.value)}
+                  placeholder="I'm trying to decide between..."
+                  className="resize-none h-32 text-sm bg-background border-border focus-visible:ring-1 focus-visible:ring-primary"
+                  disabled={isLoading}
+                />
+              </div>
 
-        {/* Analysis Content */}
-        {analysis && (
-          <div className="border-t border-border p-2.5 space-y-2.5 overflow-auto max-h-[500px]">
-            {/* Actions Row */}
-            <div className="flex justify-end">
               <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={copyFullAnalysis}
-                aria-label="Copy All"
+                type="submit"
+                disabled={!scenario.trim() || isLoading}
+                className="text-sm"
+                variant="default"
+                aria-label="Consult"
               >
-                <Copy className="h-3.5 w-3.5 mr-1.5" />
-                Copy All
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin h-3.5 w-3.5 mr-1.5" />
+                    Analyzing...
+                  </>
+                ) : (
+                  "Get Consultation"
+                )}
               </Button>
-            </div>
+            </form>
+          </TabsContent>
 
-            {/* Pros Section */}
-            <div className="space-y-1.5">
-              <button
-                onClick={() => toggleSection("pros")}
-                className="flex items-center justify-between w-full text-left text-xs font-medium"
-                aria-label="Toggle Pros"
-              >
-                <span className="flex items-center gap-1.5">
-                  <ThumbsUp className="h-3.5 w-3.5 text-green-500" />
-                  Pros
-                </span>
-                {expandedSections.pros ? (
-                  <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-              </button>
-
-              {expandedSections.pros && analysis.pros.length > 0 && (
-                <ul className="pl-5 pr-2 py-1.5 rounded border border-border/50 bg-background/50 text-sm list-disc space-y-1">
-                  {analysis.pros.map((pro, index) => (
-                    <li key={index} className="text-sm">
-                      {pro}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* Cons Section */}
-            <div className="space-y-1.5">
-              <button
-                onClick={() => toggleSection("cons")}
-                className="flex items-center justify-between w-full text-left text-xs font-medium"
-                aria-label="Toggle Cons"
-              >
-                <span className="flex items-center gap-1.5">
-                  <ThumbsDown className="h-3.5 w-3.5 text-red-500" />
-                  Cons
-                </span>
-                {expandedSections.cons ? (
-                  <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-              </button>
-
-              {expandedSections.cons && analysis.cons.length > 0 && (
-                <ul className="pl-5 pr-2 py-1.5 rounded border border-border/50 bg-background/50 text-sm list-disc space-y-1">
-                  {analysis.cons.map((con, index) => (
-                    <li key={index} className="text-sm">
-                      {con}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-
-            {/* Advice Section */}
-            <div className="space-y-1.5">
-              <button
-                onClick={() => toggleSection("advice")}
-                className="flex items-center justify-between w-full text-left text-xs font-medium"
-                aria-label="Toggle Advice"
-              >
-                <span className="flex items-center gap-1.5">
-                  <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
-                  Advice
-                </span>
-                {expandedSections.advice ? (
-                  <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-              </button>
-
-              {expandedSections.advice && (
-                <div className="relative group rounded border border-border/50 p-2.5 bg-background/50 text-sm">
-                  <div className="whitespace-pre-line">{analysis.advice}</div>
-                  <button
-                    onClick={() => copyToClipboard(analysis.advice)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Copy Advice"
+          <TabsContent value="results" className="p-0 m-0">
+            {analysis && (
+              <div className="p-3 space-y-3 overflow-auto max-h-[500px]">
+                {/* Actions Row */}
+                <div className="flex justify-end">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-xs"
+                    onClick={copyFullAnalysis}
+                    aria-label="Copy All"
                   >
-                    <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
-                  </button>
+                    <Copy className="h-3.5 w-3.5 mr-1.5" />
+                    Copy All
+                  </Button>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+
+                {/* Pros Section */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium flex items-center gap-1.5">
+                      <ThumbsUp className="h-3.5 w-3.5 text-green-500" />
+                      Pros
+                    </label>
+                    <button
+                      onClick={() => toggleSection("pros")}
+                      className="flex items-center text-xs text-muted-foreground hover:text-foreground"
+                      aria-label="Toggle Pros"
+                    >
+                      {expandedSections.pros ? (
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </div>
+
+                  {expandedSections.pros && analysis.pros.length > 0 && (
+                    <ul className="pl-5 pr-2 py-1.5 rounded border border-border/50 bg-background/50 text-sm list-disc space-y-1.5">
+                      {analysis.pros.map((pro, index) => (
+                        <li key={index} className="text-sm">
+                          {pro}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Cons Section */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium flex items-center gap-1.5">
+                      <ThumbsDown className="h-3.5 w-3.5 text-red-500" />
+                      Cons
+                    </label>
+                    <button
+                      onClick={() => toggleSection("cons")}
+                      className="flex items-center text-xs text-muted-foreground hover:text-foreground"
+                      aria-label="Toggle Cons"
+                    >
+                      {expandedSections.cons ? (
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </div>
+
+                  {expandedSections.cons && analysis.cons.length > 0 && (
+                    <ul className="pl-5 pr-2 py-1.5 rounded border border-border/50 bg-background/50 text-sm list-disc space-y-1.5">
+                      {analysis.cons.map((con, index) => (
+                        <li key={index} className="text-sm">
+                          {con}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Advice Section */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium flex items-center gap-1.5">
+                      <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                      Advice
+                    </label>
+                    <button
+                      onClick={() => toggleSection("advice")}
+                      className="flex items-center text-xs text-muted-foreground hover:text-foreground"
+                      aria-label="Toggle Advice"
+                    >
+                      {expandedSections.advice ? (
+                        <ChevronUp className="h-3.5 w-3.5" />
+                      ) : (
+                        <ChevronDown className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </div>
+
+                  {expandedSections.advice && (
+                    <div className="relative group rounded border border-border/50 p-2.5 bg-background/50 text-sm">
+                      <div className="whitespace-pre-line">
+                        {analysis.advice}
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(analysis.advice)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Copy Advice"
+                      >
+                        <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  onClick={() => setActiveTab("input")}
+                  variant="outline"
+                  className="w-full text-sm mt-2"
+                >
+                  Ask Another Question
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
