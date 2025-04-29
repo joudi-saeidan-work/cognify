@@ -101,13 +101,16 @@ ${analysis.advice}
   };
 
   return (
-    <div
-      className={cn(
-        "fixed bottom-6 right-6 z-[9999] w-full max-w-[450px]",
-        open ? "block" : "hidden"
-      )}
-    >
-      <div className="flex flex-col rounded-lg bg-card border border-border shadow-lg overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-5">
+      <div className="bg-black/50 absolute inset-0" onClick={onClose} />
+      <div
+        className={cn(
+          "z-50 flex flex-col w-full max-h-[90vh] sm:max-w-[450px] rounded-t-lg sm:rounded-lg bg-card border border-border shadow-xl overflow-hidden",
+          "animate-in slide-in-from-bottom-10 fade-in-0 duration-300 ease-in-out",
+          !open && "hidden"
+        )}
+        style={{ height: "auto", maxHeight: "90vh" }}
+      >
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-border">
           <h3 className="font-medium flex items-center gap-1.5 text-sm">
