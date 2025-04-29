@@ -11,6 +11,8 @@ import {
   Clock,
   LightbulbIcon,
   CheckCircle2,
+  MessageSquare,
+  FileText,
 } from "lucide-react";
 import { useChat } from "ai/react";
 import { AIToolConfig } from "./ai-tools-config";
@@ -18,6 +20,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface RoutineBuilderProps {
   onClose: () => void;
@@ -46,6 +49,7 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
   const [goal, setGoal] = useState("");
   const [daysAvailable, setDaysAvailable] = useState<string[]>([]);
   const [challenges, setChallenges] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("input");
 
   const [routineResult, setRoutineResult] = useState<RoutineResult | null>(
     null
@@ -92,6 +96,7 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
         console.log("Cleaned content:", cleanContent);
         const parsedContent = JSON.parse(cleanContent);
         setRoutineResult(parsedContent);
+        setActiveTab("results"); // Switch to results tab when we get data
       } catch (e) {
         toast.error("Failed to generate routine");
         console.error("Failed to parse response:", e, response.content);
@@ -111,17 +116,25 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
     }
   };
 
+  const handleCreateNew = () => {
+    setRoutineResult(null);
+    setGoal("");
+    setChallenges([]);
+    setActiveTab("input");
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-end sm:p-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-5">
       <div className="bg-black/50 absolute inset-0" onClick={onClose} />
       <div
         className={cn(
-          "z-50 flex h-full w-full flex-col rounded-t-lg sm:h-auto sm:max-h-[85vh] sm:w-full sm:max-w-[550px] sm:rounded-lg bg-card border border-border shadow-xl overflow-hidden",
+          "z-50 flex flex-col w-full max-h-[90vh] sm:max-w-[550px] rounded-t-lg sm:rounded-lg bg-card border border-border shadow-xl overflow-hidden",
           "animate-in slide-in-from-bottom-10 fade-in-0 duration-300 ease-in-out"
         )}
+        style={{ height: "auto", maxHeight: "90vh" }}
       >
         {/* Header */}
-        <div className="flex items-center px-4 py-2.5 border-b border-border">
+        <div className="flex items-center px-4 py-2.5 border-b border-border shrink-0">
           <div className="flex items-center gap-2">
             <Medal className="h-5 w-5 text-primary" />
             <h2 className="text-base font-medium">{config.name}</h2>
@@ -135,10 +148,33 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
           </button>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-4 h-full">
-          {!routineResult ? (
-            /* Input Form */
+        {/* Tabs and Content */}
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="flex-1 flex flex-col min-h-0"
+        >
+          <TabsList className="grid grid-cols-2 w-full rounded-none px-1 shrink-0">
+            <TabsTrigger
+              value="input"
+              className="flex items-center gap-1.5 text-xs"
+              disabled={isLoading}
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+              <span>Define Goal</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="results"
+              className="flex items-center gap-1.5 text-xs"
+              disabled={!routineResult}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span>Your Routine</span>
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="input" className="p-4 m-0 flex-1 overflow-auto">
+            {/* Input Form */}
             <div className="space-y-4">
               <form
                 onSubmit={(e) => {
@@ -231,101 +267,99 @@ const RoutineBuilder = ({ onClose, open, config }: RoutineBuilderProps) => {
                 </Button>
               </form>
             </div>
-          ) : (
-            /* Results Section */
-            <div className="space-y-4">
-              {/* Header with export button */}
-              <div className="flex justify-between items-center">
-                <h4 className="text-sm font-medium">Your Routine Plan</h4>
-              </div>
+          </TabsContent>
 
-              {/* Summary Cards */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="p-2.5 rounded-md bg-muted/50 border border-border/50 w-full">
-                  <p className="text-[10px] text-muted-foreground mb-1">
-                    <Clock className="h-3 w-3 inline mr-1" />
-                    Estimated Completion
-                  </p>
-                  <p className="text-sm font-medium">
-                    {routineResult.estimatedCompletionTime}
-                  </p>
+          <TabsContent value="results" className="p-4 m-0 flex-1 overflow-auto">
+            {routineResult && (
+              <div className="space-y-4">
+                {/* Summary Cards */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-md bg-muted/50 border border-border/50 w-full">
+                    <p className="text-[10px] text-muted-foreground mb-1">
+                      <Clock className="h-3 w-3 inline mr-1" />
+                      Estimated Completion
+                    </p>
+                    <p className="text-sm font-medium">
+                      {routineResult.estimatedCompletionTime}
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Milestones */}
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium">Milestones</p>
-                <div className="space-y-2">
-                  {routineResult.milestones.map((milestone, index) => (
-                    <div
-                      key={index}
-                      className="p-2.5 rounded-md bg-background border border-border/50"
-                    >
-                      <p className="text-xs font-medium">{milestone.phase}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {milestone.goal}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Weekly Schedule */}
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium">Weekly Schedule</p>
-                <div className="space-y-3">
-                  {Object.entries(routineResult.weeklyRoutine).map(
-                    ([day, tasks]) => (
-                      <div key={day} className="space-y-1.5">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          {day}
+                {/* Milestones */}
+                <div className="space-y-1.5">
+                  <p className="text-xs font-medium">Milestones</p>
+                  <div className="space-y-2">
+                    {routineResult.milestones.map((milestone, index) => (
+                      <div
+                        key={index}
+                        className="p-2.5 rounded-md bg-background border border-border/50"
+                      >
+                        <p className="text-xs font-medium">{milestone.phase}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {milestone.goal}
                         </p>
-                        {tasks.map((task, index) => (
-                          <div
-                            key={index}
-                            className="p-2 rounded-md bg-background border border-border/50 flex justify-between items-center"
-                          >
-                            <p className="text-xs">{task.task}</p>
-                            <p className="text-xs text-muted-foreground ml-2 shrink-0">
-                              {task.duration}
-                            </p>
-                          </div>
-                        ))}
                       </div>
-                    )
-                  )}
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Tips */}
-              <div className="p-3 rounded-md bg-primary/10 border border-primary/20">
-                <p className="text-xs font-medium mb-1.5 flex items-center gap-1">
-                  <LightbulbIcon className="h-3.5 w-3.5 text-primary" />
-                  Pro Tips
-                </p>
-                <ul className="space-y-1.5 text-xs">
-                  {routineResult.tips.map((tip, index) => (
-                    <li key={index} className="flex items-start gap-1.5">
-                      <span className="text-primary">•</span>
-                      <span>{tip}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                {/* Weekly Schedule */}
+                <div className="space-y-1.5">
+                  <p className="text-xs font-medium">Weekly Schedule</p>
+                  <div className="space-y-3">
+                    {Object.entries(routineResult.weeklyRoutine).map(
+                      ([day, tasks]) => (
+                        <div key={day} className="space-y-1.5">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            {day}
+                          </p>
+                          {tasks.map((task, index) => (
+                            <div
+                              key={index}
+                              className="p-2 rounded-md bg-background border border-border/50 flex justify-between items-center"
+                            >
+                              <p className="text-xs">{task.task}</p>
+                              <p className="text-xs text-muted-foreground ml-2 shrink-0">
+                                {task.duration}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
 
-              {/* Back Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2 w-full"
-                onClick={() => setRoutineResult(null)}
-                aria-label="Create Another Routine"
-              >
-                Create Another Routine
-              </Button>
-            </div>
-          )}
-        </div>
+                {/* Tips */}
+                <div className="p-3 rounded-md bg-primary/10 border border-primary/20">
+                  <p className="text-xs font-medium mb-1.5 flex items-center gap-1">
+                    <LightbulbIcon className="h-3.5 w-3.5 text-primary" />
+                    Pro Tips
+                  </p>
+                  <ul className="space-y-1.5 text-xs">
+                    {routineResult.tips.map((tip, index) => (
+                      <li key={index} className="flex items-start gap-1.5">
+                        <span className="text-primary">•</span>
+                        <span>{tip}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Create New Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 w-full"
+                  onClick={handleCreateNew}
+                  aria-label="Create Another Routine"
+                >
+                  Create Another Routine
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

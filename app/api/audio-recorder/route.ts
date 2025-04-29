@@ -7,7 +7,7 @@ const openai = createOpenAI({
   compatibility: "strict",
 });
 
-const BRAINDUMP_PROMPT = `
+const MAGIC_TODO_PROMPT = `
 Use no conversational language and only do the following: 
 ## Role
 The transcript is a voice note transcribed into text and your job is to capture what they said and organize so they can immediately understand the important items and tasks that need to be done.
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
     console.log("Message Body: ", body.messages);
     const result = await generateText({
       model: openai("gpt-3.5-turbo"),
-      system: BRAINDUMP_PROMPT,
+      system: MAGIC_TODO_PROMPT,
       messages: body.messages,
       temperature: 0.2,
     });

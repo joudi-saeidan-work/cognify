@@ -9,11 +9,14 @@ import {
   ChevronDown,
   ChevronUp,
   Code,
+  MessageSquare,
+  FileText,
 } from "lucide-react";
 import { useChat } from "ai/react";
 import { AIToolConfig } from "./ai-tools-config";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ProfessorProps {
   onClose: () => void;
@@ -35,6 +38,7 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
     explanation: true,
     example: true,
   });
+  const [activeTab, setActiveTab] = useState<string>("input");
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({
@@ -50,12 +54,14 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
         // Try to parse the response as JSON
         const parsedContent = JSON.parse(response.content);
         setLessonContent(parsedContent);
+        setActiveTab("content"); // Switch to content tab when response is received
       } catch (e) {
         // If parsing fails, use the raw response as explanation
         setLessonContent({
           explanation: response.content,
           example: "Example could not be generated.",
         });
+        setActiveTab("content"); // Still switch to content tab
         toast.error("Could not parse response properly", { duration: 3000 });
       }
     },
@@ -102,109 +108,131 @@ const Professor = ({ onClose, open, config }: ProfessorProps) => {
           </button>
         </div>
 
-        <form
-          onSubmit={handleFormSubmit}
-          className="p-2.5 flex flex-col gap-2.5"
-          aria-label="Teach me"
-        >
-          <Textarea
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="What do you want to learn about?"
-            className="resize-none h-20 text-sm bg-background border-border focus-visible:ring-1 focus-visible:ring-primary"
-            disabled={isLoading}
-          />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 w-full rounded-none">
+            <TabsTrigger value="input" className="flex items-center gap-1.5">
+              <MessageSquare className="h-3.5 w-3.5" />
+              <span>Ask</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="content"
+              disabled={!lessonContent}
+              className="flex items-center gap-1.5"
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span>Lesson</span>
+            </TabsTrigger>
+          </TabsList>
 
-          <Button
-            type="submit"
-            disabled={!topic.trim() || isLoading}
-            className="h-8 text-xs"
-            variant="default"
-            aria-label="Teach me"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="animate-spin h-3 w-3 mr-1.5" />
-                Creating lesson...
-              </>
-            ) : (
-              "Teach me"
+          <TabsContent value="input" className="p-2.5 m-0">
+            <form
+              onSubmit={handleFormSubmit}
+              className="flex flex-col gap-2.5"
+              aria-label="Teach me"
+            >
+              <Textarea
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="What do you want to learn about?"
+                className="resize-none h-20 text-sm bg-background border-border focus-visible:ring-1 focus-visible:ring-primary"
+                disabled={isLoading}
+              />
+
+              <Button
+                type="submit"
+                disabled={!topic.trim() || isLoading}
+                className="h-8 text-xs"
+                variant="default"
+                aria-label="Teach me"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="animate-spin h-3 w-3 mr-1.5" />
+                    Creating lesson...
+                  </>
+                ) : (
+                  "Teach me"
+                )}
+              </Button>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="content" className="m-0 p-0">
+            {lessonContent && (
+              <div className="border-t border-border p-2.5 space-y-2.5 overflow-auto max-h-[500px]">
+                {/* Explanation Section */}
+                <div className="space-y-1.5">
+                  <button
+                    onClick={() => toggleSection("explanation")}
+                    className="flex items-center justify-between w-full text-left text-xs font-medium"
+                    aria-label="Toggle Explanation"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <BookOpen className="h-3.5 w-3.5 text-primary" />
+                      Explanation
+                    </span>
+                    {expandedSections.explanation ? (
+                      <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                  </button>
+
+                  {expandedSections.explanation && (
+                    <div className="relative group rounded border border-border/50 p-2.5 bg-background/50 text-sm">
+                      <div className="whitespace-pre-line">
+                        {lessonContent.explanation}
+                      </div>
+                      <button
+                        onClick={() =>
+                          copyToClipboard(lessonContent.explanation)
+                        }
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Copy Explanation"
+                      >
+                        <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Example Section */}
+                <div className="space-y-1.5">
+                  <button
+                    onClick={() => toggleSection("example")}
+                    className="flex items-center justify-between w-full text-left text-xs font-medium"
+                    aria-label="Toggle Example"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Code className="h-3.5 w-3.5 text-primary" />
+                      Example
+                    </span>
+                    {expandedSections.example ? (
+                      <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                  </button>
+
+                  {expandedSections.example && (
+                    <div className="relative group rounded border border-border/50 p-2.5 bg-background/50 text-sm">
+                      <div className="whitespace-pre-line">
+                        {lessonContent.example}
+                      </div>
+                      <button
+                        onClick={() => copyToClipboard(lessonContent.example)}
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label="Copy Example"
+                      >
+                        <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
-          </Button>
-        </form>
-
-        {/* Lesson Content */}
-        {lessonContent && (
-          <div className="border-t border-border p-2.5 space-y-2.5 overflow-auto max-h-[500px]">
-            {/* Explanation Section */}
-            <div className="space-y-1.5">
-              <button
-                onClick={() => toggleSection("explanation")}
-                className="flex items-center justify-between w-full text-left text-xs font-medium"
-                aria-label="Toggle Explanation"
-              >
-                <span className="flex items-center gap-1.5">
-                  <BookOpen className="h-3.5 w-3.5 text-primary" />
-                  Explanation
-                </span>
-                {expandedSections.explanation ? (
-                  <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-              </button>
-
-              {expandedSections.explanation && (
-                <div className="relative group rounded border border-border/50 p-2.5 bg-background/50 text-sm">
-                  <div className="whitespace-pre-line">
-                    {lessonContent.explanation}
-                  </div>
-                  <button
-                    onClick={() => copyToClipboard(lessonContent.explanation)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Copy Explanation"
-                  >
-                    <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Example Section */}
-            <div className="space-y-1.5">
-              <button
-                onClick={() => toggleSection("example")}
-                className="flex items-center justify-between w-full text-left text-xs font-medium"
-                aria-label="Toggle Example"
-              >
-                <span className="flex items-center gap-1.5">
-                  <Code className="h-3.5 w-3.5 text-primary" />
-                  Example
-                </span>
-                {expandedSections.example ? (
-                  <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" />
-                ) : (
-                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-              </button>
-
-              {expandedSections.example && (
-                <div className="relative group rounded border border-border/50 p-2.5 bg-background/50 text-sm">
-                  <div className="whitespace-pre-line">
-                    {lessonContent.example}
-                  </div>
-                  <button
-                    onClick={() => copyToClipboard(lessonContent.example)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label="Copy Example"
-                  >
-                    <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
