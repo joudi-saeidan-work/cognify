@@ -122,14 +122,19 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
               <span>{formatTime(duration)}</span>
             </div>
 
-            <div className="relative w-full">
+            <div className="relative w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full">
+              <div
+                className="absolute top-0 left-0 h-full bg-blue-500 dark:bg-blue-400 rounded-full"
+                style={{ width: `${(progress / (duration || 1)) * 100}%` }}
+              ></div>
+
               <input
                 type="range"
                 min="0"
                 max={duration || 100}
                 value={progress}
                 onChange={handleProgressChange}
-                className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500 dark:accent-blue-400"
+                className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
                 aria-label="Audio progress"
                 aria-valuemin={0}
                 aria-valuemax={duration || 100}
@@ -138,9 +143,13 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
                   duration
                 )}`}
               />
+
               <div
-                className="absolute top-0 left-0 h-1.5 bg-blue-500 dark:bg-blue-400 rounded-full pointer-events-none"
-                style={{ width: `${(progress / (duration || 1)) * 100}%` }}
+                className="absolute h-3 w-3 bg-white border-2 border-blue-500 dark:border-blue-400 rounded-full top-[-3px] shadow-md"
+                style={{
+                  left: `calc(${(progress / (duration || 1)) * 100}% - 4px)`,
+                  display: duration > 0 ? "block" : "none",
+                }}
               ></div>
             </div>
 
