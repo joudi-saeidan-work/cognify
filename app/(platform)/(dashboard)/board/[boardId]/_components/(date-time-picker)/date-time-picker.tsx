@@ -78,8 +78,7 @@ export function DateTimePicker({ data, open, onClose }: DateTimePickerProps) {
   // Update local state and timeState together
   const handleDateChange = (newDate: Date | undefined) => {
     if (newDate) {
-      // Create pure date (midnight UTC)
-      newDate.setUTCHours(0, 0, 0, 0);
+      newDate.setHours(0, 0, 0, 0);
       setDate(newDate);
 
       // Preserve existing times but apply to new date

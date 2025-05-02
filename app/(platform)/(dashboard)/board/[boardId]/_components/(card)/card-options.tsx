@@ -305,7 +305,9 @@ const CardOptions = ({ data, labels }: CardOptionsProps) => {
             size="sm"
             variant="ghost"
             aria-label="Card Options"
-            className="opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent dark:hover:bg-transparent -mr-2 -mt-3"
+            className={`opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent dark:hover:bg-transparent -mr-2 -mt-3 ${
+              data.color ? "text-neutral-700" : ""
+            }`}
           >
             <MoreHorizontal className="h-3 w-3" />
           </Button>
