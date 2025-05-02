@@ -15,27 +15,22 @@ const nextConfig = {
 const withPWA = withPWAInit({
   dest: "public",
   register: true,
-  scope: "/audio-recorder",
+  scope: "/audio-recorder/",
   disable: false,
-  reloadOnOnline: true,
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
-  workboxOptions: {
-    disableDevLogs: true,
-    runtimeCaching: [
-      {
-        urlPattern: /\/audio-recorder\/.*/i,
-        handler: "NetworkFirst",
-        options: {
-          cacheName: "audio-pages-cache",
-          expiration: {
-            maxEntries: 32,
-            maxAgeSeconds: 24 * 60 * 60, // 24 hours
-          },
-        },
+  buildExcludes: [
+    /middleware-manifest\.json$/,
+    /_middleware\.js$/,
+    /^(?!.*\/audio-recorder\/).*$/,
+  ],
+  runtimeCaching: [
+    {
+      urlPattern: /\/audio-recorder\/.*/i,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "audio-recorder-cache",
       },
-    ],
-  },
+    },
+  ],
 });
 
 export default withPWA(nextConfig);

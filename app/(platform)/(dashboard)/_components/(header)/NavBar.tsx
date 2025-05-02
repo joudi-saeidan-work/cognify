@@ -10,6 +10,8 @@ import { useTheme } from "next-themes";
 import { ThemeToggle } from "../../../../../components/ThemeModeToggle";
 import { Separator } from "@/components/ui/separator";
 import DisplaySettings from "../../board/[boardId]/_components/(board-header)/display-settings";
+import { PwaInstallPrompt } from "@/components/PwaInstallPrompt";
+
 // Main NavBar component definition
 const NavBar = () => {
   const [zoomLevel, setZoomLevel] = useState(110);
@@ -29,6 +31,8 @@ const NavBar = () => {
         </div>
       </div>
       <div className="ml-auto flex items-center gap-x-2">
+        <PwaInstallPrompt />
+        <Separator orientation="vertical" className="h-6 dark:bg-muted" />
         <DisplaySettings
           zoomLevel={zoomLevel}
           setZoomLevel={setZoomLevel}
