@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Volume2, VolumeX, Pause, Play } from "lucide-react";
+import { useVoice } from "./VoiceContext";
 
 interface SpeechModalProps {
   setShowModel: (value: boolean) => void;
@@ -11,6 +12,7 @@ interface SpeechModalProps {
 }
 
 const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
+  const { selectedVoice } = useVoice();
   const [open, setOpen] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -114,6 +116,14 @@ const SpeechModal = ({ setShowModel, url }: SpeechModalProps) => {
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Sit back while I read your tasks for today
             </p>
+            {selectedVoice && (
+              <div className="mt-2 inline-flex items-center px-2.5 py-1 bg-blue-50 dark:bg-blue-900/30 rounded-full">
+                <span className="text-xs font-medium text-blue-700 dark:text-blue-300">
+                  {selectedVoice.name} ({selectedVoice.gender},{" "}
+                  {selectedVoice.language})
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="space-y-3">

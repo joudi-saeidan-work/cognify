@@ -11,6 +11,7 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
+  Volume2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,10 @@ const BoardSettings = ({
 
   const { setSelectedVoice, voices: voiceContextVoices } = useVoice();
 
+  const [isSampleLoading, setIsSampleLoading] = useState(false);
+  const [sampleAudioUrl, setSampleAudioUrl] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     setVoices(voiceData.voices_list);
   }, []);
@@ -99,6 +104,22 @@ const BoardSettings = ({
       onModelChange(modelArray[0]);
     }
   }, [selectedModel, filteredModels, onModelChange]);
+
+  useEffect(() => {
+    const savedVoice = localStorage.getItem("selectedVoice");
+    if (savedVoice) {
+      try {
+        const parsedVoice = JSON.parse(savedVoice);
+        setSelectedVoice(parsedVoice);
+        setSelectedGender(parsedVoice.gender || "");
+        setSelectedLanguage(parsedVoice.language || "");
+        setSelectedCountry(parsedVoice.country || "");
+        setSelectedModel(parsedVoice.voice_id || "");
+      } catch (e) {
+        console.error("Failed to parse saved voice", e);
+      }
+    }
+  }, []);
 
   const { execute: executeDeleteBoard, isLoading: isLoadingDelete } = useAction(
     deleteBoard,
@@ -159,8 +180,97 @@ const BoardSettings = ({
       voiceContextVoices.find((v) => v.voice_id === voiceId) || null;
     if (voice) {
       setSelectedVoice(voice);
+      localStorage.setItem("selectedVoice", JSON.stringify(voice));
     }
   };
+
+  const playSample = async () => {
+    if (!selectedModel) {
+      toast.error("Please select a voice model first");
+      return;
+    }
+
+    try {
+      setIsSampleLoading(true);
+
+      // Find the voice object for the API
+      const selectedVoiceObj = voiceContextVoices.find(
+        (v) => v.voice_id === selectedModel
+      );
+      if (!selectedVoiceObj) {
+        throw new Error("Selected voice not found");
+      }
+
+      // Prepare the voice object for API
+      const voiceForAPI = {
+        id: selectedVoiceObj.id,
+        voice_id: selectedVoiceObj.voice_id,
+        gender: selectedVoiceObj.gender,
+        language_code: selectedVoiceObj.language_code,
+        language: selectedVoiceObj.language,
+        country: selectedVoiceObj.country,
+        name: selectedVoiceObj.name,
+        type: selectedVoiceObj.type,
+      };
+
+      // Sample text to speak
+      const sampleText =
+        "This is a sample of the selected voice. You can use this voice for your tasks.";
+
+      // Call the API to generate speech
+      const response = await fetch("/api/getSpeech", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: sampleText,
+          voice: voiceForAPI,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      // Check if we have valid audio URL
+      if (data && data.length > 0 && data[0].link) {
+        setSampleAudioUrl(data[0].link);
+
+        // Play the audio
+        if (audioRef.current) {
+          audioRef.current.src = data[0].link;
+          audioRef.current.play();
+        }
+
+        toast.success("Playing sample voice");
+      } else {
+        throw new Error("No audio URL returned");
+      }
+    } catch (error) {
+      console.error("Error playing sample:", error);
+      toast.error("Failed to play sample voice");
+    } finally {
+      setIsSampleLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Create audio element if it doesn't exist
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+    }
+
+    return () => {
+      // Cleanup
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+      }
+    };
+  }, []);
 
   return (
     <DropdownMenu>
@@ -370,78 +480,154 @@ const BoardSettings = ({
             )}
           </Button>
           {voiceSettingsOpen && (
-            <div className="pb-3 pt-2 px-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Gender</span>
-                <select
-                  value={selectedGender}
-                  onChange={(e) => setSelectedGender(e.target.value)}
-                  className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded"
-                >
-                  <option value="">Select Gender</option>
-                  {/* this will go through our dataset and find all possible genders and display them in the dropdown */}
-                  {uniqueValues("gender")
-                    .sort()
-                    .map((gender: string, index: number) => (
-                      <option key={index} value={gender}>
-                        {gender}
+            <div className="pb-3 pt-2 px-2 space-y-4">
+              <div className="space-y-3">
+                {/* Gender */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-foreground/80">
+                    Gender
+                  </span>
+                  <select
+                    value={selectedGender}
+                    onChange={(e) => setSelectedGender(e.target.value)}
+                    className="text-xs bg-muted rounded-md py-1.5 px-2 border border-border/30 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                  >
+                    <option value="">Any Gender</option>
+                    {uniqueValues("gender")
+                      .sort()
+                      .map((gender: string, index: number) => (
+                        <option key={index} value={gender}>
+                          {gender}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Language */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-foreground/80">
+                    Language
+                  </span>
+                  <select
+                    value={selectedLanguage}
+                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                    className="text-xs bg-muted rounded-md py-1.5 px-2 border border-border/30 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                  >
+                    <option value="">Any Language</option>
+                    {uniqueValues("language")
+                      .sort()
+                      .map((language: string, index: number) => (
+                        <option key={index} value={language}>
+                          {language}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Country */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-foreground/80">
+                    Country
+                  </span>
+                  <select
+                    value={selectedCountry}
+                    onChange={(e) => setSelectedCountry(e.target.value)}
+                    className="text-xs bg-muted rounded-md py-1.5 px-2 border border-border/30 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                  >
+                    <option value="">Any Country</option>
+                    {uniqueValues("country")
+                      .sort()
+                      .map((country: string, index: number) => (
+                        <option key={index} value={country}>
+                          {country}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
+                {/* Model - Fix the layout to match other fields */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-foreground/80">
+                    Model
+                  </span>
+                  <select
+                    value={selectedModel}
+                    onChange={handleModelSelect}
+                    className="text-xs bg-muted rounded-md py-1.5 px-2 border border-border/30 focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+                  >
+                    <option value="">Select Model</option>
+                    {filteredModels.map((voice: Voice, index: number) => (
+                      <option key={index} value={voice.voice_id}>
+                        {voice.name}
                       </option>
                     ))}
-                </select>
+                  </select>
+                </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Language</span>
-                <select
-                  value={selectedLanguage}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
-                  className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded"
-                >
-                  <option value="">Select Language</option>
-                  {/* this will go through our dataset and find all possible genders and display them in the dropdown */}
-                  {uniqueValues("language")
-                    .sort()
-                    .map((language: string, index: number) => (
-                      <option key={index} value={language}>
-                        {language}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Country</span>
-                <select
-                  value={selectedCountry}
-                  onChange={(e) => setSelectedCountry(e.target.value)}
-                  className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded"
-                >
-                  <option value="">Select Country</option>
-                  {/* this will go through our dataset and find all possible genders and display them in the dropdown */}
-                  {uniqueValues("country")
-                    .sort()
-                    .map((country: string, index: number) => (
-                      <option key={index} value={country}>
-                        {country}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Model</span>
-                <select
-                  value={selectedModel}
-                  onChange={handleModelSelect}
-                  className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded"
-                >
-                  <option value="">Select Model</option>
-                  {/* this will go through our dataset and find all possible genders and display them in the dropdown */}
-                  {filteredModels.map((voice: Voice, index: number) => (
-                    <option key={index} value={voice.voice_id}>
-                      {voice.name} ({voice.voice_id})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Test Voice Button */}
+              <Button
+                size="sm"
+                variant="outline"
+                className="w-full text-xs flex items-center justify-center gap-2 hover:bg-accent/20 transition-colors mt-2"
+                onClick={playSample}
+                disabled={isSampleLoading || !selectedModel}
+              >
+                {isSampleLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin h-3 w-3"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    <span>Testing Voice...</span>
+                  </>
+                ) : (
+                  <>
+                    <Volume2 className="h-3.5 w-3.5 text-accent" />
+                    <span>Test Selected Voice</span>
+                  </>
+                )}
+              </Button>
+
+              {/* Selected Voice Display */}
+              {selectedModel && (
+                <div className="mt-2 py-2 px-3 rounded-md bg-accent/5 border border-accent/10">
+                  <div className="flex items-center gap-2">
+                    <div className="bg-accent/20 p-1 rounded-full">
+                      <Volume2 className="h-3 w-3 text-accent" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium">Selected Voice:</p>
+                      <p className="text-xs text-muted-foreground">
+                        {
+                          voiceContextVoices.find(
+                            (v) => v.voice_id === selectedModel
+                          )?.name
+                        }
+                        <span className="opacity-60 ml-1">
+                          ({selectedModel})
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
