@@ -31,10 +31,10 @@
       "sizes": "180x180"
     }
   ],
-  "theme_color": "#FFFFFF",
-  "background_color": "#FFFFFF",
-  "start_url": "/audio-recorder/",
-  "scope": "/audio-recorder/",
+  "start_url": "/install/audio-recorder/",
+  "scope": "/install/audio-recorder/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay"],
+  "theme_color": "#000000",
   "orientation": "portrait"
 }

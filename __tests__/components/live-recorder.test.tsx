@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { LiveRecorder } from "@/app/audio-recorder/_components/live-recorder";
+import { LiveRecorder } from "@/app/install/audio-recorder/_components/live-recorder";
 
 // Mock console methods to prevent warnings in test output
 beforeAll(() => {

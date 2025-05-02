@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 
 export const metadata: Metadata = {
   manifest: "/manifest.json",
-  title: "Audio Recorder",
+  title: "Cognify Audio Recorder",
   description: "Start speaking and leave the rest to us",
   icons: [
     { url: "/icons/favicon.ico", href: "/favicon.ico" },
@@ -22,13 +22,13 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Audio Recorder",
+    title: "Cognify Audio Recorder",
     // You can copy the startupImage array from your root layout if needed
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#FFFFFF",
+  themeColor: "#1e1e1e",
 };
 
 export default function AudioRecorderLayout({

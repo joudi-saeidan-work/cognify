@@ -12,7 +12,7 @@ import {
   within,
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { AudioRecorder } from "../../app/audio-recorder/_components/audio-recorder";
+import { AudioRecorder } from "../../app/install/audio-recorder/_components/audio-recorder";
 import { toast } from "sonner";
 import * as useActionModule from "@/hooks/use-actions";
 

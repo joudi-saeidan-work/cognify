@@ -16,7 +16,7 @@ import { createCard } from "@/actions/create-card";
 import { useParams } from "next/navigation";
 import { useOnClickOutside, useEventListener } from "usehooks-ts";
 import { toast } from "sonner";
-import { LiveRecorder } from "@/app/audio-recorder/_components/live-recorder";
+import { LiveRecorder } from "@/app/install/audio-recorder/_components/live-recorder";
 import { Hint } from "@/components/hint";
 
 interface CardFormProps {

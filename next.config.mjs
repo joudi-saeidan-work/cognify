@@ -15,13 +15,8 @@ const nextConfig = {
 const withPWA = withPWAInit({
   dest: "public",
   register: true,
-  scope: "/audio-recorder/",
+  scope: "/install/audio-recorder/",
   disable: false,
-  buildExcludes: [
-    /middleware-manifest\.json$/,
-    /_middleware\.js$/,
-    /^(?!.*\/audio-recorder\/).*$/,
-  ],
   runtimeCaching: [
     {
       urlPattern: /\/audio-recorder\/.*/i,
