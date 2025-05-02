@@ -13,6 +13,7 @@ export const useVoice = jest.fn().mockReturnValue({
   },
   setSelectedVoice: jest.fn(),
   voices: [],
+  saveVoiceSelection: jest.fn(),
 });
 
 export const VoiceProvider = ({ children }: { children: ReactNode }) => (

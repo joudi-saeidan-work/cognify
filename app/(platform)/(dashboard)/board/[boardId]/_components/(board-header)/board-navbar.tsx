@@ -42,6 +42,7 @@ const BoardNavbar = ({
   const [colorBlindMode, setColorBlindMode] = useState(false);
   const [selectedModel, setSelectedModel] = useState<Voice | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTitleEditing, setIsTitleEditing] = useState(false);
 
   const [visibilitySettings, setVisibilitySettings] = useState({
     showAssistant: true,
@@ -71,6 +72,10 @@ const BoardNavbar = ({
     document.documentElement.style.fontSize = `${zoomLevel}%`;
   }, [zoomLevel]);
 
+  const handleEditingChange = (isEditing: boolean) => {
+    setIsTitleEditing(isEditing);
+  };
+
   return (
     <div
       className="w-full flex items-center px-4 gap-x-4 
@@ -94,16 +99,10 @@ const BoardNavbar = ({
         </button>
       </Hint>
       <Separator orientation="vertical" className="h-6 bg-muted-foreground" />
-      <div className="group relative flex items-center">
-        <BoardTitleForm data={data} />
-        {user && (
-          <div
-            className="transition-transform
-        duration-300
-        transform
-        translate-x-0
-        group-hover:translate-x-[150px] absolute left-[calc(100%-125px)] top-1/2 -translate-y-1/2"
-          >
+      <div className="relative flex items-center">
+        <BoardTitleForm data={data} onEditingChange={handleEditingChange} />
+        {user && !isTitleEditing && (
+          <div className="ml-2">
             <ReadTasksButton
               username={user.firstName || "User"}
               boardId={data.id}

@@ -74,7 +74,12 @@ const BoardSettings = ({
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
 
-  const { setSelectedVoice, voices: voiceContextVoices } = useVoice();
+  const {
+    selectedVoice,
+    setSelectedVoice,
+    voices: voiceContextVoices,
+    saveVoiceSelection,
+  } = useVoice();
 
   const [isSampleLoading, setIsSampleLoading] = useState(false);
   const [sampleAudioUrl, setSampleAudioUrl] = useState<string | null>(null);
@@ -106,18 +111,11 @@ const BoardSettings = ({
   }, [selectedModel, filteredModels, onModelChange]);
 
   useEffect(() => {
-    const savedVoice = localStorage.getItem("selectedVoice");
-    if (savedVoice) {
-      try {
-        const parsedVoice = JSON.parse(savedVoice);
-        setSelectedVoice(parsedVoice);
-        setSelectedGender(parsedVoice.gender || "");
-        setSelectedLanguage(parsedVoice.language || "");
-        setSelectedCountry(parsedVoice.country || "");
-        setSelectedModel(parsedVoice.voice_id || "");
-      } catch (e) {
-        console.error("Failed to parse saved voice", e);
-      }
+    if (selectedVoice) {
+      setSelectedGender(selectedVoice.gender || "");
+      setSelectedLanguage(selectedVoice.language || "");
+      setSelectedCountry(selectedVoice.country || "");
+      setSelectedModel(selectedVoice.voice_id || "");
     }
   }, []);
 
@@ -179,8 +177,7 @@ const BoardSettings = ({
     const voice =
       voiceContextVoices.find((v) => v.voice_id === voiceId) || null;
     if (voice) {
-      setSelectedVoice(voice);
-      localStorage.setItem("selectedVoice", JSON.stringify(voice));
+      saveVoiceSelection(voice);
     }
   };
 

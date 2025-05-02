@@ -13,9 +13,13 @@ import { Hint } from "@/components/hint";
 
 interface BoardTitleFormProps {
   data: Board;
+  onEditingChange?: (isEditing: boolean) => void;
 }
 
-export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
+export const BoardTitleForm = ({
+  data,
+  onEditingChange,
+}: BoardTitleFormProps) => {
   const { execute, fieldErrors } = useAction(updateBoard, {
     onSuccess: (data) => {
       toast.success(`Board ${data.title} Updated!`);
@@ -33,11 +37,15 @@ export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
 
   const [isEditing, setIsEditing] = useState(false);
 
-  const disableEditing = () => setIsEditing(false);
+  const disableEditing = () => {
+    setIsEditing(false);
+    onEditingChange?.(false);
+  };
 
   const enableEditing = () => {
     // Focus Input
     setIsEditing(true);
+    onEditingChange?.(true);
     setTimeout(() => {
       textareaRef.current?.focus();
       textareaRef.current?.select();
@@ -105,23 +113,21 @@ export const BoardTitleForm = ({ data }: BoardTitleFormProps) => {
           </Hint>
 
           {/* Add Cover Button - Only shows on hover */}
-          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-            <FormPopOver board={data}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-auto p-1"
-                aria-label={`Change Cover`}
-              >
-                <ImageIcon className="h-4 w-4" />
-                {data.color || data.imageFullUrl ? (
-                  <span>Change Cover</span>
-                ) : (
-                  <span>Add Cover</span>
-                )}
-              </Button>
-            </FormPopOver>
-          </div>
+          <FormPopOver board={data}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-auto p-1"
+              aria-label={`Change Cover`}
+            >
+              <ImageIcon className="h-4 w-4" />
+              {data.color || data.imageFullUrl ? (
+                <span>Change Cover</span>
+              ) : (
+                <span>Add Cover</span>
+              )}
+            </Button>
+          </FormPopOver>
         </div>
       )}
     </div>
