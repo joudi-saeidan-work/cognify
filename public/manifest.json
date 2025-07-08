@@ -4,17 +4,21 @@
   "description": "Start speaking and leave the rest to us",
   "icons": [
     {
-      "src": "/manifest-icon-192.maskable.png",
-      "sizes": "192x192",
+      "src": "/icons/android-chrome-192x192.png",
       "type": "image/png",
-      "purpose": "any"
+      "sizes": "192x192"
     },
     {
-      "src": "/manifest-icon-512.maskable.png",
-      "sizes": "512x512",
+      "src": "/icons/android-chrome-512x512.png",
       "type": "image/png",
-      "purpose": "any"
+      "sizes": "512x512"
     },
+    {
+      "src": "/icons/favicon.ico",
+      "type": "image/x-icon",
+      "sizes": "48x48"
+    },
+
     {
       "src": "/icons/favicon-16x16.png",
       "type": "image/png",

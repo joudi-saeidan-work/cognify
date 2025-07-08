@@ -25,8 +25,8 @@ export const OfflineOverlay = () => {
         <div className="space-y-4">
           <h1 className="text-2xl font-bold">Offline Mode</h1>
           <p className="text-muted-foreground">
-            You're currently offline. The audio recorder is still available, but
-            other features require an internet connection.
+            You're currently offline. Please check your internet connection, and
+            try again.
           </p>
           <div className="h-48 w-48 mx-auto bg-gradient-to-r from-rose-400 to-orange-400 rounded-full animate-pulse opacity-50" />
         </div>
